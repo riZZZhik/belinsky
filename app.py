@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 
 from word_finder import WordFinder
@@ -16,4 +17,7 @@ app.register_error_handler(404, word_finder.request_not_found)
 
 # Run app
 if __name__ == '__main__':
-    app.run(debug=True)
+    APP_HOST = os.environ.get("APP_HOST", 'localhost')
+    APP_PORT = os.environ.get("APP_PORT", 5000)
+    APP_DEBUG = os.environ.get("APP_DEBUG", True)
+    app.run(host=APP_HOST, port=APP_PORT, debug=APP_DEBUG)
