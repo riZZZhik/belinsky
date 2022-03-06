@@ -1,4 +1,3 @@
-export FLASK_APP=main
-export FLASK_ENV=development
+export FLASK_APP=app
 
 flask run
