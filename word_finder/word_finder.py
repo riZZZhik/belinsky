@@ -2,8 +2,8 @@ from flask import request
 
 
 class WordFinder:
-    def __init__(self):
-        self.words = ['test', 'super_test']
+    def __init__(self, database):
+        self.database = database
 
     def highlight_words(self):
         response = {
@@ -29,7 +29,7 @@ class WordFinder:
             return response, 400
 
         # Add new word to database
-        self.words.append(request.json['word'])
+        self.database.flaskdb.insert_one({'word': request.json['word']})
 
         response = {
             'result': 'ok',
@@ -39,7 +39,7 @@ class WordFinder:
 
     def get_all_words(self):
         response = {
-            'result': self.words,
+            'result': str([data['word'] for data in self.database.flaskdb.find()]),
             'status': 200
         }
         return response, 200

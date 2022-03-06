@@ -1,13 +1,21 @@
 import os
+
 from flask import Flask
+from flask_pymongo import PyMongo
 
 from word_finder import WordFinder
 
-# Initialize WordFinder
-word_finder = WordFinder()
-
 # Initialize Flask
 app = Flask("WordFinder")
+
+# Connect MongoDB
+app.config["MONGO_URI"] = 'mongodb://' + os.environ['MONGODB_USERNAME'] + ':' + os.environ['MONGODB_PASSWORD'] + '@' + \
+                          os.environ['MONGODB_HOSTNAME'] + ':27017/' + os.environ['MONGODB_DATABASE']
+mongo = PyMongo(app, authSource="admin")
+db = mongo.db
+
+# Initialize WordFinder
+word_finder = WordFinder(db)
 
 # Add handlers
 app.add_url_rule('/highlight-words', view_func=word_finder.highlight_words, methods=['POST'])

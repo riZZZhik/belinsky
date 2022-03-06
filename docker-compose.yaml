@@ -1,12 +1,12 @@
 services:
-  flask:
+  flask_app:
     build: .
-    container_name: flask
+    container_name: flask_app
     restart: unless-stopped
     environment:
       MONGODB_DATABASE: flaskdb
-      MONGODB_USERNAME: user
-      MONGODB_PASSWORD: user_password
+      MONGODB_USERNAME: admin
+      MONGODB_PASSWORD: admin_password
       MONGODB_HOSTNAME: mongodb
 
     depends_on:
