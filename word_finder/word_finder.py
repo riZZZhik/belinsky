@@ -29,7 +29,7 @@ class WordFinder:
             return response, 400
 
         # Add new word to database
-        self.database.flaskdb.insert_one({'word': request.json['word']})
+        self._save_word(request.json['word'])
 
         response = {
             'result': 'ok',
@@ -39,7 +39,7 @@ class WordFinder:
 
     def get_all_words(self):
         response = {
-            'result': str([data['word'] for data in self.database.flaskdb.find()]),
+            'result': self._load_words(),
             'status': 200
         }
         return response, 200
@@ -51,3 +51,9 @@ class WordFinder:
             'status': 404
         }
         return response, 404
+
+    def _save_word(self, word):
+        self.database.flaskdb.insert_one({'word': word})
+
+    def _load_words(self):
+        str([data['word'] for data in self.database.flaskdb.find()])
