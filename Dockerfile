@@ -1,5 +1,5 @@
 # Setup machine
-FROM python:3.8
+FROM --platform=linux/amd64 python:3.8
 LABEL MAINTAINER="Dmitry Barsukoff <t.me/riZZZhik>"
 
 # Setup Flask
