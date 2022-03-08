@@ -52,15 +52,15 @@ class WordFinder:
             return response, 400
 
         # Add new word to database
-        lemma = self.tokenizer.lemmatize(request.json['word'])
-        if lemma in self._load_words():
+        lemmatized = ' '.join([self.tokenizer.lemmatize(word) for word in request.json['word'].split()])
+        if lemmatized in self._load_words():
             response = {
                 'error': "word already in database",
                 'status': 406
             }
             return response, 406
         else:
-            self.database.flaskdb.insert_one({'word': lemma})
+            self.database.flaskdb.insert_one({'word': lemmatized})
 
             response = {
                 'result': 'ok',
