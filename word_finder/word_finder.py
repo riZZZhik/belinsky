@@ -75,6 +75,14 @@ class WordFinder:
         }
         return response, 200
 
+    def clear_all_words(self):
+        self.database.flaskdb.drop()
+
+        response = {
+            'status': 200
+        }
+        return response, 200
+
     @staticmethod
     def request_not_found(_):
         response = {

@@ -21,6 +21,7 @@ word_finder = WordFinder(db)
 app.add_url_rule('/highlight-words', view_func=word_finder.highlight_words, methods=['POST'])
 app.add_url_rule('/add-new-word', view_func=word_finder.add_new_word, methods=['POST'])
 app.add_url_rule('/get-all-words', view_func=word_finder.get_all_words, methods=['GET'])
+app.add_url_rule('/clear-all-words', view_func=word_finder.clear_all_words, methods=['GET'])
 app.register_error_handler(404, word_finder.request_not_found)
 
 # Run app
