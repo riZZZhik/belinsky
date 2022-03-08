@@ -1,6 +1,13 @@
 from pymystem3 import Mystem
 
 
+class Token:
+    def __init__(self, word, lemma, position):
+        self.word = word
+        self.lemma = lemma
+        self.position = position
+
+
 class Tokenizer:
     def __init__(self):
         self.lemmatizer = Mystem()
@@ -22,11 +29,6 @@ class Tokenizer:
             delta += len(word) + 1
 
             # Create token from data
-            token = {
-                'word': word,
-                'lemma': lemma,
-                'position': position
-            }
-            tokenized.append(token)
+            tokenized.append(Token(word, lemma, position))
 
         return tokenized

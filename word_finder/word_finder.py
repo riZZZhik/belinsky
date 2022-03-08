@@ -25,12 +25,9 @@ class WordFinder:
             return response, 400
 
         # Process text
-        words = self._load_words()
         tokenized = self.tokenizer.tokenize(request.json['text'])
-
-        result = dict([(token['lemma'], token['position']) for token in tokenized if token['lemma'] in words])
         response = {
-            'result': result,
+            'result': self._compare_words(tokenized),
             'status': 200
         }
         return response, 200
@@ -93,3 +90,15 @@ class WordFinder:
 
     def _load_words(self):
         return [data['word'] for data in self.database.flaskdb.find()]
+
+    def _compare_words(self, tokenized):
+        words = self._load_words()
+        result = {}
+        for token in tokenized:
+            if token.lemma in words:
+                if token.lemma in result.keys():
+                    result[token.lemma].append(token.position)
+                else:
+                    result[token.lemma] = [token.position]
+
+        return result

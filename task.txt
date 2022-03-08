@@ -6,7 +6,7 @@
 POST
 localhost/highlight-words
 request_body:{'text': 'мама любит бананы'}
-response_body:{'result': {'любить банан': [5, 17]}}
+response_body:{'result': {'любить банан': [[5, 17],]}}
 
 POST
 localhost/add-new-word
