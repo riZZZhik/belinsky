@@ -25,12 +25,19 @@ class WordFinder:
             return response, 400
 
         # Process text
-        tokenized = self.tokenizer.tokenize(request.json['text'])
-        response = {
-            'result': self._compare_words(tokenized),
-            'status': 200
-        }
-        return response, 200
+        try:
+            tokenized = self.tokenizer.tokenize(request.json['text'])
+            response = {
+                'result': self._compare_words(tokenized),
+                'status': 200
+            }
+            return response, 200
+        except Exception as e:
+            response = {
+                'error': "Unexpected error on server : %s" % e,
+                'status': 500
+            }
+            return response, 500
 
     def add_new_word(self):
         # Check request body
@@ -49,7 +56,7 @@ class WordFinder:
             return response, 400
 
         # Add new word to database
-        lemmatized = ' '.join([self.tokenizer.lemmatize(word) for word in request.json['word'].split()])
+        lemmatized = [self.tokenizer.lemmatize(word) for word in request.json['word'].split()]
         if lemmatized in self._load_words():
             response = {
                 'error': "word already in database",
@@ -67,7 +74,7 @@ class WordFinder:
 
     def get_all_words(self):
         response = {
-            'result': self._load_words(),
+            'result': [' '.join(x) for x in self._load_words()],
             'status': 200
         }
         return response, 200
@@ -83,7 +90,8 @@ class WordFinder:
     @staticmethod
     def request_not_found(_):
         response = {
-            'error': "Request not found. Use one of: 'highlight-words', 'add-new-word', 'get-all-words'",
+            'error': "Request not found. Use one of: "
+                     "'highlight-words', 'add-new-word', 'get-all-words', 'clear-all-words'",
             'status': 404
         }
         return response, 404
@@ -93,12 +101,29 @@ class WordFinder:
 
     def _compare_words(self, tokenized):
         words = self._load_words()
+        lemmatized = [x.lemma for x in tokenized]
+
         result = {}
-        for token in tokenized:
-            if token.lemma in words:
-                if token.lemma in result.keys():
-                    result[token.lemma].append(token.position)
+        for word in words:
+            for index in self._find_sublist_indexes(word, lemmatized):
+                key = ' '.join(word)
+                position = [tokenized[index].position[0], tokenized[index + len(word) - 1].position[1]]
+                if key in result.keys():
+                    result[key].append(position)
                 else:
-                    result[token.lemma] = [token.position]
+                    result[key] = [position]
 
         return result
+
+    @staticmethod
+    def _find_sublist_indexes(sub, bigger):
+        first, rest = sub[0], sub[1:]
+        pos = 0
+        result = []
+        try:
+            while True:
+                pos = bigger.index(first, pos) + 1
+                if not rest or bigger[pos:pos + len(rest)] == rest:
+                    result.append(pos - 1)
+        except ValueError:
+            return result

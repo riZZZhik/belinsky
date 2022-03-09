@@ -19,10 +19,6 @@ class Tokenizer:
         delta = 0
         tokenized = []
         for word in text.split():
-            # Check word
-            if word is None:
-                continue
-
             # Process word
             lemma = self.lemmatize(word)
             position = (delta, delta + len(word) - 1)
