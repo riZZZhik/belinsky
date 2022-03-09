@@ -2,6 +2,7 @@ from pymystem3 import Mystem
 
 
 class Token:
+    """Word token structure."""
     def __init__(self, word, lemma, position):
         self.word = word
         self.lemma = lemma
@@ -9,13 +10,35 @@ class Token:
 
 
 class Tokenizer:
+    """Class for tokenizing words and phrases."""
     def __init__(self):
+        """Initialize Tokenizer."""
         self.lemmatizer = Mystem()
 
     def lemmatize(self, word):
+        """ Lemmatize word.
+
+        Arguments:
+             word (str): Word to be lemmatized.
+
+        Returns:
+            str:
+                Lemmatized word.
+        """
+
         return self.lemmatizer.lemmatize(word)[-2]
 
     def tokenize(self, text):
+        """ Tokenize text.
+
+        Arguments:
+            text (str): Text to be tokenized.
+
+        Returns:
+            List:
+                Words' tokens.
+        """
+
         delta = 0
         tokenized = []
         for word in text.split():

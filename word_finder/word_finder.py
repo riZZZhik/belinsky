@@ -4,11 +4,42 @@ from .tokenizer import Tokenizer
 
 
 class WordFinder:
+    """ WordFinder API worker."""
+
     def __init__(self, database):
+        """ Initialize WordFinder API worker.
+
+        Arguments:
+             database (flask_pymongo.wrappers.Database): MongoDB database connection.
+        """
+
         self.database = database
         self.tokenizer = Tokenizer()
 
     def highlight_words(self):
+        """ Highlight known words in text.
+        ---
+        Body (JSON):
+            - text: Text to process.
+
+        Responses:
+            200:
+                description: Return highlighted words and their indexes in text.
+                schema:
+                    result: Dictionary with highlighted words and their indexes.
+                    status: 200
+            400:
+                description: Json body or 'text' key in request body not found.
+                schema:
+                    error: Error description.
+                    status: 400
+            500:
+                description: Unexpected error while processing request.
+                schema:
+                    error: Error description.
+                    status: 500
+        """
+
         # Check request body
         if not request.json:
             response = {
@@ -34,12 +65,30 @@ class WordFinder:
             return response, 200
         except Exception as e:
             response = {
-                'error': "Unexpected error on server : %s" % e,
+                'error': "unexpected error encountered during processing request: %s" % e,
                 'status': 500
             }
             return response, 500
 
     def add_new_word(self):
+        """ Add new word or phrase to database.
+        ---
+        Body (JSON):
+            - word: Word or phrase to add.
+
+        Responses:
+            200:
+                description: Return that request processed properly.
+                schema:
+                    result: 'ok'.
+                    status: 200
+            400:
+                description: Json body or 'word' key in request body not found.
+                schema:
+                    error: Error description.
+                    status: 400
+        """
+
         # Check request body
         if not request.json:
             response = {
@@ -73,6 +122,16 @@ class WordFinder:
             return response, 200
 
     def get_all_words(self):
+        """ Get all known words in database.
+        ---
+        Responses:
+            200:
+                description: Return words and phrases from database.
+                schema:
+                    result: List of known words and phrases.
+                    status: 200
+        """
+
         response = {
             'result': [' '.join(x) for x in self._load_words()],
             'status': 200
@@ -80,6 +139,15 @@ class WordFinder:
         return response, 200
 
     def clear_all_words(self):
+        """ Clear known words and phrases from database.
+        ---
+        Responses:
+            200:
+                description: Return that request processed properly.
+                schema:
+                    status: 200
+        """
+
         self.database.flaskdb.drop()
 
         response = {
@@ -89,6 +157,16 @@ class WordFinder:
 
     @staticmethod
     def request_not_found(_):
+        """ Respond that request not found.
+        ---
+        Responses:
+            404:
+                description: Request not found.
+                schema:
+                    error: Error description.
+                    status: 404
+        """
+
         response = {
             'error': "Request not found. Use one of: "
                      "'highlight-words', 'add-new-word', 'get-all-words', 'clear-all-words'",
@@ -98,16 +176,34 @@ class WordFinder:
 
     @staticmethod
     def request_error(_):
+        """ Respond that there is unexpected error on server.
+        ---
+        Responses:
+            500:
+                description: Request not found.
+                schema:
+                    error: Error description.
+                    status: 500
+        """
+
         response = {
-            'error': "Unknown error encountered during processing request",
+            'error': "unexpected error encountered during processing request",
             'status': 500
         }
         return response, 500
 
     def _load_words(self):
+        """Load words and phrases from database."""
         return [data['word'] for data in self.database.flaskdb.find()]
 
     def _compare_words(self, tokenized):
+        """ Compare text with words and phrases from database.
+
+        Returns:
+            Dict:
+                Return highlighted words and their indexes in text.
+        """
+
         words = self._load_words()
         lemmatized = [x.lemma for x in tokenized]
 
@@ -125,6 +221,12 @@ class WordFinder:
 
     @staticmethod
     def _find_sublist_indexes(sub, bigger):
+        """ Find indexes of sublist first items in list.
+
+        Returns:
+            List:
+                Indexes of sublist first items in list.
+        """
         first, rest = sub[0], sub[1:]
         pos = 0
         result = []
