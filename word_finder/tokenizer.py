@@ -1,4 +1,5 @@
 from pymystem3 import Mystem
+from transliterate import translit
 
 
 class Token:
@@ -25,7 +26,7 @@ class Tokenizer:
             str:
                 Lemmatized word.
         """
-
+        word = translit(word, 'ru')
         return self.lemmatizer.lemmatize(word)[-2]
 
     def tokenize(self, text):
@@ -41,7 +42,7 @@ class Tokenizer:
 
         delta = 0
         tokenized = []
-        for word in text.split():
+        for word in translit(text, 'ru').split():
             # Process word
             lemma = self.lemmatize(word)
             position = (delta, delta + len(word) - 1)
