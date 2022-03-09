@@ -96,6 +96,14 @@ class WordFinder:
         }
         return response, 404
 
+    @staticmethod
+    def request_error(_):
+        response = {
+            'error': "Unknown error encountered during processing request",
+            'status': 500
+        }
+        return response, 500
+
     def _load_words(self):
         return [data['word'] for data in self.database.flaskdb.find()]
 
