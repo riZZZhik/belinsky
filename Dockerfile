@@ -17,6 +17,7 @@ COPY app.py .
 # Create test entrypoint
 FROM base as test
 COPY test_app.py .
+RUN pip install flask-unittest
 ENTRYPOINT ["python", "test_app.py"]
 
 # Create production entrypoint
