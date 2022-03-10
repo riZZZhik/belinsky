@@ -4,11 +4,12 @@ services:
       context: .
       target: test
     container_name: flask_app_test
+    restart: "no"
     environment:
       MONGODB_DATABASE: flaskdb
       MONGODB_USERNAME: admin
       MONGODB_PASSWORD: admin_password
-      MONGODB_HOSTNAME: mongodb
+      MONGODB_HOSTNAME: mongodb_test
 
     depends_on:
       - mongodb_test
