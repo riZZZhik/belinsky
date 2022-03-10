@@ -3,7 +3,8 @@ LABEL MAINTAINER="Dmitry Barsukoff <t.me/riZZZhik>"
 
 # Setup Flask
 ENV FLASK_APP=app.py \
-    FLASK_RUN_HOST=0.0.0.0
+    FLASK_RUN_HOST=0.0.0.0 \
+    FLASK_RUN_PORT=5000
 
 # Install requirements
 WORKDIR /word_finder
@@ -22,5 +23,5 @@ ENTRYPOINT ["python", "test_app.py"]
 
 # Create production entrypoint
 FROM base as production
-EXPOSE 5000
+EXPOSE $FLASK_RUN_PORT
 ENTRYPOINT ["flask", "run"]

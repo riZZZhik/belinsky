@@ -60,7 +60,7 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         self.assertEqual(response.json, correct_response)
 
     def test_get_all_words(self, client):
-        response = client.post(
+        client.post(
             '/add-new-word',
             json={'word': 'проверка'}
         )
@@ -162,7 +162,7 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_highlight_word_hyphen_phrase(self, client):
+    def test_highlight_hyphen_phrase(self, client):
         client.post(
             '/add-new-word',
             json={

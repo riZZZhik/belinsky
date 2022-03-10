@@ -41,6 +41,11 @@ class WordFinder:
                 schema:
                     error: Error description.
                     status: 400
+            406:
+                description: Word already in database.
+                schema:
+                    error: Error description.
+                    status: 406
         """
 
         # Check request body
@@ -272,6 +277,7 @@ class WordFinder:
             List:
                 Indexes of sublist first items in list.
         """
+
         first, rest = sub[0], sub[1:]
         pos = 0
         result = []
