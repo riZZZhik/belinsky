@@ -1,5 +1,5 @@
 services:
-  flask_app:
+  flask_app_test:
     build:
       context: .
       target: test
@@ -12,10 +12,8 @@ services:
 
     depends_on:
       - mongodb_test
-    ports:
-      - "4958:5000"
 
-  mongodb:
+  mongodb_test:
     image: mongo
     command: mongod --quiet --logpath /dev/null
     container_name: mongodb_test
