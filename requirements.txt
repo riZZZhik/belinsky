@@ -1,5 +1,6 @@
 # API requirements
 flask
+flask-unittest
 flask_pymongo
 
 # NLP requirements

@@ -1,6 +1,14 @@
 from flask import request
+from pymystem3 import Mystem
+from transliterate import translit
 
-from .tokenizer import Tokenizer
+
+class Token:
+    """Word token structure."""
+    def __init__(self, word, lemma, position):
+        self.word = word
+        self.lemma = lemma
+        self.position = position
 
 
 class WordFinder:
@@ -14,7 +22,75 @@ class WordFinder:
         """
 
         self.database = database
-        self.tokenizer = Tokenizer()
+        self.lemmatizer = Mystem()
+
+    def add_new_word(self):
+        """ Add new word or phrase to database.
+        ---
+        Body (JSON):
+            - word: Word or phrase to add.
+
+        Responses:
+            200:
+                description: Return that request processed properly.
+                schema:
+                    result: 'ok'.
+                    status: 200
+            400:
+                description: Json body or 'word' key in request body not found.
+                schema:
+                    error: Error description.
+                    status: 400
+        """
+
+        # Check request body
+        if not request.json:
+            response = {
+                'error': "json body not found in request",
+                'status': 400
+            }
+            return response, 400
+
+        if 'word' not in request.json:
+            response = {
+                'error': "key 'word' not found in request body",
+                'status': 400
+            }
+            return response, 400
+
+        # Add new word to database
+        lemmatized = [self.lemmatize(word) for word in request.json['word'].split()]
+        if lemmatized in self._load_words():
+            response = {
+                'error': "word already in database",
+                'status': 406
+            }
+            return response, 406
+        else:
+            self.database.flaskdb.insert_one({'word': lemmatized})
+
+            response = {
+                'result': 'ok',
+                'status': 200
+            }
+            return response, 200
+
+    def get_all_words(self):
+        """ Get all known words in database.
+        ---
+        Responses:
+            200:
+                description: Return words and phrases from database.
+                schema:
+                    result: List of known words and phrases.
+                    status: 200
+        """
+
+        response = {
+            'result': [' '.join(x) for x in self._load_words()],
+            'status': 200
+        }
+        return response, 200
 
     def highlight_words(self):
         """ Highlight known words in text.
@@ -57,7 +133,7 @@ class WordFinder:
 
         # Process text
         try:
-            tokenized = self.tokenizer.tokenize(request.json['text'])
+            tokenized = self.tokenize(request.json['text'])
             response = {
                 'result': self._compare_words(tokenized),
                 'status': 200
@@ -69,74 +145,6 @@ class WordFinder:
                 'status': 500
             }
             return response, 500
-
-    def add_new_word(self):
-        """ Add new word or phrase to database.
-        ---
-        Body (JSON):
-            - word: Word or phrase to add.
-
-        Responses:
-            200:
-                description: Return that request processed properly.
-                schema:
-                    result: 'ok'.
-                    status: 200
-            400:
-                description: Json body or 'word' key in request body not found.
-                schema:
-                    error: Error description.
-                    status: 400
-        """
-
-        # Check request body
-        if not request.json:
-            response = {
-                'error': "json body not found in request",
-                'status': 400
-            }
-            return response, 400
-
-        if 'word' not in request.json:
-            response = {
-                'error': "key 'word' not found in request body",
-                'status': 400
-            }
-            return response, 400
-
-        # Add new word to database
-        lemmatized = [self.tokenizer.lemmatize(word) for word in request.json['word'].split()]
-        if lemmatized in self._load_words():
-            response = {
-                'error': "word already in database",
-                'status': 406
-            }
-            return response, 406
-        else:
-            self.database.flaskdb.insert_one({'word': lemmatized})
-
-            response = {
-                'result': 'ok',
-                'status': 200
-            }
-            return response, 200
-
-    def get_all_words(self):
-        """ Get all known words in database.
-        ---
-        Responses:
-            200:
-                description: Return words and phrases from database.
-                schema:
-                    result: List of known words and phrases.
-                    status: 200
-        """
-
-        response = {
-            'result': [' '.join(x) for x in self._load_words()],
-            'status': 200
-        }
-        return response, 200
 
     def clear_all_words(self):
         """ Clear known words and phrases from database.
@@ -191,6 +199,43 @@ class WordFinder:
             'status': 500
         }
         return response, 500
+
+    def lemmatize(self, word):
+        """ Lemmatize word.
+
+        Arguments:
+             word (str): Word to be lemmatized.
+
+        Returns:
+            str:
+                Lemmatized word.
+        """
+        word = translit(word, 'ru')
+        return self.lemmatizer.lemmatize(word)[-2]
+
+    def tokenize(self, text):
+        """ Tokenize text.
+
+        Arguments:
+            text (str): Text to be tokenized.
+
+        Returns:
+            List:
+                Words' tokens.
+        """
+
+        delta = 0
+        tokenized = []
+        for word in translit(text, 'ru').split():
+            # Process word
+            lemma = self.lemmatize(word)
+            position = (delta, delta + len(word) - 1)
+            delta += len(word) + 1
+
+            # Create token from data
+            tokenized.append(Token(word, lemma, position))
+
+        return tokenized
 
     def _load_words(self):
         """Load words and phrases from database."""
