@@ -1,5 +1,12 @@
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/18220726-51689aa2-6ff2-4ffa-a278-e46ae40c6965?action=collection%2Ffork&collection-url=entityId%3D18220726-51689aa2-6ff2-4ffa-a278-e46ae40c6965%26entityType%3Dcollection%26workspaceId%3Def145b73-8364-42bb-bcd4-f7bce58058e2)
 
+# How to use
+
+## Run production
+`docker-compose up --build`
+
+## Run tests
+`docker-compose -f docker-compose-test.yaml up --build --exit-code-from flask_app_test`
 
 # API (Cloned from Postman)
 ## 1. highlight-words
