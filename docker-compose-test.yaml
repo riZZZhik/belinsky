@@ -17,7 +17,7 @@ services:
 
   mongodb:
     image: mongo
-    command: mongod -v
+    command: mongod --quiet --logpath /dev/null
     container_name: mongodb_test
     restart: unless-stopped
     environment:
