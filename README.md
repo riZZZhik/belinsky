@@ -173,6 +173,25 @@ POST {{host}}/add-new-word
 }
 ```
 
+### 406
+
+**Request**
+
+```json
+{
+    "word": "очень супер длинная фраза"
+}
+```
+
+**Response**
+
+```json
+{
+  "error": "word already in database",
+  "status": 406
+}
+```
+
 ----------------
 
 ## 3. get-all-words
