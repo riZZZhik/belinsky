@@ -227,7 +227,7 @@ GET {{host}}/get-all-words
 ## 4. clear-all-words
 
 ```http
-GET {{host}}/clear-all-words
+POST {{host}}/clear-all-words
 ```
 
 ### 200
