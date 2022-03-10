@@ -7,7 +7,7 @@ from app import create_app
 class WordFinderTest(flask_unittest.ClientTestCase):
     app = create_app()
 
-    def setUp(self, client):
+    def tearDown(self, client):
         client.post('clear-all-words')
 
     def test_get_all_words_clear(self, client):
