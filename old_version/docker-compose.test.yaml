@@ -1,25 +1,23 @@
 services:
-  flask_app:
+  flask_app_test:
     build:
-      context: .
-      target: production
-    container_name: flask_app
-    restart: unless-stopped
+      context: ..
+      target: test
+    container_name: flask_app_test
+    restart: "no"
     environment:
       MONGODB_DATABASE: flaskdb
       MONGODB_USERNAME: admin
       MONGODB_PASSWORD: admin_password
-      MONGODB_HOSTNAME: mongodb
+      MONGODB_HOSTNAME: mongodb_test
 
     depends_on:
-      - mongodb
-    ports:
-      - "4958:5000"
+      - mongodb_test
 
-  mongodb:
+  mongodb_test:
     image: mongo
     command: mongod --quiet --logpath /dev/null
-    container_name: mongodb
+    container_name: mongodb_test
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
@@ -27,8 +25,8 @@ services:
       MONGO_INITDB_DATABASE: flaskdb
       MONGODB_DATA_DIR: /data/db
     volumes:
-      - mongodbdata:/data/db
+      - mongodbdata_test:/data/db
 
 volumes:
-  mongodbdata:
+  mongodbdata_test:
     driver: local
