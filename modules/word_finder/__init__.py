@@ -6,7 +6,7 @@ from .tokenizer import Tokenizer
 from .word_finder import WordFinder
 
 
-def create_blueprint():
+def create_blueprint_word_finder():
     # Create Flask blueprint
     word_finder_bp = Blueprint('word_finder', __name__)
 
@@ -28,4 +28,4 @@ def create_blueprint():
     return word_finder_bp
 
 
-__all__ = ['create_blueprint', 'WordFinder', 'Tokenizer']
+__all__ = ['create_blueprint_word_finder', 'WordFinder', 'Tokenizer']

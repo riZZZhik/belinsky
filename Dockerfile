@@ -14,7 +14,7 @@ COPY app app
 COPY modules modules
 COPY main.py .
 
-# Create production entrypoint
+# Create production target
 FROM base as production
 
 # Expose Flask port
@@ -23,7 +23,7 @@ EXPOSE 5000
 # Default execute
 CMD ["gunicorn", "main:\"create_app()\"", "-b 0.0.0.0:5000"]
 
-# Create test entrypoint
+# Create test target
 FROM base as test
 
 # Install unittest dependencies
