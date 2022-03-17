@@ -11,6 +11,7 @@ RUN python -c "from pymystem3 import autoinstall; autoinstall()"
 
 # Copy work files
 COPY app app
+COPY modules modules
 COPY main.py .
 
 # Create production entrypoint
