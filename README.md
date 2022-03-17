@@ -8,7 +8,7 @@
 ## Run tests
 `docker-compose -f docker-compose.test.yaml up --build --exit-code-from word_finder_app_test`
 
-# API (Cloned from Postman)
+# API requests
 ## 1. highlight-words
 
 ### 200
@@ -20,7 +20,7 @@
 curl --request POST \
   --header "Content-Type: application/json" \
   --data '{"text": "мама любит по-любому бананы"}' \
-  $url/highlight-words
+  $APP_URL/highlight-words
 ``` 
 
 **Response**
@@ -79,7 +79,7 @@ curl --request POST \
 curl --request POST \
   --header "Content-Type: application/json" \
   --data '{"no_text": "мама любит по-любому бананы"}' \
-  $url/highlight-words
+  $APP_URL/highlight-words
 ``` 
 
 **Response**
@@ -97,7 +97,7 @@ curl --request POST \
 
 ```bash
 curl --request POST \
-  $url/highlight-words
+  $APP_URL/highlight-words
 ``` 
 
 **Response**
@@ -121,7 +121,7 @@ curl --request POST \
 curl --request POST \
   --header "Content-Type: application/json" \
   --data '{"word": "Privet банану"}' \
-  $url/add-new-word
+  $APP_URL/add-new-word
 ``` 
 
 **Response**
@@ -141,7 +141,7 @@ curl --request POST \
 curl --request POST \
   --header "Content-Type: application/json" \
   --data '{"no_word": "Privet банану"}' \
-  $url/add-new-word
+  $APP_URL/add-new-word
 ``` 
 
 **Response**
@@ -159,7 +159,7 @@ curl --request POST \
 
 ```bash
 curl --request POST \
-  $url/add-new-word
+  $APP_URL/add-new-word
 ``` 
 
 **Response**
@@ -180,7 +180,7 @@ curl --request POST \
 curl --request POST \
   --header "Content-Type: application/json" \
   --data '{"no_word": "Privet банану"}' \
-  $url/add-new-word
+  $APP_URL/add-new-word
 ``` 
 
 **Response**
@@ -201,7 +201,7 @@ curl --request POST \
 **Request**
 
 ```bash
-curl $url/get-all-words
+curl $APP_URL/get-all-words
 ``` 
 
 **Response**
@@ -229,7 +229,7 @@ curl $url/get-all-words
 
 ```bash
 curl --request POST \
-  $url/add-new-word
+  $APP_URL/add-new-word
 ``` 
 
 **Response**
