@@ -1,0 +1,85 @@
+services:
+  nginx:
+    build: nginx/
+    container_name: word_finder_nginx
+
+    ports:
+      - "4958:80"
+
+    depends_on:
+      - word_finder_app_1
+      - word_finder_app_2
+      - word_finder_app_backup
+
+  app_1:
+    build:
+      context: word_finder_app/
+      target: production
+    command: gunicorn main:"create_app()" -b 0.0.0.0:5000
+    container_name: word_finder_app_1
+    restart: unless-stopped
+
+    environment:
+      MONGODB_USERNAME: admin
+      MONGODB_PASSWORD: admin_password
+      MONGODB_HOSTNAME: word_finder_db
+
+    ports:
+      - "4900:5000"
+    depends_on:
+      - word_finder_db
+
+  app_2:
+    build:
+      context: word_finder_app/
+      target: production
+    command: gunicorn main:"create_app()" -b 0.0.0.0:5000
+    container_name: word_finder_app_2
+    restart: unless-stopped
+
+    environment:
+      MONGODB_USERNAME: admin
+      MONGODB_PASSWORD: admin_password
+      MONGODB_HOSTNAME: word_finder_db
+
+    ports:
+      - "4901:5000"
+    depends_on:
+      - word_finder_db
+
+  app_backup:
+    build:
+      context: word_finder_app/
+      target: production
+    command: gunicorn main:"create_app()" -b 0.0.0.0:5000
+    container_name: word_finder_app_backup
+    restart: unless-stopped
+
+    environment:
+      MONGODB_USERNAME: admin
+      MONGODB_PASSWORD: admin_password
+      MONGODB_HOSTNAME: word_finder_db
+
+    ports:
+      - "4899:5000"
+    depends_on:
+      - word_finder_db
+
+  word_finder_db:
+    image: mongo
+    command: mongod --quiet --logpath /dev/null
+    container_name: word_finder_db
+    restart: unless-stopped
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin_password
+      MONGO_INITDB_DATABASE: word_finder_db
+      MONGODB_DATA_DIR: /data/db
+
+    volumes:
+      - mongodbdata:/data/db
+
+volumes:
+  mongodbdata:
+    driver: local
