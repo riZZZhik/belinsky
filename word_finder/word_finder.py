@@ -1,14 +1,6 @@
 from flask import request
-from pymystem3 import Mystem
-from transliterate import translit
 
-
-class Token:
-    """Word token structure."""
-    def __init__(self, word, lemma, position):
-        self.word = word
-        self.lemma = lemma
-        self.position = position
+from tokenizer import Tokenizer
 
 
 class WordFinder:
@@ -22,7 +14,7 @@ class WordFinder:
         """
 
         self.database = database
-        self.lemmatizer = Mystem()
+        self.tokenizer = Tokenizer()
 
     def add_new_word(self):
         """ Add new word or phrase to database.
@@ -64,7 +56,7 @@ class WordFinder:
             return response, 400
 
         # Add new word to database
-        lemmatized = [self.lemmatize(word) for word in request.json['word'].split()]
+        lemmatized = [self.tokenizer.lemmatize(word) for word in request.json['word'].split()]
         if lemmatized in self._load_words():
             response = {
                 'error': "word already in database",
@@ -138,9 +130,8 @@ class WordFinder:
 
         # Process text
         try:
-            tokenized = self.tokenize(request.json['text'])
             response = {
-                'result': self._compare_words(tokenized),
+                'result': self.tokenizer.compare_words(request.json['text'], self._load_words()),
                 'status': 200
             }
             return response, 200
@@ -205,86 +196,11 @@ class WordFinder:
         }
         return response, 500
 
-    def lemmatize(self, word):
-        """ Lemmatize word.
-
-        Arguments:
-             word (str): Word to be lemmatized.
-
-        Returns:
-            str:
-                Lemmatized word.
-        """
-        word = translit(word, 'ru')
-        return self.lemmatizer.lemmatize(word)[-2]
-
-    def tokenize(self, text):
-        """ Tokenize text.
-
-        Arguments:
-            text (str): Text to be tokenized.
-
-        Returns:
-            List:
-                Words' tokens.
-        """
-
-        delta = 0
-        tokenized = []
-        for word in translit(text, 'ru').split():
-            # Process word
-            lemma = self.lemmatize(word)
-            position = (delta, delta + len(word) - 1)
-            delta += len(word) + 1
-
-            # Create token from data
-            tokenized.append(Token(word, lemma, position))
-
-        return tokenized
-
     def _load_words(self):
-        """Load words and phrases from database."""
+        """ Load words and phrases from database.
+
+        Returns:
+            List: Word and phrases in database.
+        """
+
         return [data['word'] for data in self.database.flaskdb.find()]
-
-    def _compare_words(self, tokenized):
-        """ Compare text with words and phrases from database.
-
-        Returns:
-            Dict:
-                Return highlighted words and their indexes in text.
-        """
-
-        words = self._load_words()
-        lemmatized = [x.lemma for x in tokenized]
-
-        result = {}
-        for word in words:
-            for index in self._find_sublist_indexes(word, lemmatized):
-                key = ' '.join(word)
-                position = [tokenized[index].position[0], tokenized[index + len(word) - 1].position[1]]
-                if key in result.keys():
-                    result[key].append(position)
-                else:
-                    result[key] = [position]
-
-        return result
-
-    @staticmethod
-    def _find_sublist_indexes(sub, bigger):
-        """ Find indexes of sublist first items in list.
-
-        Returns:
-            List:
-                Indexes of sublist first items in list.
-        """
-
-        first, rest = sub[0], sub[1:]
-        pos = 0
-        result = []
-        try:
-            while True:
-                pos = bigger.index(first, pos) + 1
-                if not rest or bigger[pos:pos + len(rest)] == rest:
-                    result.append(pos - 1)
-        except ValueError:
-            return result
