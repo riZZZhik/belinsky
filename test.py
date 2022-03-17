@@ -1,8 +1,9 @@
+import sys
 import unittest
 import flask_unittest
 
 from app import create_app
-from modules.word_finder import Tokenizer
+from modules.word_finder.tokenizer import Tokenizer, Token
 
 
 class WordFinderTest(flask_unittest.ClientTestCase):
@@ -20,6 +21,35 @@ class WordFinderTest(flask_unittest.ClientTestCase):
     def test_lemmatizer_hyphen(self, _):
         response = self.tokenizer.lemmatize('по-любому')
         correct_response = 'любой'
+        self.assertEqual(response, correct_response)
+
+    def test_tokenizer(self, _):
+        response = [token.to_list() for token in self.tokenizer.tokenize('Мама по-любому обожает апельсины')]
+        correct_response = [
+            Token("мама", "мама", (0, 3)).to_list(),
+            Token('по-любому', 'любой', (5, 13)).to_list(),
+            Token('обожает', 'обожать', (15, 21)).to_list(),
+            Token('апельсины', 'апельсин', (23, 31)).to_list()
+        ]
+        self.assertEqual(response, correct_response)
+
+    def test_compare_words(self, _):
+        words = ([[self.tokenizer.lemmatize('привет')], [self.tokenizer.lemmatize('папа')]])
+        response = self.tokenizer.compare_words('Привет, я Папа', words)
+
+        correct_response = {
+            'привет': [[0, 6]],
+            'папа': [[10, 13]]
+        }
+        self.assertEqual(response, correct_response)
+
+    def test_compare_phrases(self, _):
+        words = ([[self.tokenizer.lemmatize('я '), self.tokenizer.lemmatize('папа')]])
+        response = self.tokenizer.compare_words('Привет, я Папа', words)
+
+        correct_response = {
+            'я папа': [[8, 13]]
+        }
         self.assertEqual(response, correct_response)
 
     def test_get_all_words_clear(self, client):
@@ -195,4 +225,5 @@ class WordFinderTest(flask_unittest.ClientTestCase):
 
 if __name__ == '__main__':
     runner = unittest.TextTestRunner()
-    runner.run(unittest.makeSuite(WordFinderTest))
+    result = runner.run(unittest.makeSuite(WordFinderTest))
+    sys.exit(not result.wasSuccessful())

@@ -10,6 +10,9 @@ class Token:
         self.lemma = lemma
         self.position = position
 
+    def to_list(self):
+        return self.word, self.lemma, self.position
+
 
 class Tokenizer:
     """NLP worker for WordFinder app."""
@@ -44,7 +47,7 @@ class Tokenizer:
 
         delta = 0
         tokenized = []
-        for word in translit(text, 'ru').split():
+        for word in translit(text.lower(), 'ru').split():
             # Process word
             lemma = self.lemmatize(word)
             position = (delta, delta + len(word) - 1)
