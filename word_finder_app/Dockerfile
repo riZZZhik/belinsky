@@ -17,9 +17,6 @@ COPY main.py .
 # Create production target
 FROM base as production
 
-# Expose Flask port
-EXPOSE 5000
-
 # Default execute
 CMD ["gunicorn", "main:\"create_app()\"", "-b 0.0.0.0:5000"]
 

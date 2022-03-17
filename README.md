@@ -2,8 +2,11 @@
 
 # How to use
 
-## Run production
+## Run production on one host
 `docker-compose up --build`
+
+## Run production on several hosts
+`docker-compose -f docker-compose.several.yaml up --build`
 
 ## Run tests
 `docker-compose -f docker-compose.test.yaml up --build --exit-code-from word_finder_app_test`
