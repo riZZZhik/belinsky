@@ -5,7 +5,6 @@ services:
 
     ports:
       - "4958:80"
-
     depends_on:
       - word_finder_app_1
       - word_finder_app_2
