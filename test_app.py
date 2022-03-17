@@ -2,13 +2,25 @@ import unittest
 import flask_unittest
 
 from app import create_app
+from word_finder import Tokenizer
 
 
 class WordFinderTest(flask_unittest.ClientTestCase):
     app = create_app()
+    tokenizer = Tokenizer()
 
     def tearDown(self, client):
         client.post('clear-all-words')
+
+    def test_lemmatizer(self, _):
+        response = self.tokenizer.lemmatize('Апельсины')
+        correct_response = 'апельсин'
+        self.assertEqual(response, correct_response)
+
+    def test_lemmatizer_hyphen(self, _):
+        response = self.tokenizer.lemmatize('по-любому')
+        correct_response = 'любой'
+        self.assertEqual(response, correct_response)
 
     def test_get_all_words_clear(self, client):
         response = client.get('/get-all-words')
