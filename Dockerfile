@@ -6,6 +6,9 @@ WORKDIR /word_finder
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# Download pymystem weights
+RUN python -c "from pymystem3 import autoinstall; autoinstall()"
+
 # Copy work files
 COPY app app
 COPY main.py .
