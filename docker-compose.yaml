@@ -1,31 +1,34 @@
 services:
-  flask_app:
+  word_finder_app:
     build:
       context: .
       target: production
-    container_name: flask_app
+    command: gunicorn main:"create_app()" -b 0.0.0.0:5000
+    container_name: word_finder_app
     restart: unless-stopped
+
     environment:
-      MONGODB_DATABASE: flaskdb
       MONGODB_USERNAME: admin
       MONGODB_PASSWORD: admin_password
-      MONGODB_HOSTNAME: mongodb
+      MONGODB_HOSTNAME: word_finder_db
 
     depends_on:
-      - mongodb
+      - word_finder_db
     ports:
-      - "4958:5000"
+      - "${APP_FORWARD_PORT-4958}:5000"
 
-  mongodb:
+  word_finder_db:
     image: mongo
     command: mongod --quiet --logpath /dev/null
-    container_name: mongodb
+    container_name: word_finder_db
     restart: unless-stopped
+
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin_password
-      MONGO_INITDB_DATABASE: flaskdb
+      MONGO_INITDB_DATABASE: word_finder_db
       MONGODB_DATA_DIR: /data/db
+
     volumes:
       - mongodbdata:/data/db
 

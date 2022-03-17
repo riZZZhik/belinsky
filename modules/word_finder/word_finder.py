@@ -1,4 +1,5 @@
 from flask import request
+from pymongo import MongoClient
 
 from .tokenizer import Tokenizer
 
@@ -6,14 +7,14 @@ from .tokenizer import Tokenizer
 class WordFinder:
     """ WordFinder API worker."""
 
-    def __init__(self, database):
+    def __init__(self, mongo_uri):
         """ Initialize WordFinder API worker.
 
         Arguments:
-             database (flask_pymongo.wrappers.Database): MongoDB database connection.
+             mongo_uri (str): MongoDB URI.
         """
 
-        self.database = database
+        self.database = MongoClient(mongo_uri).db.word_finder_db
         self.tokenizer = Tokenizer()
 
     def add_new_word(self):
@@ -64,7 +65,7 @@ class WordFinder:
             }
             return response, 406
         else:
-            self.database.flaskdb.insert_one({'word': lemmatized})
+            self.database.insert_one({'word': lemmatized})
 
             response = {
                 'result': 'ok',
@@ -152,7 +153,7 @@ class WordFinder:
                     status: 200
         """
 
-        self.database.flaskdb.drop()
+        self.database.drop()
 
         response = {
             'status': 200
@@ -203,4 +204,4 @@ class WordFinder:
             List: Word and phrases in database.
         """
 
-        return [data['word'] for data in self.database.flaskdb.find()]
+        return [data['word'] for data in self.database.find()]

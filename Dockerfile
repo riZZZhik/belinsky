@@ -1,30 +1,34 @@
 FROM --platform=linux/amd64 python:3.8 as base
 LABEL MAINTAINER="Dmitry Barsukoff <t.me/riZZZhik>"
 
-# Setup Flask
-ENV FLASK_APP=app.py \
-    FLASK_RUN_HOST=0.0.0.0 \
-    FLASK_RUN_PORT=5000
-
 # Install requirements
 WORKDIR /word_finder
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# Download pymystem weights
+RUN python -c "from pymystem3 import autoinstall; autoinstall()"
+
 # Copy work files
-COPY word_finder word_finder
-COPY app.py .
+COPY app app
+COPY modules modules
+COPY main.py .
 
-# Create production entrypoint
+# Create production target
 FROM base as production
-EXPOSE $FLASK_RUN_PORT
-ENTRYPOINT ["flask", "run"]
 
-# Create test entrypoint
+# Expose Flask port
+EXPOSE 5000
+
+# Default execute
+CMD ["gunicorn", "main:\"create_app()\"", "-b 0.0.0.0:5000"]
+
+# Create test target
 FROM base as test
 
-RUN pip install flask-unittest
-COPY test_app.py .
+# Install unittest dependencies
+RUN pip install flask-unittest==0.1.2
+COPY test.py .
 
-ENV FLASK_ENV=development
-ENTRYPOINT ["python3", "test_app.py"]
+# Default execute
+CMD ["python", "test.py"]

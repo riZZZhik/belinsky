@@ -6,26 +6,22 @@
 `docker-compose up --build`
 
 ## Run tests
-`docker-compose -f docker-compose.test.yaml up --build --exit-code-from flask_app_test`
+`docker-compose -f docker-compose.test.yaml up --build --exit-code-from word_finder_app_test`
 
 # API (Cloned from Postman)
 ## 1. highlight-words
-
-```http
-POST {{host}}/highlight-words
-```
-
 
 ### 200
 
 **Request**
 
 
-```json
-{
-    "text": "мама любит по-любому бананы; а маша недолюбливает апельсины; ненавидеть ненавижу ненавидит; очень супер длинная фраза"
-}
-```
+```shell
+curl --request POST \
+  --header "Content-Type: application/json" \
+  --data '{"text": "мама любит по-любому бананы"}' \
+  $url/highlight-words
+``` 
 
 **Response**
 
@@ -79,12 +75,12 @@ POST {{host}}/highlight-words
 ### 400
 
 **Request**
-
-```json
-{
-    "no_text": "мама любит по-любому бананы; а маша недолюбливает апельсины; ненавидеть ненавижу ненавидит; очень супер длинная фраза"
-}
-```
+```bash
+curl --request POST \
+  --header "Content-Type: application/json" \
+  --data '{"no_text": "мама любит по-любому бананы"}' \
+  $url/highlight-words
+``` 
 
 **Response**
 
@@ -99,8 +95,10 @@ POST {{host}}/highlight-words
 
 **Request**
 
-```json
-```
+```bash
+curl --request POST \
+  $url/highlight-words
+``` 
 
 **Response**
 
@@ -115,19 +113,16 @@ POST {{host}}/highlight-words
 
 ## 2. add-new-word
 
-```http
-POST {{host}}/add-new-word
-```
-
 ### 200
 
 **Request**
 
-```json
-{
-    "word": "очень супер длинная фраза"
-}
-```
+```bash
+curl --request POST \
+  --header "Content-Type: application/json" \
+  --data '{"word": "Privet банану"}' \
+  $url/add-new-word
+``` 
 
 **Response**
 
@@ -142,11 +137,12 @@ POST {{host}}/add-new-word
 
 **Request**
 
-```json
-{
-    "no_word": "очень супер длинная фраза"
-}
-```
+```bash
+curl --request POST \
+  --header "Content-Type: application/json" \
+  --data '{"no_word": "Privet банану"}' \
+  $url/add-new-word
+``` 
 
 **Response**
 
@@ -161,8 +157,10 @@ POST {{host}}/add-new-word
 
 **Request**
 
-```
-```
+```bash
+curl --request POST \
+  $url/add-new-word
+``` 
 
 **Response**
 
@@ -173,15 +171,17 @@ POST {{host}}/add-new-word
 }
 ```
 
+
 ### 406
 
 **Request**
 
-```json
-{
-    "word": "очень супер длинная фраза"
-}
-```
+```bash
+curl --request POST \
+  --header "Content-Type: application/json" \
+  --data '{"no_word": "Privet банану"}' \
+  $url/add-new-word
+``` 
 
 **Response**
 
@@ -196,16 +196,13 @@ POST {{host}}/add-new-word
 
 ## 3. get-all-words
 
-```http
-GET {{host}}/get-all-words
-```
-
 ### 200
 
 **Request**
 
-```json
-```
+```bash
+curl $url/get-all-words
+``` 
 
 **Response**
 
@@ -226,16 +223,14 @@ GET {{host}}/get-all-words
 
 ## 4. clear-all-words
 
-```http
-POST {{host}}/clear-all-words
-```
-
 ### 200
 
 **Request**
 
-```json
-```
+```bash
+curl --request POST \
+  $url/add-new-word
+``` 
 
 **Response**
 

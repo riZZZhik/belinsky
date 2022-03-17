@@ -1,29 +1,32 @@
 services:
-  flask_app_test:
+  word_finder_app_test:
     build:
       context: .
       target: test
-    container_name: flask_app_test
+    command: python test.py
+    container_name: word_finder_app_test
     restart: "no"
+
     environment:
-      MONGODB_DATABASE: flaskdb
       MONGODB_USERNAME: admin
       MONGODB_PASSWORD: admin_password
-      MONGODB_HOSTNAME: mongodb_test
+      MONGODB_HOSTNAME: word_finder_db_test
 
     depends_on:
-      - mongodb_test
+      - word_finder_db_test
 
-  mongodb_test:
+  word_finder_db_test:
     image: mongo
     command: mongod --quiet --logpath /dev/null
-    container_name: mongodb_test
+    container_name: word_finder_db_test
     restart: unless-stopped
+
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin_password
-      MONGO_INITDB_DATABASE: flaskdb
+      MONGO_INITDB_DATABASE: word_finder_db
       MONGODB_DATA_DIR: /data/db
+
     volumes:
       - mongodbdata_test:/data/db
 

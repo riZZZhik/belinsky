@@ -1,7 +1,8 @@
 # API requirements
-flask
-flask_pymongo
+flask==2.0.3
+pymongo==4.0.2
+gunicorn==20.1.0
 
 # NLP requirements
-pymystem3
-transliterate
+pymystem3==0.2.0
+transliterate==1.10.2
