@@ -1,7 +1,7 @@
 services:
-  word_finder_app:
+  app:
     build:
-      context: .
+      context: word_finder_app
       target: production
     command: gunicorn main:"create_app()" -b 0.0.0.0:5000
     container_name: word_finder_app
