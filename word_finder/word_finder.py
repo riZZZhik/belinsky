@@ -1,6 +1,6 @@
 from flask import request
 
-from tokenizer import Tokenizer
+from .tokenizer import Tokenizer
 
 
 class WordFinder:

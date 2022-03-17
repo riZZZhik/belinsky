@@ -8,20 +8,23 @@ ENV FLASK_APP=app.py \
 
 # Install requirements
 WORKDIR /word_finder
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 # Copy work files
-COPY word_finder .
+COPY word_finder word_finder
 COPY app.py .
-
-# Create test entrypoint
-FROM base as test
-COPY test_app.py .
-RUN pip install flask-unittest
-ENTRYPOINT ["python", "test_app.py"]
 
 # Create production entrypoint
 FROM base as production
 EXPOSE $FLASK_RUN_PORT
 ENTRYPOINT ["flask", "run"]
+
+# Create test entrypoint
+FROM base as test
+
+RUN pip install flask-unittest
+COPY test_app.py .
+
+ENV FLASK_ENV=development
+ENTRYPOINT ["python3", "test_app.py"]

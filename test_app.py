@@ -1,8 +1,7 @@
 import unittest
 import flask_unittest
 
-from app import create_app
-from word_finder import Tokenizer
+from word_finder import create_app, Tokenizer
 
 
 class WordFinderTest(flask_unittest.ClientTestCase):

@@ -6,7 +6,7 @@
 `docker-compose up --build`
 
 ## Run tests
-`docker-compose -f docker-compose-test.yaml up --build --exit-code-from flask_app_test`
+`docker-compose -f docker-compose.test.yaml up --build --exit-code-from flask_app_test`
 
 # API (Cloned from Postman)
 ## 1. highlight-words
