@@ -1,7 +1,0 @@
-# API requirements
-flask
-flask_pymongo
-
-# NLP requirements
-pymystem3
-transliterate
