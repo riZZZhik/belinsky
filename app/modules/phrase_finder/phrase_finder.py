@@ -1,10 +1,10 @@
 from flask import request
 from pymongo import MongoClient
 
-from .tokenizer import Tokenizer
+from .phrase_comparer import PhraseComparer
 
 
-class WordFinder:
+class PhraseFinder:
     """ WordFinder API worker."""
 
     def __init__(self, mongo_uri):
@@ -15,7 +15,7 @@ class WordFinder:
         """
 
         self.database = MongoClient(mongo_uri).db.word_finder_db
-        self.tokenizer = Tokenizer()
+        self.tokenizer = PhraseComparer()
 
     def add_new_word(self):
         """ Add new word or phrase to database.

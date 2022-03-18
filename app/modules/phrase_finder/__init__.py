@@ -2,18 +2,18 @@ import os
 
 from flask import Blueprint
 
-from .tokenizer import Tokenizer
-from .word_finder import WordFinder
+from .phrase_comparer import PhraseComparer
+from .phrase_finder import PhraseFinder
 
 
-def create_blueprint_word_finder():
+def create_blueprint_phrase_finder():
     # Create Flask blueprint
-    word_finder_bp = Blueprint('word_finder', __name__)
+    word_finder_bp = Blueprint('phrase_finder', __name__)
 
     # Connect MongoDB
     mongo_uri = 'mongodb://' + os.environ['MONGODB_USERNAME'] + ':' + os.environ['MONGODB_PASSWORD'] + \
                 '@' + os.environ['MONGODB_HOSTNAME'] + ':27017/'
-    worker = WordFinder(mongo_uri)
+    worker = PhraseFinder(mongo_uri)
 
     # Add request handlers
     word_finder_bp.add_url_rule('/highlight-words', view_func=worker.highlight_words, methods=['POST'])
@@ -28,4 +28,4 @@ def create_blueprint_word_finder():
     return word_finder_bp
 
 
-__all__ = ['create_blueprint_word_finder', 'WordFinder', 'Tokenizer']
+__all__ = ['create_blueprint_phrase_finder', 'PhraseFinder', 'PhraseComparer']
