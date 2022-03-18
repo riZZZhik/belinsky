@@ -5,7 +5,7 @@ from .phrase_comparer import PhraseComparer
 
 
 class PhraseFinder:
-    """ WordFinder API worker."""
+    """ PhraseFinder API worker."""
 
     def __init__(self, mongo_uri):
         """ Initialize WordFinder API worker.
@@ -15,9 +15,9 @@ class PhraseFinder:
         """
 
         self.database = MongoClient(mongo_uri).db.word_finder_db
-        self.tokenizer = PhraseComparer()
+        self.comparer = PhraseComparer()
 
-    def add_new_word(self):
+    def add_phrase(self):
         """ Add new word or phrase to database.
         ---
         Body (JSON):
@@ -57,7 +57,7 @@ class PhraseFinder:
             return response, 400
 
         # Add new word to database
-        lemmatized = [self.tokenizer.lemmatize(word) for word in request.json['word'].split()]
+        lemmatized = [self.comparer.lemmatize(word) for word in request.json['word'].split()]
         if lemmatized in self._load_words():
             response = {
                 'error': "word already in database",
@@ -73,7 +73,7 @@ class PhraseFinder:
             }
             return response, 200
 
-    def get_all_words(self):
+    def get_known_phrases(self):
         """ Get all known words in database.
         ---
         Responses:
@@ -90,7 +90,24 @@ class PhraseFinder:
         }
         return response, 200
 
-    def highlight_words(self):
+    def clear_known_phrases(self):
+        """ Clear known words and phrases from database.
+        ---
+        Responses:
+            200:
+                description: Return that request processed properly.
+                schema:
+                    status: 200
+        """
+
+        self.database.drop()
+
+        response = {
+            'status': 200
+        }
+        return response, 200
+
+    def find_phrases(self):
         """ Highlight known words in text.
         ---
         Body (JSON):
@@ -132,7 +149,7 @@ class PhraseFinder:
         # Process text
         try:
             response = {
-                'result': self.tokenizer.compare_words(request.json['text'], self._load_words()),
+                'result': self.comparer.compare_words(request.json['text'], self._load_words()),
                 'status': 200
             }
             return response, 200
@@ -142,42 +159,6 @@ class PhraseFinder:
                 'status': 500
             }
             return response, 500
-
-    def clear_all_words(self):
-        """ Clear known words and phrases from database.
-        ---
-        Responses:
-            200:
-                description: Return that request processed properly.
-                schema:
-                    status: 200
-        """
-
-        self.database.drop()
-
-        response = {
-            'status': 200
-        }
-        return response, 200
-
-    @staticmethod
-    def request_not_found(_):
-        """ Respond that request not found.
-        ---
-        Responses:
-            404:
-                description: Request not found.
-                schema:
-                    error: Error description.
-                    status: 404
-        """
-
-        response = {
-            'error': "Request not found. Use one of: "
-                     "'highlight-words', 'add-new-word', 'get-all-words', 'clear-all-words'",
-            'status': 404
-        }
-        return response, 404
 
     @staticmethod
     def request_error(_):
@@ -192,7 +173,7 @@ class PhraseFinder:
         """
 
         response = {
-            'error': "unexpected error encountered during processing request",
+            'error': "unexpected error encountered during PhraseFinder processing",
             'status': 500
         }
         return response, 500
