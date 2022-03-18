@@ -1,7 +1,7 @@
 services:
   nginx:
     build: nginx/
-    container_name: word_finder_nginx
+    container_name: belinsky_nginx
 
     ports:
       - "4958:4958"
@@ -11,15 +11,15 @@ services:
 
   app:
     build:
-      context: word_finder_app/
+      context: app/
       target: production
-    command: gunicorn main:"create_app()" -b 0.0.0.0:5000
+    command: gunicorn app:"create_app()" -b 0.0.0.0:5000
     restart: unless-stopped
 
     environment:
       MONGODB_USERNAME: admin
       MONGODB_PASSWORD: admin_password
-      MONGODB_HOSTNAME: word_finder_database
+      MONGODB_HOSTNAME: belinsky_database
 
     expose:
       - "5000"
@@ -28,15 +28,15 @@ services:
 
   app_backup:
     build:
-      context: word_finder_app/
+      context: app/
       target: production
-    command: gunicorn main:"create_app()" -b 0.0.0.0:4999
+    command: gunicorn app:"create_app()" -b 0.0.0.0:4999
     restart: unless-stopped
 
     environment:
       MONGODB_USERNAME: admin
       MONGODB_PASSWORD: admin_password
-      MONGODB_HOSTNAME: word_finder_database
+      MONGODB_HOSTNAME: belinsky_database
 
     expose:
       - "4999"
@@ -46,13 +46,13 @@ services:
   database:
     image: mongo
     command: mongod --quiet --logpath /dev/null
-    container_name: word_finder_database
+    container_name: belinsky_database
     restart: unless-stopped
 
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin_password
-      MONGO_INITDB_DATABASE: word_finder_db
+      MONGO_INITDB_DATABASE: belinsky_db
       MONGODB_DATA_DIR: /data/db
 
     volumes:

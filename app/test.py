@@ -3,12 +3,12 @@ import unittest
 import flask_unittest
 
 from app import create_app
-from modules.word_finder.tokenizer import Tokenizer, Token
+from modules.phrase_finder.phrase_comparer import PhraseComparer, Token
 
 
 class WordFinderTest(flask_unittest.ClientTestCase):
     app = create_app()
-    tokenizer = Tokenizer()
+    tokenizer = PhraseComparer()
 
     def tearDown(self, client):
         client.post('clear-all-words')

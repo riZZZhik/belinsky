@@ -14,8 +14,8 @@ class Token:
         return self.word, self.lemma, self.position
 
 
-class Tokenizer:
-    """NLP worker for WordFinder app."""
+class PhraseComparer:
+    """Compare phrases"""
 
     def __init__(self):
         self.lemmatizer = Mystem()
@@ -42,7 +42,7 @@ class Tokenizer:
 
         Returns:
             List:
-                Words' tokens as 'word_finder.tokenizer.Token' structure.
+                Words' tokens as 'phrase_comparer.Token' structure.
         """
 
         delta = 0
