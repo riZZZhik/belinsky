@@ -3,7 +3,7 @@ services:
     build:
       context: app/
       target: test
-    command: python test.py
+    command: python app_test.py
     restart: "no"
 
     environment:

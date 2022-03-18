@@ -24,7 +24,7 @@ FROM base as test
 
 # Install unittest dependencies
 RUN pip install flask-unittest==0.1.2
-COPY test.py .
+COPY app_test.py .
 
 # Default execute
 CMD ["python", "test.py"]

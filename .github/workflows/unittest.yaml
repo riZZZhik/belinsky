@@ -1,4 +1,4 @@
-name: Unittest WordFinder app
+name: Unittest Belinsky app
 
 on:
   push:
