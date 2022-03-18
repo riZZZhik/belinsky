@@ -2,11 +2,8 @@
 
 # How to use
 
-## Run production on one host
-`docker-compose up --build`
-
-## Run production on several hosts
-`docker-compose -f docker-compose.several.yaml up --build --scale app=$NUM_HOSTS`
+## Run production
+`docker-compose up --build --scale app=[NUM_HOSTS]`
 
 ## Run tests
 `docker-compose -f docker-compose.test.yaml up --build --exit-code-from word_finder_app_test`
