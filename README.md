@@ -160,7 +160,7 @@ curl --request POST \
 ```bash
 curl --request POST \
   --header "Content-Type: application/json" \
-  --data '{"no_word": "Privet банану"}' \
+  --data '{"word": "Privet банану"}' \
   $APP_URL/add-new-word
 ``` 
 
