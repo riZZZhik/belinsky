@@ -19,12 +19,12 @@ services:
     environment:
       MONGODB_USERNAME: admin
       MONGODB_PASSWORD: admin_password
-      MONGODB_HOSTNAME: word_finder_db
+      MONGODB_HOSTNAME: word_finder_database
 
     expose:
       - "5000"
     depends_on:
-      - word_finder_db
+      - database
 
   app_backup:
     build:
@@ -36,17 +36,17 @@ services:
     environment:
       MONGODB_USERNAME: admin
       MONGODB_PASSWORD: admin_password
-      MONGODB_HOSTNAME: word_finder_db
+      MONGODB_HOSTNAME: word_finder_database
 
     expose:
       - "4999"
     depends_on:
-      - word_finder_db
+      - database
 
-  word_finder_db:
+  database:
     image: mongo
     command: mongod --quiet --logpath /dev/null
-    container_name: word_finder_db
+    container_name: word_finder_database
     restart: unless-stopped
 
     environment:

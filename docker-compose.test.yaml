@@ -1,5 +1,5 @@
 services:
-  word_finder_app_test:
+  app_test:
     build:
       context: word_finder_app/
       target: test
@@ -10,15 +10,15 @@ services:
     environment:
       MONGODB_USERNAME: admin
       MONGODB_PASSWORD: admin_password
-      MONGODB_HOSTNAME: word_finder_db_test
+      MONGODB_HOSTNAME: word_finder_database_test
 
     depends_on:
-      - word_finder_db_test
+      - database_test
 
-  word_finder_db_test:
+  database_test:
     image: mongo
     command: mongod --quiet --logpath /dev/null
-    container_name: word_finder_db_test
+    container_name: word_finder_database_test
     restart: unless-stopped
 
     environment:

@@ -6,9 +6,10 @@
 `docker-compose up --build --scale app=[NUM_HOSTS]`
 
 ## Run tests
-`docker-compose -f docker-compose.test.yaml up --build --exit-code-from word_finder_app_test`
+`docker-compose -f docker-compose.test.yaml up --build --abort-on-container-exit`
 
 # API requests
+
 ## 1. highlight-words
 
 ### 200
@@ -19,7 +20,7 @@
 ```shell
 curl --request POST \
   --header "Content-Type: application/json" \
-  --data '{"text": "мама любит по-любому бананы"}' \
+  --data '{"text": "мама по-любому любит banan"}' \
   $APP_URL/highlight-words
 ``` 
 
@@ -28,42 +29,22 @@ curl --request POST \
 ```json
 {
   "result": {
-    "любить любой": [
+    "мама": [
+      [
+        0,
+        3
+      ]
+    ],
+    "любой любить": [
       [
         5,
         19
       ]
     ],
-    "любой": [
+    "банан": [
       [
-        11,
-        19
-      ]
-    ],
-    "недолюбливать апельсин": [
-      [
-        36,
-        59
-      ]
-    ],
-    "ненавидеть": [
-      [
-        61,
-        70
-      ],
-      [
-        72,
-        79
-      ],
-      [
-        81,
-        90
-      ]
-    ],
-    "очень супер длинный фраза": [
-      [
-        92,
-        116
+        21,
+        25
       ]
     ]
   },
@@ -209,11 +190,9 @@ curl $APP_URL/get-all-words
 ```json
 {
   "result": [
-    "недолюбливать апельсин",
-    "любой",
-    "ненавидеть",
-    "любить любой",
-    "очень супер длинный фраза"
+    "любой любить",
+    "мама",
+    "банан"
   ],
   "status": 200
 }
@@ -236,6 +215,7 @@ curl --request POST \
 
 ```json
 {
+  "result": "ok",
   "status": 200
 }
 ```
