@@ -6,16 +6,14 @@ services:
     ports:
       - "4958:80"
     depends_on:
-      - app_1
-      - app_2
+      - app
       - app_backup
 
-  app_1:
+  app:
     build:
       context: word_finder_app/
       target: production
     command: gunicorn main:"create_app()" -b 0.0.0.0:5000
-    container_name: word_finder_app_1
     restart: unless-stopped
 
     environment:
@@ -23,26 +21,8 @@ services:
       MONGODB_PASSWORD: admin_password
       MONGODB_HOSTNAME: word_finder_db
 
-    ports:
-      - "4900:5000"
-    depends_on:
-      - word_finder_db
-
-  app_2:
-    build:
-      context: word_finder_app/
-      target: production
-    command: gunicorn main:"create_app()" -b 0.0.0.0:5000
-    container_name: word_finder_app_2
-    restart: unless-stopped
-
-    environment:
-      MONGODB_USERNAME: admin
-      MONGODB_PASSWORD: admin_password
-      MONGODB_HOSTNAME: word_finder_db
-
-    ports:
-      - "4901:5000"
+    expose:
+      - "5000"
     depends_on:
       - word_finder_db
 
@@ -50,8 +30,7 @@ services:
     build:
       context: word_finder_app/
       target: production
-    command: gunicorn main:"create_app()" -b 0.0.0.0:5000
-    container_name: word_finder_app_backup
+    command: gunicorn main:"create_app()" -b 0.0.0.0:4999
     restart: unless-stopped
 
     environment:
@@ -59,8 +38,8 @@ services:
       MONGODB_PASSWORD: admin_password
       MONGODB_HOSTNAME: word_finder_db
 
-    ports:
-      - "4899:5000"
+    expose:
+      - "4999"
     depends_on:
       - word_finder_db
 
