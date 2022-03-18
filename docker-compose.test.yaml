@@ -4,7 +4,6 @@ services:
       context: word_finder_app/
       target: test
     command: python test.py
-    container_name: word_finder_app_test
     restart: "no"
 
     environment:

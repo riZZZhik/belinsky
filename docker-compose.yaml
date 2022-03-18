@@ -4,7 +4,7 @@ services:
     container_name: word_finder_nginx
 
     ports:
-      - "4958:80"
+      - "4958:4958"
     depends_on:
       - app
       - app_backup
