@@ -4,7 +4,17 @@
 # How to use
 
 ## Run production
-`docker-compose up --build --scale app=[NUM_HOSTS]`
+`docker-compose up --build` 
+
+### Envs:
+- BELINSKY_WSGI_MODULE (default: app:"create_app()") - WSGI application path in pattern $(MODULE_NAME):-$(VARIABLE_NAME).
+- BELINSKY_HOST (default: 0.0.0.0) - Application hostname.
+- BELINSKY_PORT (default: 4958) - Application port.
+- BELINSKY_NUM_WORKERS (default: 4) - Number of worker processes for handling requests.
+- BELINSKY_NUM_THREADS (default: 1) - Number of threads.
+  - _NB! The suggested number of workers\*threads is (2*CPU)+1_
+- BELINSKY_WORKER_CLASS (default: sync) - Type of workers to use.
+- BELINSKY_NUM_WORKER_CONNECTIONS (default: 1000) - Maximum number of simultaneous clients.
 
 ## Run tests
 `docker-compose -f docker-compose.test.yaml up --build --abort-on-container-exit`
