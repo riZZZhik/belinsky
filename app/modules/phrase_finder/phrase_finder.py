@@ -1,7 +1,13 @@
 from flask import request
+from prometheus_client import Summary
 from pymongo import MongoClient
 
 from .phrase_comparer import PhraseComparer
+
+ADD_PHRASE_LATENCY = Summary('pf_add_phrase_latency', 'Latency of "add-phrase" request')
+GET_KNOWN_PHRASES_LATENCY = Summary('pf_get_known_phrases_latency', 'Latency of "get-known-phrases" request')
+CLEAR_KNOWN_PHRASES_LATENCY = Summary('pf_clear_known_phrases_latency', 'Latency of "clear-known-phrases" request')
+FIND_PHRASES_LATENCY = Summary('pf_find_phrases_latency', 'Latency of "find-phrases" request')
 
 
 class PhraseFinder:
@@ -17,6 +23,7 @@ class PhraseFinder:
         self.database = MongoClient(mongo_uri).db.word_finder_db
         self.comparer = PhraseComparer()
 
+    @ADD_PHRASE_LATENCY.time()
     def add_phrase(self):
         """ Add new word or phrase to database.
         ---
@@ -73,6 +80,7 @@ class PhraseFinder:
             }
             return response, 200
 
+    @GET_KNOWN_PHRASES_LATENCY.time()
     def get_known_phrases(self):
         """ Get all known words in database.
         ---
@@ -90,6 +98,7 @@ class PhraseFinder:
         }
         return response, 200
 
+    @CLEAR_KNOWN_PHRASES_LATENCY.time()
     def clear_known_phrases(self):
         """ Clear known words and phrases from database.
         ---
@@ -107,6 +116,7 @@ class PhraseFinder:
         }
         return response, 200
 
+    @FIND_PHRASES_LATENCY.time()
     def find_phrases(self):
         """ Highlight known words in text.
         ---

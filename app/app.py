@@ -21,7 +21,6 @@ def create_app():
         registry = CollectorRegistry()
         multiprocess.MultiProcessCollector(registry)
         data = generate_latest(registry)
-        print(data, flush=True)
         return data, 200
 
     # Register blueprints
