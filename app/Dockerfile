@@ -1,6 +1,9 @@
 FROM --platform=linux/amd64 python:3.8 as base
 LABEL MAINTAINER="Dmitry Barsukoff <t.me/riZZZhik>"
 
+# Define default environments
+ENV PROMETHEUS_MULTIPROC_DIR /tmp
+
 # Install requirements
 WORKDIR /belinsky
 COPY requirements.txt .
@@ -12,6 +15,7 @@ RUN python -c "from pymystem3 import autoinstall; autoinstall()"
 # Copy work files
 COPY modules modules
 COPY app.py .
+COPY gunicorn_config.py .
 
 # Create production target
 FROM base as production

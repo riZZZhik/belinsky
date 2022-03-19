@@ -4,6 +4,9 @@ import os
 # Import Flask
 from flask import Flask
 
+# Prometheus imports
+from prometheus_client import multiprocess, generate_latest, CollectorRegistry
+
 # Import app modules blueprints
 from modules import create_blueprint_phrase_finder
 
@@ -11,6 +14,15 @@ from modules import create_blueprint_phrase_finder
 def create_app():
     # Create Flask app
     app = Flask("Belinsky")
+
+    # Register prometheus route
+    @app.route("/metrics")
+    def metrics():
+        registry = CollectorRegistry()
+        multiprocess.MultiProcessCollector(registry)
+        data = generate_latest(registry)
+        print(data, flush=True)
+        return data, 200
 
     # Register blueprints
     app.register_blueprint(create_blueprint_phrase_finder())
