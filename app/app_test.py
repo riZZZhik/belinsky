@@ -8,23 +8,23 @@ from modules.phrase_finder.phrase_comparer import PhraseComparer, Token
 
 class WordFinderTest(flask_unittest.ClientTestCase):
     app = create_app()
-    tokenizer = PhraseComparer()
+    comparer = PhraseComparer()
 
     def tearDown(self, client):
-        client.post('clear-all-words')
+        client.post('clear-known-phrases')
 
     def test_lemmatizer(self, _):
-        response = self.tokenizer.lemmatize('Апельсины')
+        response = self.comparer.lemmatize('Апельсины')
         correct_response = 'апельсин'
         self.assertEqual(response, correct_response)
 
     def test_lemmatizer_hyphen(self, _):
-        response = self.tokenizer.lemmatize('по-любому')
+        response = self.comparer.lemmatize('по-любому')
         correct_response = 'любой'
         self.assertEqual(response, correct_response)
 
     def test_tokenizer(self, _):
-        response = [token.to_list() for token in self.tokenizer.tokenize('Мама по-любому обожает апельсины')]
+        response = [token.to_list() for token in self.comparer.tokenize('Мама по-любому обожает апельсины')]
         correct_response = [
             Token("мама", "мама", (0, 3)).to_list(),
             Token('по-любому', 'любой', (5, 13)).to_list(),
@@ -33,37 +33,27 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         ]
         self.assertEqual(response, correct_response)
 
-    def test_compare_words(self, _):
-        words = ([[self.tokenizer.lemmatize('привет')], [self.tokenizer.lemmatize('папа')]])
-        response = self.tokenizer.compare_words('Привет, я Папа', words)
-
-        correct_response = {
-            'привет': [[0, 6]],
-            'папа': [[10, 13]]
-        }
-        self.assertEqual(response, correct_response)
-
     def test_compare_phrases(self, _):
-        words = ([[self.tokenizer.lemmatize('я '), self.tokenizer.lemmatize('папа')]])
-        response = self.tokenizer.compare_words('Привет, я Папа', words)
+        words = ([[self.comparer.lemmatize('я '), self.comparer.lemmatize('папа')]])
+        response = self.comparer.compare_words('Привет, я Папа', words)
 
         correct_response = {
             'я папа': [[8, 13]]
         }
         self.assertEqual(response, correct_response)
 
-    def test_get_all_words_clear(self, client):
-        response = client.get('/get-all-words')
+    def test_get_known_phrases_clear(self, client):
+        response = client.get('/get-known-phrases')
         correct_response = {
             'result': [],
             'status': 200
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_add_new_word(self, client):
+    def test_add_phrase(self, client):
         response = client.post(
-            '/add-new-word',
-            json={'word': 'проверка'}
+            '/add-phrase',
+            json={'word': 'супер тест'}
         )
         correct_response = {
             'result': 'ok',
@@ -71,59 +61,44 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_add_new_word_translit(self, client):
+    def test_add_phrase_translit(self, client):
         client.post(
-            '/add-new-word',
+            '/add-phrase',
             json={
-                'word': 'bananu'
+                'word': 'хочу bananu'
             }
         )
 
-        response = client.get('/get-all-words')
+        response = client.get('/get-known-phrases')
         correct_response = {
-            'result': ['банан'],
+            'result': ['хотеть банан'],
             'status': 200
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_add_new_word_phrase(self, client):
+    def test_get_known_phrases(self, client):
         client.post(
-            '/add-new-word',
-            json={
-                'word': 'супер тест'
-            }
-        )
-
-        response = client.get('/get-all-words')
-        correct_response = {
-            'result': ['супер тест'],
-            'status': 200
-        }
-        self.assertEqual(response.json, correct_response)
-
-    def test_get_all_words(self, client):
-        client.post(
-            '/add-new-word',
+            '/add-phrase',
             json={'word': 'проверка'}
         )
 
-        response = client.get('/get-all-words')
+        response = client.get('/get-known-phrases')
         correct_response = {
             'result': ['проверка'],
             'status': 200
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_highlight_one_word(self, client):
+    def test_find_word(self, client):
         client.post(
-            '/add-new-word',
+            '/add-phrase',
             json={
                 'word': 'бананы'
             }
         )
 
         response = client.post(
-            '/highlight-words',
+            '/find-phrases',
             json={'text': 'мама любит бананы'}
         )
         correct_response = {
@@ -132,16 +107,16 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_highlight_one_word_translit(self, client):
+    def test_find_word_translit(self, client):
         client.post(
-            '/add-new-word',
+            '/add-phrase',
             json={
                 'word': 'бананы'
             }
         )
 
         response = client.post(
-            '/highlight-words',
+            '/find-phrases',
             json={'text': 'маме и папе по bananu'}
         )
         correct_response = {
@@ -150,16 +125,16 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_highlight_multiple_words(self, client):
+    def test_find_word_multiple(self, client):
         client.post(
-            '/add-new-word',
+            '/add-phrase',
             json={
                 'word': 'бананы'
             }
         )
 
         response = client.post(
-            '/highlight-words',
+            '/find-phrases',
             json={'text': 'банану мама любит бананы'}
         )
         correct_response = {
@@ -168,16 +143,16 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_highlight_phrase(self, client):
+    def test_find_phrase(self, client):
         client.post(
-            '/add-new-word',
+            '/add-phrase',
             json={
                 'word': 'ненавижу апельсины'
             }
         )
 
         response = client.post(
-            '/highlight-words',
+            '/find-phrases',
             json={'text': 'папа ненавидит апельсины'}
         )
         correct_response = {
@@ -186,16 +161,16 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_highlight_word_hyphen(self, client):
+    def test_find_word_hyphen(self, client):
         client.post(
-            '/add-new-word',
+            '/add-phrase',
             json={
                 'word': 'любой'
             }
         )
 
         response = client.post(
-            '/highlight-words',
+            '/find-phrases',
             json={'text': 'мама по-любому любит'}
         )
         correct_response = {
@@ -204,16 +179,16 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_highlight_hyphen_phrase(self, client):
+    def test_find_phrase_hyphen(self, client):
         client.post(
-            '/add-new-word',
+            '/add-phrase',
             json={
                 'word': 'обожает любой'
             }
         )
 
         response = client.post(
-            '/highlight-words',
+            '/find-phrases',
             json={'text': 'мама обожает по-любому тебя'}
         )
         correct_response = {
