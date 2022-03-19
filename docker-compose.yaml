@@ -1,19 +1,10 @@
 services:
-  nginx:
-    build: nginx/
-    container_name: belinsky_nginx
-
-    ports:
-      - "4958:4958"
-    depends_on:
-      - app
-      - app_backup
-
   app:
     build:
       context: app/
       target: production
-    command: gunicorn app:"create_app()" -b 0.0.0.0:5000 -w 4
+    command: sh start_gunicorn.sh
+    container_name: belinsky_app
     restart: unless-stopped
 
     environment:
@@ -21,25 +12,8 @@ services:
       MONGODB_PASSWORD: admin_password
       MONGODB_HOSTNAME: belinsky_database
 
-    expose:
-      - "5000"
-    depends_on:
-      - database
-
-  app_backup:
-    build:
-      context: app/
-      target: production
-    command: gunicorn app:"create_app()" -b 0.0.0.0:4999  -w 4
-    restart: unless-stopped
-
-    environment:
-      MONGODB_USERNAME: admin
-      MONGODB_PASSWORD: admin_password
-      MONGODB_HOSTNAME: belinsky_database
-
-    expose:
-      - "4999"
+    ports:
+      - "${BELINSKY_PORT-4958}:5000"
     depends_on:
       - database
 

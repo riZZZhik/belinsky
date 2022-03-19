@@ -12,12 +12,13 @@ RUN python -c "from pymystem3 import autoinstall; autoinstall()"
 # Copy work files
 COPY modules modules
 COPY app.py .
+COPY start_gunicorn.sh .
 
 # Create production target
 FROM base as production
 
 # Default execute
-CMD ["gunicorn", "app:\"create_app()\"", "-b 0.0.0.0:5000"]
+CMD ["sh", "start_gunicorn.sh"]
 
 # Create test target
 FROM base as test
