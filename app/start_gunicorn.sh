@@ -3,6 +3,7 @@
 echo Starting Belinsky application.
 
 params="${BELINSKY_WSGI_MODULE-app:"create_app()"} \
+--config ${BELINSKY_GUNICORN_CONFIG-gunicorn_config.py} \
 --bind 0.0.0.0:5000 \
 --workers ${BELINSKY_NUM_WORKERS-4} \
 --threads ${BELINSKY_NUM_THREADS-1} \
