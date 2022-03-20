@@ -2,10 +2,14 @@ services:
   prometheus:
     image: prom/prometheus
 
-    ports:
-      - "9090:9090"
     volumes:
       - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+
+    ports:
+      - "${BELINSKY_OBSERVABILITY_PORT-4800}:3000"
 
 networks:
   default:
