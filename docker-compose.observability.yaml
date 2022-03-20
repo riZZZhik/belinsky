@@ -12,6 +12,8 @@ services:
       - "${BELINSKY_OBSERVABILITY_PORT-4800}:3000"
     volumes:
       - ./observability/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./observability/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./observability/main-dashboard.json:/etc/grafana/provisioning/dashboards/main-dashboard.json
 
 networks:
   default:
