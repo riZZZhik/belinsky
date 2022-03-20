@@ -16,7 +16,7 @@ def create_app():
     app = Flask("Belinsky")
 
     # Register prometheus route
-    @app.route("/metrics")
+    @app.route("/metrics/prometheus")
     def metrics():
         registry = CollectorRegistry()
         multiprocess.MultiProcessCollector(registry)
