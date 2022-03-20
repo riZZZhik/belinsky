@@ -13,8 +13,8 @@ RUN pip install -r requirements.txt
 RUN python -c "from pymystem3 import autoinstall; autoinstall()"
 
 # Copy work files
-COPY modules modules
-COPY app.py .
+COPY belinsky belinsky
+COPY wsgi.py .
 COPY gunicorn_config.py .
 COPY start_gunicorn.sh .
 

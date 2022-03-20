@@ -2,11 +2,11 @@ import sys
 import unittest
 import flask_unittest
 
-from app import create_app
-from modules.phrase_finder.phrase_comparer import PhraseComparer, Token
+from belinsky import create_app
+from belinsky.modules.phrase_finder.phrase_comparer import PhraseComparer, Token
 
 
-class phraseFinderTest(flask_unittest.ClientTestCase):
+class PhraseFinderTest(flask_unittest.ClientTestCase):
     app = create_app()
     comparer = PhraseComparer()
 
@@ -200,5 +200,5 @@ class phraseFinderTest(flask_unittest.ClientTestCase):
 
 if __name__ == '__main__':
     runner = unittest.TextTestRunner()
-    result = runner.run(unittest.makeSuite(phraseFinderTest))
+    result = runner.run(unittest.makeSuite(PhraseFinderTest))
     sys.exit(not result.wasSuccessful())
