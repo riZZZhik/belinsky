@@ -1,7 +1,15 @@
 from flask import request
+from prometheus_client import Counter, Summary
 from pymongo import MongoClient
 
 from .phrase_comparer import PhraseComparer
+
+ADD_PHRASE_LATENCY = Summary('pf_add_phrase_latency', 'Latency of "add-phrase" request')
+GET_KNOWN_PHRASES_LATENCY = Summary('pf_get_known_phrases_latency', 'Latency of "get-known-phrases" request')
+CLEAR_KNOWN_PHRASES_LATENCY = Summary('pf_clear_known_phrases_latency', 'Latency of "clear-known-phrases" request')
+FIND_PHRASES_LATENCY = Summary('pf_find_phrases_latency', 'Latency of "find-phrases" request')
+
+ERROR_500_COUNTER = Counter('pf_500_error_counter', 'Counter of 500 errors')
 
 
 class PhraseFinder:
@@ -17,6 +25,7 @@ class PhraseFinder:
         self.database = MongoClient(mongo_uri).db.word_finder_db
         self.comparer = PhraseComparer()
 
+    @ADD_PHRASE_LATENCY.time()
     def add_phrase(self):
         """ Add new word or phrase to database.
         ---
@@ -73,6 +82,7 @@ class PhraseFinder:
             }
             return response, 200
 
+    @GET_KNOWN_PHRASES_LATENCY.time()
     def get_known_phrases(self):
         """ Get all known words in database.
         ---
@@ -90,6 +100,7 @@ class PhraseFinder:
         }
         return response, 200
 
+    @CLEAR_KNOWN_PHRASES_LATENCY.time()
     def clear_known_phrases(self):
         """ Clear known words and phrases from database.
         ---
@@ -107,6 +118,7 @@ class PhraseFinder:
         }
         return response, 200
 
+    @FIND_PHRASES_LATENCY.time()
     def find_phrases(self):
         """ Highlight known words in text.
         ---
@@ -147,18 +159,11 @@ class PhraseFinder:
             return response, 400
 
         # Process text
-        try:
-            response = {
-                'result': self.comparer.compare_words(request.json['text'], self._load_words()),
-                'status': 200
-            }
-            return response, 200
-        except Exception as e:
-            response = {
-                'error': "unexpected error encountered during processing request: %s" % e,
-                'status': 500
-            }
-            return response, 500
+        response = {
+            'result': self.comparer.compare_words(request.json['text'], self._load_words()),
+            'status': 200
+        }
+        return response, 200
 
     @staticmethod
     def request_error(_):
@@ -172,6 +177,7 @@ class PhraseFinder:
                     status: 500
         """
 
+        ERROR_500_COUNTER.inc()
         response = {
             'error': "unexpected error encountered during PhraseFinder processing",
             'status': 500

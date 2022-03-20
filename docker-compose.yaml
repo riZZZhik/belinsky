@@ -35,3 +35,8 @@ services:
 volumes:
   mongodbdata:
     driver: local
+
+networks:
+  default:
+    name: belinsky_network
+    driver: bridge
