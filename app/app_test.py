@@ -6,7 +6,7 @@ from app import create_app
 from modules.phrase_finder.phrase_comparer import PhraseComparer, Token
 
 
-class WordFinderTest(flask_unittest.ClientTestCase):
+class phraseFinderTest(flask_unittest.ClientTestCase):
     app = create_app()
     comparer = PhraseComparer()
 
@@ -34,8 +34,8 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         self.assertEqual(response, correct_response)
 
     def test_compare_phrases(self, _):
-        words = ([[self.comparer.lemmatize('я '), self.comparer.lemmatize('папа')]])
-        response = self.comparer.compare_words('Привет, я Папа', words)
+        phrases = ([[self.comparer.lemmatize('я '), self.comparer.lemmatize('папа')]])
+        response = self.comparer.compare_phrases('Привет, я Папа', phrases)
 
         correct_response = {
             'я папа': [[8, 13]]
@@ -53,7 +53,7 @@ class WordFinderTest(flask_unittest.ClientTestCase):
     def test_add_phrase(self, client):
         response = client.post(
             '/add-phrase',
-            json={'word': 'супер тест'}
+            json={'phrase': 'супер тест'}
         )
         correct_response = {
             'result': 'ok',
@@ -65,7 +65,7 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         client.post(
             '/add-phrase',
             json={
-                'word': 'хочу bananu'
+                'phrase': 'хочу bananu'
             }
         )
 
@@ -79,7 +79,7 @@ class WordFinderTest(flask_unittest.ClientTestCase):
     def test_get_known_phrases(self, client):
         client.post(
             '/add-phrase',
-            json={'word': 'проверка'}
+            json={'phrase': 'проверка'}
         )
 
         response = client.get('/get-known-phrases')
@@ -89,11 +89,11 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_find_word(self, client):
+    def test_find_phrase(self, client):
         client.post(
             '/add-phrase',
             json={
-                'word': 'бананы'
+                'phrase': 'бананы'
             }
         )
 
@@ -107,11 +107,11 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_find_word_translit(self, client):
+    def test_find_phrase_translit(self, client):
         client.post(
             '/add-phrase',
             json={
-                'word': 'бананы'
+                'phrase': 'бананы'
             }
         )
 
@@ -125,11 +125,11 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_find_word_multiple(self, client):
+    def test_find_phrase_multiple(self, client):
         client.post(
             '/add-phrase',
             json={
-                'word': 'бананы'
+                'phrase': 'бананы'
             }
         )
 
@@ -147,7 +147,7 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         client.post(
             '/add-phrase',
             json={
-                'word': 'ненавижу апельсины'
+                'phrase': 'ненавижу апельсины'
             }
         )
 
@@ -161,11 +161,11 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_find_word_hyphen(self, client):
+    def test_find_phrase_hyphen(self, client):
         client.post(
             '/add-phrase',
             json={
-                'word': 'любой'
+                'phrase': 'любой'
             }
         )
 
@@ -183,7 +183,7 @@ class WordFinderTest(flask_unittest.ClientTestCase):
         client.post(
             '/add-phrase',
             json={
-                'word': 'обожает любой'
+                'phrase': 'обожает любой'
             }
         )
 
@@ -200,5 +200,5 @@ class WordFinderTest(flask_unittest.ClientTestCase):
 
 if __name__ == '__main__':
     runner = unittest.TextTestRunner()
-    result = runner.run(unittest.makeSuite(WordFinderTest))
+    result = runner.run(unittest.makeSuite(phraseFinderTest))
     sys.exit(not result.wasSuccessful())

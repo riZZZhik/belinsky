@@ -112,7 +112,7 @@ curl --request POST \
 ```bash
 curl --request POST \
   --header "Content-Type: application/json" \
-  --data '{"word": "Privet банану"}' \
+  --data '{"phrase": "Privet банану"}' \
   $APP_URL/add-phrase
 ``` 
 
@@ -132,7 +132,7 @@ curl --request POST \
 ```bash
 curl --request POST \
   --header "Content-Type: application/json" \
-  --data '{"no_word": "Privet банану"}' \
+  --data '{"no_phrase": "Privet банану"}' \
   $APP_URL/add-phrase
 ``` 
 
@@ -140,7 +140,7 @@ curl --request POST \
 
 ```json
 {
-  "error": "item 'word' not found in request body",
+  "error": "item 'phrase' not found in request body",
   "status": 400
 }
 ```
@@ -171,7 +171,7 @@ curl --request POST \
 ```bash
 curl --request POST \
   --header "Content-Type: application/json" \
-  --data '{"word": "Privet банану"}' \
+  --data '{"phrase": "Privet банану"}' \
   $APP_URL/add-phrase
 ``` 
 
@@ -179,7 +179,7 @@ curl --request POST \
 
 ```json
 {
-  "error": "word already in database",
+  "error": "phrase already in database",
   "status": 406
 }
 ```

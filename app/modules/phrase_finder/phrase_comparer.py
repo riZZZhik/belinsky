@@ -58,8 +58,8 @@ class PhraseComparer:
 
         return tokenized
 
-    def compare_words(self, text, words):
-        """ Compare text with words and phrases.
+    def compare_phrases(self, text, words):
+        """ Compare text with known phrases.
 
         Arguments:
             text (str): Text to compare.

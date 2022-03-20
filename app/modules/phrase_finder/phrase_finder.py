@@ -16,21 +16,21 @@ class PhraseFinder:
     """ PhraseFinder API worker."""
 
     def __init__(self, mongo_uri):
-        """ Initialize WordFinder API worker.
+        """ Initialize Belinsky's Phrase Finder API worker.
 
         Arguments:
              mongo_uri (str): MongoDB URI.
         """
 
-        self.database = MongoClient(mongo_uri).db.word_finder_db
+        self.database = MongoClient(mongo_uri).db.belinsky_db
         self.comparer = PhraseComparer()
 
     @ADD_PHRASE_LATENCY.time()
     def add_phrase(self):
-        """ Add new word or phrase to database.
+        """ Add new phrase to database.
         ---
         Body (JSON):
-            - word: Word or phrase to add.
+            - phrase: Phrase to add.
 
         Responses:
             200:
@@ -39,12 +39,12 @@ class PhraseFinder:
                     result: 'ok'.
                     status: 200
             400:
-                description: Json body or 'word' key in request body not found.
+                description: Json body or 'phrase' key in request body not found.
                 schema:
                     error: Error description.
                     status: 400
             406:
-                description: Word already in database.
+                description: Phrase already in database.
                 schema:
                     error: Error description.
                     status: 406
@@ -58,51 +58,52 @@ class PhraseFinder:
             }
             return response, 400
 
-        if 'word' not in request.json:
+        if 'phrase' not in request.json:
             response = {
-                'error': "key 'word' not found in request body",
+                'error': "key 'phrase' not found in request body",
                 'status': 400
             }
             return response, 400
 
-        # Add new word to database
-        lemmatized = [self.comparer.lemmatize(word) for word in request.json['word'].split()]
-        if lemmatized in self._load_words():
+        # Check if phrase already exists
+        lemmatized = [self.comparer.lemmatize(phrase) for phrase in request.json['phrase'].split()]
+        if lemmatized in self._load_phrases():
             response = {
-                'error': "word already in database",
+                'error': "phrase already in database",
                 'status': 406
             }
             return response, 406
-        else:
-            self.database.insert_one({'word': lemmatized})
 
-            response = {
-                'result': 'ok',
-                'status': 200
-            }
-            return response, 200
+        # Add phrase to dataset
+        self.database.insert_one({'phrase': lemmatized})
+
+        response = {
+            'result': 'ok',
+            'status': 200
+        }
+        return response, 200
 
     @GET_KNOWN_PHRASES_LATENCY.time()
     def get_known_phrases(self):
-        """ Get all known words in database.
+        """ Get all known phrases from database.
         ---
         Responses:
             200:
-                description: Return words and phrases from database.
+                description: Return phrases from database.
                 schema:
-                    result: List of known words and phrases.
+                    result: List of known phrases.
                     status: 200
         """
 
         response = {
-            'result': [' '.join(x) for x in self._load_words()],
+            'result': [' '.join(x) for x in self._load_phrases()],
             'status': 200
         }
         return response, 200
 
     @CLEAR_KNOWN_PHRASES_LATENCY.time()
     def clear_known_phrases(self):
-        """ Clear known words and phrases from database.
+        """ Clear known phrases from database.
         ---
         Responses:
             200:
@@ -120,16 +121,16 @@ class PhraseFinder:
 
     @FIND_PHRASES_LATENCY.time()
     def find_phrases(self):
-        """ Highlight known words in text.
+        """ Find known phrases in text.
         ---
         Body (JSON):
             - text: Text to process.
 
         Responses:
             200:
-                description: Return highlighted words and their indexes in text.
+                description: Return found phrases and their indexes in text.
                 schema:
-                    result: Dictionary with highlighted words and their indexes.
+                    result: Dictionary with found phrases and their indexes.
                     status: 200
             400:
                 description: Json body or 'text' key in request body not found.
@@ -160,7 +161,7 @@ class PhraseFinder:
 
         # Process text
         response = {
-            'result': self.comparer.compare_words(request.json['text'], self._load_words()),
+            'result': self.comparer.compare_phrases(request.json['text'], self._load_phrases()),
             'status': 200
         }
         return response, 200
@@ -184,11 +185,11 @@ class PhraseFinder:
         }
         return response, 500
 
-    def _load_words(self):
-        """ Load words and phrases from database.
+    def _load_phrases(self):
+        """ Load phrases from database.
 
         Returns:
-            List: Word and phrases in database.
+            List: Phrases in database.
         """
 
-        return [data['word'] for data in self.database.find()]
+        return [data['phrase'] for data in self.database.find()]
