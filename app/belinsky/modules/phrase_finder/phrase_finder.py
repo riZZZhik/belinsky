@@ -1,28 +1,22 @@
 from flask import request
-from prometheus_client import Counter, Summary
-from pymongo import MongoClient
+from prometheus_client import Summary
 
 from .phrase_comparer import PhraseComparer
+from ... import database
+from ...models import User
 
 ADD_PHRASE_LATENCY = Summary('pf_add_phrase_latency', 'Latency of "add-phrase" request')
 GET_KNOWN_PHRASES_LATENCY = Summary('pf_get_known_phrases_latency', 'Latency of "get-known-phrases" request')
 CLEAR_KNOWN_PHRASES_LATENCY = Summary('pf_clear_known_phrases_latency', 'Latency of "clear-known-phrases" request')
 FIND_PHRASES_LATENCY = Summary('pf_find_phrases_latency', 'Latency of "find-phrases" request')
 
-ERROR_500_COUNTER = Counter('pf_500_error_counter', 'Counter of 500 errors')
-
 
 class PhraseFinder:
     """ PhraseFinder API worker."""
 
-    def __init__(self, mongo_uri):
-        """ Initialize Belinsky's Phrase Finder API worker.
+    def __init__(self):
+        """Initialize Belinsky's Phrase Finder API worker."""
 
-        Arguments:
-             mongo_uri (str): MongoDB URI.
-        """
-
-        self.database = MongoClient(mongo_uri).db.belinsky_db
         self.comparer = PhraseComparer()
 
     @ADD_PHRASE_LATENCY.time()
@@ -75,7 +69,7 @@ class PhraseFinder:
             return response, 406
 
         # Add phrase to dataset
-        self.database.insert_one({'phrase': lemmatized})
+        database.edit_instance(User, 'belinsky', known_phrases=self._load_phrases() + [lemmatized])
 
         response = {
             'result': 'ok',
@@ -112,7 +106,7 @@ class PhraseFinder:
                     status: 200
         """
 
-        self.database.drop()
+        database.edit_instance(User, 'belinsky', known_phrases=[])
 
         response = {
             'status': 200
@@ -167,29 +161,11 @@ class PhraseFinder:
         return response, 200
 
     @staticmethod
-    def request_error(_):
-        """ Respond that there is unexpected error on server.
-        ---
-        Responses:
-            500:
-                description: Request not found.
-                schema:
-                    error: Error description.
-                    status: 500
-        """
-
-        ERROR_500_COUNTER.inc()
-        response = {
-            'error': "unexpected error encountered during PhraseFinder processing",
-            'status': 500
-        }
-        return response, 500
-
-    def _load_phrases(self):
+    def _load_phrases():
         """ Load phrases from database.
 
         Returns:
             List: Phrases in database.
         """
 
-        return [data['phrase'] for data in self.database.find()]
+        return database.get_instance(User, 'belinsky').known_phrases

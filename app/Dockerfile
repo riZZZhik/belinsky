@@ -12,14 +12,16 @@ RUN pip install -r requirements.txt
 # Download pymystem weights
 RUN python -c "from pymystem3 import autoinstall; autoinstall()"
 
-# Copy work files
+# Copy default work files
 COPY belinsky belinsky
-COPY wsgi.py .
-COPY gunicorn_config.py .
-COPY start_gunicorn.sh .
 
 # Create production target
 FROM base as production
+
+# Copy production work files
+COPY wsgi.py .
+COPY gunicorn_config.py .
+COPY start_gunicorn.sh .
 
 # Default execute
 CMD ["sh", "start_gunicorn.sh"]
@@ -29,6 +31,8 @@ FROM base as test
 
 # Install unittest dependencies
 RUN pip install flask-unittest==0.1.2
+
+# Copy test work files
 COPY app_test.py .
 
 # Default execute
