@@ -7,6 +7,7 @@
 `docker-compose up --build` 
 
 ### Envs:
+- BELINSKY_SECRET_KEY (default: secrets.token_hex(16)) - App's secret key.
 - BELINSKY_WSGI_MODULE (default: app:"create_app()") - WSGI application path in pattern $(MODULE_NAME):-$(VARIABLE_NAME).
 - BELINSKY_HOST (default: 0.0.0.0) - Application hostname.
 - BELINSKY_PORT (default: 4958) - Application port.

@@ -1,5 +1,6 @@
 # System imports
 import os
+import secrets
 
 # Import Flask
 from flask import Flask
@@ -14,6 +15,7 @@ from modules import create_blueprint_phrase_finder
 def create_app():
     # Create Flask app
     app = Flask("Belinsky")
+    app.config['SECRET_KEY'] = os.environ.get("BELINSKY_SECRET_KEY", secrets.token_hex(16))
 
     # Register prometheus route
     @app.route("/metrics/prometheus")
