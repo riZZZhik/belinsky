@@ -93,16 +93,16 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         client.post(
             '/add-phrase',
             json={
-                'phrase': 'бананы'
+                'phrase': 'ненавижу апельсины'
             }
         )
 
         response = client.post(
             '/find-phrases',
-            json={'text': 'мама любит бананы'}
+            json={'text': 'папа ненавидит апельсины'}
         )
         correct_response = {
-            'result': {'банан': [[11, 16]]},
+            'result': {'ненавидеть апельсин': [[5, 23]]},
             'status': 200
         }
         self.assertEqual(response.json, correct_response)
@@ -139,42 +139,6 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         )
         correct_response = {
             'result': {'банан': [[0, 5], [18, 23]]},
-            'status': 200
-        }
-        self.assertEqual(response.json, correct_response)
-
-    def test_find_phrase(self, client):
-        client.post(
-            '/add-phrase',
-            json={
-                'phrase': 'ненавижу апельсины'
-            }
-        )
-
-        response = client.post(
-            '/find-phrases',
-            json={'text': 'папа ненавидит апельсины'}
-        )
-        correct_response = {
-            'result': {'ненавидеть апельсин': [[5, 23]]},
-            'status': 200
-        }
-        self.assertEqual(response.json, correct_response)
-
-    def test_find_phrase_hyphen(self, client):
-        client.post(
-            '/add-phrase',
-            json={
-                'phrase': 'любой'
-            }
-        )
-
-        response = client.post(
-            '/find-phrases',
-            json={'text': 'мама по-любому любит'}
-        )
-        correct_response = {
-            'result': {'любой': [[5, 13]]},
             'status': 200
         }
         self.assertEqual(response.json, correct_response)
