@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from flask_login import LoginManager, current_user, login_user, logout_user
 
-from .database import db, get_instance
+from .database import db, add_instance, get_instance
 from .models import User
 
 login_manager = LoginManager()
@@ -60,10 +60,8 @@ def signup():
         return response, 406
 
     # Add user to database
-    user = User(username=request.json['username'])
-    user.set_password(request.json['password'])
-    db.session.add(user)
-    db.session.commit()
+    instance_func = lambda instance: instance.set_password(request.json['password'])
+    add_instance(User, instance_func, username=request.json['username'])
     login_user(user, remember=True)
 
     response = {
