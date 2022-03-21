@@ -17,6 +17,12 @@
 - BELINSKY_WORKER_CLASS (default: sync) - Type of workers to use.
 - BELINSKY_NUM_WORKER_CONNECTIONS (default: 1000) - Maximum number of simultaneous clients.
 
+## Run observability
+`docker-compose -f docker-compose.observability.yaml up --build`
+
+### Envs:
+- BELINSKY_OBSERVABILITY_PORT (default: 4800) - Port to forward Grafana on.
+
 ## Run tests
 `docker-compose -f docker-compose.test.yaml up --build --abort-on-container-exit`
 
