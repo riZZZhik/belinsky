@@ -1,9 +1,6 @@
 # Import Flask
 from flask import Flask
 
-# Prometheus imports
-from prometheus_client import multiprocess, generate_latest, CollectorRegistry
-
 # Module imports
 from . import config
 from .auth import login_manager
@@ -19,6 +16,7 @@ def create_app():
     with app.app_context():
         # Import modules
         from .auth import auth_bp
+        from .route import main_bp
         from .modules import create_blueprint_phrase_finder
 
         # Initialize database
@@ -30,15 +28,8 @@ def create_app():
         # Initialize authentication
         login_manager.init_app(app)
 
-        # Register prometheus route
-        @app.route("/metrics/prometheus")
-        def metrics():
-            registry = CollectorRegistry()
-            multiprocess.MultiProcessCollector(registry)
-            data = generate_latest(registry)
-            return data, 200
-
         # Register blueprints
+        app.register_blueprint(main_bp)
         app.register_blueprint(auth_bp)
         app.register_blueprint(create_blueprint_phrase_finder())
 
