@@ -16,7 +16,7 @@ def get_all(model):
 def add_instance(model, instance_func=None, **kwargs):
     instance = model(**kwargs)
     if instance_func:
-        instance_func(instance, **kwargs)
+        instance_func(instance)
     db.session.add(instance)
     commit_changes()
     return instance

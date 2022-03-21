@@ -1,5 +1,5 @@
 from flask import request
-from flask_login import current_user
+from flask_login import current_user, login_required
 from prometheus_client import Summary
 
 from .phrase_comparer import PhraseComparer
@@ -20,6 +20,7 @@ class PhraseFinder:
         self.comparer = PhraseComparer()
 
     @ADD_PHRASE_LATENCY.time()
+    @login_required
     def add_phrase(self):
         """ Add new phrase to database.
         ---
@@ -78,6 +79,7 @@ class PhraseFinder:
         return response, 200
 
     @GET_KNOWN_PHRASES_LATENCY.time()
+    @login_required
     def get_known_phrases(self):
         """ Get all known phrases from database.
         ---
@@ -96,6 +98,7 @@ class PhraseFinder:
         return response, 200
 
     @CLEAR_KNOWN_PHRASES_LATENCY.time()
+    @login_required
     def clear_known_phrases(self):
         """ Clear known phrases from database.
         ---
@@ -114,6 +117,7 @@ class PhraseFinder:
         return response, 200
 
     @FIND_PHRASES_LATENCY.time()
+    @login_required
     def find_phrases(self):
         """ Find known phrases in text.
         ---

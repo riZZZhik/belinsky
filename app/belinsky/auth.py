@@ -61,7 +61,7 @@ def signup():
 
     # Add user to database
     instance_func = lambda instance: instance.set_password(request.json['password'])
-    add_instance(User, instance_func, username=request.json['username'])
+    user = add_instance(User, instance_func, username=request.json['username'])
     login_user(user, remember=True)
 
     response = {
