@@ -1,18 +1,16 @@
 """Database models."""
+from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from .database import db
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'belinsky_db'
     # User info
-    user_id = db.Column(db.Integer())
-    username = db.Column(db.String(), primary_key=True)
+    id = db.Column(db.Integer(), primary_key=True)
+    username = db.Column(db.String())
     password = db.Column(db.String())
-
-    created_at = db.Column(db.DateTime())
-    last_login = db.Column(db.DateTime())
 
     # User data
     known_phrases = db.Column(db.ARRAY(db.String()), default=[])
@@ -26,4 +24,4 @@ class User(db.Model):
         return check_password_hash(self.password, password)
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return '<User %s>' % self.username

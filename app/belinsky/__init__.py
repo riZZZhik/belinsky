@@ -6,6 +6,7 @@ from prometheus_client import multiprocess, generate_latest, CollectorRegistry
 
 # Module imports
 from . import config
+from .auth import login_manager
 from .database import db
 from .models import User
 
@@ -17,6 +18,7 @@ def create_app():
 
     with app.app_context():
         # Import modules
+        from .auth import auth_bp
         from .modules import create_blueprint_phrase_finder
 
         # Initialize database
@@ -25,9 +27,8 @@ def create_app():
         db.init_app(app)
         db.create_all()
 
-        # Create blank user
-        if database.get_instance(User, 'belinsky') is None:
-            database.add_instance(User, username='belinsky', password='admin')
+        # Initialize authentication
+        login_manager.init_app(app)
 
         # Register prometheus route
         @app.route("/metrics/prometheus")
@@ -38,6 +39,7 @@ def create_app():
             return data, 200
 
         # Register blueprints
+        app.register_blueprint(auth_bp)
         app.register_blueprint(create_blueprint_phrase_finder())
 
     return app

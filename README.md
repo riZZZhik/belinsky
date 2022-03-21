@@ -20,14 +20,233 @@
 ## Run tests
 `docker-compose -f docker-compose.test.yaml up --build --abort-on-container-exit`
 
-# API requests
+# Authentication requests
+
+## 1. signup
+
+### 200
+
+**Request**
+
+```shell
+curl \ 
+  --header "Content-Type: application/json" \
+  --data '{"username": "your_username", "password": "your_password"}' \
+  $APP_URL/signup
+``` 
+
+**Response**
+
+```json
+{
+  "result": "Successfully signed up",
+  "status": 200
+}
+```
+
+
+### 400
+
+**Request**
+
+```shell
+curl \ 
+  --header "Content-Type: application/json" \
+  --data '{"username": "your_username"}' \
+  $APP_URL/signup
+``` 
+
+**Response**
+
+```json
+{
+  "error": "Not enough keys in request. Required keys: username, password",
+  "status": 400
+}
+```
+
+### 400
+
+**Request**
+
+```shell
+curl $APP_URL/signup
+``` 
+
+**Response**
+
+```json
+{
+  "error": "json body not found in request",
+  "status": 400
+}
+```
+
+### 406
+
+**Request**
+
+```shell
+curl \ 
+  --header "Content-Type: application/json" \
+  --data '{"username": "your_username", "password": "your_password"}' \
+  $APP_URL/signup
+``` 
+
+**Response**
+
+```json
+{
+  "result": "User with (%s) username already exists.",
+  "status": 406
+}
+```
+
+## 2. login
+
+### 200
+
+**Request**
+
+```shell
+curl \ 
+  --header "Content-Type: application/json" \
+  --data '{"username": "your_username", "password": "your_password"}' \
+  $APP_URL/login
+``` 
+
+**Response**
+
+```json
+{
+  "result": "Successfully logged in",
+  "status": 200
+}
+```
+
+
+### 400
+
+**Request**
+
+```shell
+curl \ 
+  --header "Content-Type: application/json" \
+  --data '{"username": "your_username"}' \
+  $APP_URL/login
+``` 
+
+**Response**
+
+```json
+{
+  "error": "Not enough keys in request. Required keys: username, password",
+  "status": 400
+}
+```
+
+### 400
+
+**Request**
+
+```shell
+curl $APP_URL/login
+``` 
+
+**Response**
+
+```json
+{
+  "error": "json body not found in request",
+  "status": 400
+}
+```
+
+### 406
+
+**Request**
+
+```shell
+curl \ 
+  --header "Content-Type: application/json" \
+  --data '{"username": "your_username", "password": "your_password"}' \
+  $APP_URL/login
+``` 
+
+**Response**
+
+```json
+{
+  "result": "User with %s username not found. Please signup first",
+  "status": 406
+}
+```
+
+### 406
+
+**Request**
+
+```shell
+curl \ 
+  --header "Content-Type: application/json" \
+  --data '{"username": "your_username", "password": "not_your_password"}' \
+  $APP_URL/login
+``` 
+
+**Response**
+
+```json
+{
+  "result": "Invalid password. Please try again.",
+  "status": 406
+}
+```
+
+
+## 3. logout
+
+### 200
+
+**Request**
+
+```shell
+curl $APP_URL/logout
+``` 
+
+**Response**
+
+```json
+{
+  "result": "Successfully logged out.",
+  "status": 200
+}
+```
+
+### 406
+
+**Request**
+
+```shell
+curl $APP_URL/logout
+``` 
+
+**Response**
+
+```json
+{
+  "result": "You are not logged in.",
+  "status": 406
+}
+```
+
+
+# Phrase finder requests
 
 ## 1. find-phrases
 
 ### 200
 
 **Request**
-
 
 ```shell
 curl --request POST \
@@ -64,10 +283,10 @@ curl --request POST \
 }
 ```
 
-
 ### 400
 
 **Request**
+
 ```bash
 curl --request POST \
   --header "Content-Type: application/json" \
@@ -129,7 +348,6 @@ curl --request POST \
 ### 400
 
 **Request**
-
 ```bash
 curl --request POST \
   --header "Content-Type: application/json" \
@@ -163,7 +381,6 @@ curl --request POST \
   "status": 400
 }
 ```
-
 
 ### 406
 

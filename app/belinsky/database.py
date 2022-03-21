@@ -3,8 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-def get_instance(model, username):
-    data = model.query.get(username)
+def get_instance(model, **kwargs):
+    data = model.query.filter_by(**kwargs).first()
     return data
 
 
@@ -24,8 +24,8 @@ def delete_instance(model, username):
     commit_changes()
 
 
-def edit_instance(model, username, **kwargs):
-    instance = model.query.filter_by(username=username).all()[0]
+def edit_instance(model, query_filter, **kwargs):
+    instance = get_instance(model, **query_filter)
     for attr, new_value in kwargs.items():
         setattr(instance, attr, new_value)
     commit_changes()

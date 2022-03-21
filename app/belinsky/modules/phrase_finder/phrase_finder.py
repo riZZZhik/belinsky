@@ -1,4 +1,5 @@
 from flask import request
+from flask_login import current_user
 from prometheus_client import Summary
 
 from .phrase_comparer import PhraseComparer
@@ -16,7 +17,6 @@ class PhraseFinder:
 
     def __init__(self):
         """Initialize Belinsky's Phrase Finder API worker."""
-
         self.comparer = PhraseComparer()
 
     @ADD_PHRASE_LATENCY.time()
@@ -33,7 +33,7 @@ class PhraseFinder:
                     result: 'ok'.
                     status: 200
             400:
-                description: Json body or 'phrase' key in request body not found.
+                description: Json body or 'phrase' key not found in request body.
                 schema:
                     error: Error description.
                     status: 400
@@ -47,29 +47,29 @@ class PhraseFinder:
         # Check request body
         if not request.json:
             response = {
-                'error': "json body not found in request",
+                'error': "Json body not found in request",
                 'status': 400
             }
             return response, 400
 
         if 'phrase' not in request.json:
             response = {
-                'error': "key 'phrase' not found in request body",
+                'error': "Key 'phrase' not found in request body",
                 'status': 400
             }
             return response, 400
 
         # Check if phrase already exists
         lemmatized = [self.comparer.lemmatize(phrase) for phrase in request.json['phrase'].split()]
-        if lemmatized in self._load_phrases():
+        if lemmatized in current_user.known_phrases:
             response = {
-                'error': "phrase already in database",
+                'error': "Phrase already in database.",
                 'status': 406
             }
             return response, 406
 
         # Add phrase to dataset
-        database.edit_instance(User, 'belinsky', known_phrases=self._load_phrases() + [lemmatized])
+        database.edit_instance(User, {'id': current_user.id}, known_phrases=current_user.known_phrases + [lemmatized])
 
         response = {
             'result': 'ok',
@@ -90,7 +90,7 @@ class PhraseFinder:
         """
 
         response = {
-            'result': [' '.join(x) for x in self._load_phrases()],
+            'result': [' '.join(x) for x in current_user.known_phrases],
             'status': 200
         }
         return response, 200
@@ -106,7 +106,7 @@ class PhraseFinder:
                     status: 200
         """
 
-        database.edit_instance(User, 'belinsky', known_phrases=[])
+        database.edit_instance(User, {'id': current_user.id}, known_phrases=[])
 
         response = {
             'status': 200
@@ -127,7 +127,7 @@ class PhraseFinder:
                     result: Dictionary with found phrases and their indexes.
                     status: 200
             400:
-                description: Json body or 'text' key in request body not found.
+                description: Json body or 'text' key not found in request body.
                 schema:
                     error: Error description.
                     status: 400
@@ -141,31 +141,21 @@ class PhraseFinder:
         # Check request body
         if not request.json:
             response = {
-                'error': "json body not found in request",
+                'error': "Json body not found in request",
                 'status': 400
             }
             return response, 400
 
         if 'text' not in request.json:
             response = {
-                'error': "key 'text' not found in request body",
+                'error': "Key 'text' not found in request body",
                 'status': 400
             }
             return response, 400
 
         # Process text
         response = {
-            'result': self.comparer.compare_phrases(request.json['text'], self._load_phrases()),
+            'result': self.comparer.compare_phrases(request.json['text'], current_user.known_phrases),
             'status': 200
         }
         return response, 200
-
-    @staticmethod
-    def _load_phrases():
-        """ Load phrases from database.
-
-        Returns:
-            List: Phrases in database.
-        """
-
-        return database.get_instance(User, 'belinsky').known_phrases
