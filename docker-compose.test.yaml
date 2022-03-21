@@ -7,28 +7,28 @@ services:
     restart: "no"
 
     environment:
-      MONGODB_USERNAME: admin
-      MONGODB_PASSWORD: admin_password
-      MONGODB_HOSTNAME: belinsky_database_test
+      BELINSKY_POSTGRES_USER: belinsky
+      BELINSKY_POSTGRES_PASSWORD: belinsky_db_password
+      BELINSKY_POSTGRES_HOST: belinsky_database_test
+      BELINSKY_POSTGRES_PORT: 5432
+      BELINSKY_POSTGRES_DB: belinsky_db
 
     depends_on:
       - database_test
 
   database_test:
-    image: mongo
-    command: mongod --quiet --logpath /dev/null
+    image: postgres
     container_name: belinsky_database_test
     restart: unless-stopped
 
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin_password
-      MONGO_INITDB_DATABASE: belinsky_db
-      MONGODB_DATA_DIR: /data/db
+      POSTGRES_USER: belinsky
+      POSTGRES_PASSWORD: belinsky_db_password
+      POSTGRES_DB: belinsky_db
 
     volumes:
-      - mongodbdata_test:/data/db
+      - belinsky_db_test_volume:/var/lib/postgresql
 
 volumes:
-  mongodbdata_test:
+  belinsky_db_test_volume:
     driver: local

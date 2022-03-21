@@ -1,28 +1,22 @@
 from flask import request
-from prometheus_client import Counter, Summary
-from pymongo import MongoClient
+from flask_login import current_user
+from prometheus_client import Summary
 
 from .phrase_comparer import PhraseComparer
+from ... import database
+from ...models import User
 
 ADD_PHRASE_LATENCY = Summary('pf_add_phrase_latency', 'Latency of "add-phrase" request')
 GET_KNOWN_PHRASES_LATENCY = Summary('pf_get_known_phrases_latency', 'Latency of "get-known-phrases" request')
 CLEAR_KNOWN_PHRASES_LATENCY = Summary('pf_clear_known_phrases_latency', 'Latency of "clear-known-phrases" request')
 FIND_PHRASES_LATENCY = Summary('pf_find_phrases_latency', 'Latency of "find-phrases" request')
 
-ERROR_500_COUNTER = Counter('pf_500_error_counter', 'Counter of 500 errors')
-
 
 class PhraseFinder:
     """ PhraseFinder API worker."""
 
-    def __init__(self, mongo_uri):
-        """ Initialize Belinsky's Phrase Finder API worker.
-
-        Arguments:
-             mongo_uri (str): MongoDB URI.
-        """
-
-        self.database = MongoClient(mongo_uri).db.belinsky_db
+    def __init__(self):
+        """Initialize Belinsky's Phrase Finder API worker."""
         self.comparer = PhraseComparer()
 
     @ADD_PHRASE_LATENCY.time()
@@ -39,7 +33,7 @@ class PhraseFinder:
                     result: 'ok'.
                     status: 200
             400:
-                description: Json body or 'phrase' key in request body not found.
+                description: Json body or 'phrase' key not found in request body.
                 schema:
                     error: Error description.
                     status: 400
@@ -53,29 +47,29 @@ class PhraseFinder:
         # Check request body
         if not request.json:
             response = {
-                'error': "json body not found in request",
+                'error': "Json body not found in request",
                 'status': 400
             }
             return response, 400
 
         if 'phrase' not in request.json:
             response = {
-                'error': "key 'phrase' not found in request body",
+                'error': "Key 'phrase' not found in request body",
                 'status': 400
             }
             return response, 400
 
         # Check if phrase already exists
         lemmatized = [self.comparer.lemmatize(phrase) for phrase in request.json['phrase'].split()]
-        if lemmatized in self._load_phrases():
+        if lemmatized in current_user.known_phrases:
             response = {
-                'error': "phrase already in database",
+                'error': "Phrase already in database.",
                 'status': 406
             }
             return response, 406
 
         # Add phrase to dataset
-        self.database.insert_one({'phrase': lemmatized})
+        database.edit_instance(User, {'id': current_user.id}, known_phrases=current_user.known_phrases + [lemmatized])
 
         response = {
             'result': 'ok',
@@ -96,7 +90,7 @@ class PhraseFinder:
         """
 
         response = {
-            'result': [' '.join(x) for x in self._load_phrases()],
+            'result': [' '.join(x) for x in current_user.known_phrases],
             'status': 200
         }
         return response, 200
@@ -112,7 +106,7 @@ class PhraseFinder:
                     status: 200
         """
 
-        self.database.drop()
+        database.edit_instance(User, {'id': current_user.id}, known_phrases=[])
 
         response = {
             'status': 200
@@ -133,7 +127,7 @@ class PhraseFinder:
                     result: Dictionary with found phrases and their indexes.
                     status: 200
             400:
-                description: Json body or 'text' key in request body not found.
+                description: Json body or 'text' key not found in request body.
                 schema:
                     error: Error description.
                     status: 400
@@ -147,49 +141,21 @@ class PhraseFinder:
         # Check request body
         if not request.json:
             response = {
-                'error': "json body not found in request",
+                'error': "Json body not found in request",
                 'status': 400
             }
             return response, 400
 
         if 'text' not in request.json:
             response = {
-                'error': "key 'text' not found in request body",
+                'error': "Key 'text' not found in request body",
                 'status': 400
             }
             return response, 400
 
         # Process text
         response = {
-            'result': self.comparer.compare_phrases(request.json['text'], self._load_phrases()),
+            'result': self.comparer.compare_phrases(request.json['text'], current_user.known_phrases),
             'status': 200
         }
         return response, 200
-
-    @staticmethod
-    def request_error(_):
-        """ Respond that there is unexpected error on server.
-        ---
-        Responses:
-            500:
-                description: Request not found.
-                schema:
-                    error: Error description.
-                    status: 500
-        """
-
-        ERROR_500_COUNTER.inc()
-        response = {
-            'error': "unexpected error encountered during PhraseFinder processing",
-            'status': 500
-        }
-        return response, 500
-
-    def _load_phrases(self):
-        """ Load phrases from database.
-
-        Returns:
-            List: Phrases in database.
-        """
-
-        return [data['phrase'] for data in self.database.find()]
