@@ -3,7 +3,7 @@ import unittest
 import flask_unittest
 
 from belinsky import create_app
-from belinsky.modules.phrase_finder.phrase_comparer import PhraseComparer, Token
+from belinsky.routes.phrase_finder.phrase_comparer import PhraseComparer, Token
 
 
 class PhraseFinderTest(flask_unittest.ClientTestCase):

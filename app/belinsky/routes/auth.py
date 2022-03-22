@@ -1,14 +1,12 @@
 from flask import Blueprint, request
 from flask_login import LoginManager, current_user, login_user, logout_user
 
-from .database import db, add_instance, get_instance
-from .models import User
+from ..database import add_instance, get_instance
+from ..models import User
 
 login_manager = LoginManager()
-auth_bp = Blueprint('auth_bp', __name__)
 
 
-@auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
     """ Sign up.
     ---
@@ -71,7 +69,6 @@ def signup():
     return response, 200
 
 
-@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     """ Login.
     ---
@@ -146,7 +143,6 @@ def login():
     return response, 200
 
 
-@auth_bp.route('/logout', methods=['GET', 'POST'])
 def logout():
     """ Logout.
     ---
@@ -184,3 +180,13 @@ def load_user(user_id):
     if user_id is not None:
         return get_instance(User, id=user_id)
     return None
+
+
+def create_blueprint_auth():
+    auth_bp = Blueprint('auth_bp', __name__)
+
+    auth_bp.add_url_rule('/signup', view_func=signup, methods=['GET', 'POST'])
+    auth_bp.add_url_rule('/login', view_func=login, methods=['GET', 'POST'])
+    auth_bp.add_url_rule('/logout', view_func=logout, methods=['GET', 'POST'])
+
+    return auth_bp
