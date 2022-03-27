@@ -45,11 +45,27 @@ curl \
 
 ```json
 {
-  "result": "Successfully signed up",
+  "result": "Successfully signed up as your_username",
   "status": 200
 }
 ```
 
+### 400
+
+**Request**
+
+```shell
+curl $APP_URL/signup
+``` 
+
+**Response**
+
+```json
+{
+  "error": "json body not found in request",
+  "status": 400
+}
+```
 
 ### 400
 
@@ -71,23 +87,6 @@ curl \
 }
 ```
 
-### 400
-
-**Request**
-
-```shell
-curl $APP_URL/signup
-``` 
-
-**Response**
-
-```json
-{
-  "error": "json body not found in request",
-  "status": 400
-}
-```
-
 ### 406
 
 **Request**
@@ -103,7 +102,7 @@ curl \
 
 ```json
 {
-  "result": "User with (%s) username already exists.",
+  "result": "User with your_username username already exists.",
   "status": 406
 }
 ```
@@ -125,11 +124,27 @@ curl \
 
 ```json
 {
-  "result": "Successfully logged in",
+  "result": "Successfully logged in as your_username",
   "status": 200
 }
 ```
 
+### 400
+
+**Request**
+
+```shell
+curl $APP_URL/login
+``` 
+
+**Response**
+
+```json
+{
+  "error": "json body not found in request",
+  "status": 400
+}
+```
 
 ### 400
 
@@ -151,23 +166,6 @@ curl \
 }
 ```
 
-### 400
-
-**Request**
-
-```shell
-curl $APP_URL/login
-``` 
-
-**Response**
-
-```json
-{
-  "error": "json body not found in request",
-  "status": 400
-}
-```
-
 ### 406
 
 **Request**
@@ -175,7 +173,7 @@ curl $APP_URL/login
 ```shell
 curl \ 
   --header "Content-Type: application/json" \
-  --data '{"username": "your_username", "password": "your_password"}' \
+  --data '{"username": "not_your_username", "password": "your_password"}' \
   $APP_URL/login
 ``` 
 
@@ -183,7 +181,7 @@ curl \
 
 ```json
 {
-  "result": "User with %s username not found. Please signup first",
+  "result": "User with not_your_username username not found. Please signup first",
   "status": 406
 }
 ```
@@ -241,6 +239,105 @@ curl $APP_URL/logout
 ```json
 {
   "result": "You are not logged in.",
+  "status": 406
+}
+```
+
+## 4. delete-user
+
+### 200
+
+**Request**
+
+```shell
+curl \ 
+  --header "Content-Type: application/json" \
+  --data '{"username": "your_username", "password": "your_password"}' \
+  $APP_URL/delete-user
+``` 
+
+**Response**
+
+```json
+{
+  "result": "Successfully deleted your_username user",
+  "status": 200
+}
+```
+
+### 400
+
+**Request**
+
+```shell
+curl $APP_URL/delete-user
+``` 
+
+**Response**
+
+```json
+{
+  "error": "json body not found in request",
+  "status": 400
+}
+```
+
+### 400
+
+**Request**
+
+```shell
+curl \ 
+  --header "Content-Type: application/json" \
+  --data '{"username": "your_username"}' \
+  $APP_URL/delete-user
+``` 
+
+**Response**
+
+```json
+{
+  "error": "Not enough keys in request. Required keys: username, password",
+  "status": 400
+}
+```
+
+### 406
+
+**Request**
+
+```shell
+curl \ 
+  --header "Content-Type: application/json" \
+  --data '{"username": "not_your_username", "password": "your_password"}' \
+  $APP_URL/delete-user
+``` 
+
+**Response**
+
+```json
+{
+  "result": "User with not_your_username username not found. Please signup first",
+  "status": 406
+}
+```
+
+### 406
+
+**Request**
+
+```shell
+curl \ 
+  --header "Content-Type: application/json" \
+  --data '{"username": "your_username", "password": "not_your_password"}' \
+  $APP_URL/delete-user
+``` 
+
+**Response**
+
+```json
+{
+  "result": "Invalid password. Please try again.",
   "status": 406
 }
 ```

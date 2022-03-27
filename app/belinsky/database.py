@@ -4,13 +4,13 @@ db = SQLAlchemy()
 
 
 def get_instance(model, **kwargs):
-    data = model.query.filter_by(**kwargs).first()
-    return data
+    instance = model.query.filter_by(**kwargs).first()
+    return instance
 
 
 def get_all(model):
-    data = model.query.all()
-    return data
+    instances = model.query.all()
+    return instances
 
 
 def add_instance(model, instance_func=None, **kwargs):
@@ -22,8 +22,8 @@ def add_instance(model, instance_func=None, **kwargs):
     return instance
 
 
-def delete_instance(model, username):
-    model.query.filter_by(username=username).delete()
+def delete_instance(model, **kwargs):
+    db.session.delete(get_instance(model, **kwargs))
     commit_changes()
 
 
