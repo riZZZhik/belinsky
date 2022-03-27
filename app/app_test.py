@@ -1,17 +1,31 @@
 import sys
 import unittest
+
 import flask_unittest
 
-from belinsky import create_app
+from belinsky import create_app, database, models
 from belinsky.routes.phrase_finder.phrase_comparer import PhraseComparer, Token
 
 
 class PhraseFinderTest(flask_unittest.ClientTestCase):
+    # Initialize app
+    credentials = {'username': 'unittester', 'password': 'test_password'}
     app = create_app()
+
+    # Create test user
+    with app.app_context():
+        if database.get_instance(models.User, username='unittester') is None:
+            database.add_instance(models.User, lambda instance: instance.set_password('test_password'),
+                                  username='unittester')
+
+    # Initialize plugins
     comparer = PhraseComparer()
 
+    def setUp(self, client):
+        client.post('login', json=self.credentials)
+
     def tearDown(self, client):
-        client.post('clear-known-phrases')
+        database.edit_instance(models.User, {'username': 'unittester'}, known_phrases=[])
 
     def test_lemmatizer(self, _):
         response = self.comparer.lemmatize('Апельсины')
@@ -41,6 +55,39 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
             'я папа': [[8, 13]]
         }
         self.assertEqual(response, correct_response)
+
+    def test_signup(self, client):
+        response = client.post('/signup', json={'username': 'unittester_1', 'password': 'test_password'})
+        correct_response = {
+            'result': "Successfully signed up as unittester_1.",
+            'status': 200
+        }
+        self.assertEqual(response.json, correct_response)
+
+    def test_delete(self, client):
+        response = client.post('delete-user', json={'username': 'unittester_1', 'password': 'test_password'})
+        correct_response = {
+            'result': "Successfully deleted unittester_1 user.",
+            'status': 200
+        }
+        self.assertEqual(response.json, correct_response)
+
+    def test_logout(self, client):
+        response = client.post('/logout')
+        correct_response = {
+            'result': 'Successfully logged out.',
+            'status': 200
+        }
+        self.assertEqual(response.json, correct_response)
+
+    def test_login(self, client):
+        client.post('/logout')
+        response = client.post('login', json=self.credentials)
+        correct_response = {
+            'result': "Successfully logged in as unittester.",
+            'status': 200
+        }
+        self.assertEqual(response.json, correct_response)
 
     def test_get_known_phrases_clear(self, client):
         response = client.get('/get-known-phrases')
