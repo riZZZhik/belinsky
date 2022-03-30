@@ -1,12 +1,21 @@
 from flask import Blueprint, request
 from flask_login import LoginManager, current_user, login_user, logout_user
+from prometheus_client import Summary
 
 from ..database import add_instance, get_instance, delete_instance
 from ..models import User
 
+# Initialize login manager
 login_manager = LoginManager()
 
+# Initialize prometheus metrics
+SIGNUP_LATENCY = Summary('signup_latency', 'Latency of "signup" request')
+LOGIN_LATENCY = Summary('login_latency', 'Latency of "login" request')
+LOGOUT_LATENCY = Summary('logout_latency', 'Latency of "logout" request')
+DELETE_USER_LATENCY = Summary('delete_user_latency', 'Latency of "delete-user" request')
 
+
+@SIGNUP_LATENCY.time()
 def signup():
     """ Sign up.
     ---
@@ -69,6 +78,7 @@ def signup():
     return response, 200
 
 
+@LOGIN_LATENCY.time()
 def login():
     """ Login.
     ---
@@ -143,6 +153,7 @@ def login():
     return response, 200
 
 
+@LOGOUT_LATENCY.time()
 def logout():
     """ Logout.
     ---
@@ -174,6 +185,7 @@ def logout():
     return response, 200
 
 
+@DELETE_USER_LATENCY.time()
 def delete_user():
     """ Delete user.
     ---
