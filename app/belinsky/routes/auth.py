@@ -253,6 +253,15 @@ def load_user(user_id):
     return None
 
 
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    response = {
+        'error': "Unauthorized request. Please login first.",
+        'status': 401
+    }
+    return response, 401
+
+
 def create_blueprint_auth():
     auth_bp = Blueprint('auth_bp', __name__)
 
