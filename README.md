@@ -7,13 +7,11 @@
 `docker-compose up --build` 
 
 ### Envs:
+- BELINSKY_PORT (default: 4958) - Port to forward belinsky on.
 - BELINSKY_SECRET_KEY (default: secrets.token_hex(16)) - App's secret key.
-- BELINSKY_WSGI_MODULE (default: app:"create_app()") - WSGI application path in pattern $(MODULE_NAME):-$(VARIABLE_NAME).
-- BELINSKY_HOST (default: 0.0.0.0) - Application hostname.
-- BELINSKY_PORT (default: 4958) - Application port.
 - BELINSKY_NUM_WORKERS (default: 4) - Number of worker processes for handling requests.
 - BELINSKY_NUM_THREADS (default: 1) - Number of threads.
-  - _NB! The suggested number of workers\*threads is (2*CPU)+1_
+  - _NB! The suggested maximum number of workers\*threads is (2*CPU)+1_
 - BELINSKY_WORKER_CLASS (default: sync) - Type of workers to use.
 - BELINSKY_NUM_WORKER_CONNECTIONS (default: 1000) - Maximum number of simultaneous clients.
 
