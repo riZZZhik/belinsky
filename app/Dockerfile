@@ -37,4 +37,4 @@ RUN pip install flask-unittest==0.1.2
 COPY app_test.py .
 
 # Default execute
-CMD ["python", "test.py"]
+CMD ["python", "app_test.py"]

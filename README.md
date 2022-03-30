@@ -1,21 +1,17 @@
 [![Tests](https://github.com/riZZZhik/belinsky/actions/workflows/tests.yaml/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/tests.yaml)
 [![Build and push](https://github.com/riZZZhik/belinsky/actions/workflows/push.yaml/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/push.yaml)
 
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/18220726-51689aa2-6ff2-4ffa-a278-e46ae40c6965?action=collection%2Ffork&collection-url=entityId%3D18220726-51689aa2-6ff2-4ffa-a278-e46ae40c6965%26entityType%3Dcollection%26workspaceId%3Def145b73-8364-42bb-bcd4-f7bce58058e2)
-
 # How to use
 
 ## Run production
 `docker-compose up --build` 
 
 ### Envs:
+- BELINSKY_PORT (default: 4958) - Port to forward belinsky on.
 - BELINSKY_SECRET_KEY (default: secrets.token_hex(16)) - App's secret key.
-- BELINSKY_WSGI_MODULE (default: app:"create_app()") - WSGI application path in pattern $(MODULE_NAME):-$(VARIABLE_NAME).
-- BELINSKY_HOST (default: 0.0.0.0) - Application hostname.
-- BELINSKY_PORT (default: 4958) - Application port.
 - BELINSKY_NUM_WORKERS (default: 4) - Number of worker processes for handling requests.
 - BELINSKY_NUM_THREADS (default: 1) - Number of threads.
-  - _NB! The suggested number of workers\*threads is (2*CPU)+1_
+  - _NB! The suggested maximum number of workers\*threads is (2*CPU)+1_
 - BELINSKY_WORKER_CLASS (default: sync) - Type of workers to use.
 - BELINSKY_NUM_WORKER_CONNECTIONS (default: 1000) - Maximum number of simultaneous clients.
 
@@ -28,11 +24,14 @@
 ## Run tests
 `docker-compose -f docker-compose.test.yaml up --build --abort-on-container-exit`
 
-# Authentication requests
+# API routes
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/18220726-51689aa2-6ff2-4ffa-a278-e46ae40c6965?action=collection%2Ffork&collection-url=entityId%3D18220726-51689aa2-6ff2-4ffa-a278-e46ae40c6965%26entityType%3Dcollection%26workspaceId%3Def145b73-8364-42bb-bcd4-f7bce58058e2)
 
-## 1. signup
+## Authentication requests
 
-### 200
+### 1. signup
+
+#### 200
 
 **Request**
 
@@ -40,7 +39,7 @@
 curl \ 
   --header "Content-Type: application/json" \
   --data '{"username": "your_username", "password": "your_password"}' \
-  $APP_URL/signup
+  $BELINSKY_URL/signup
 ``` 
 
 **Response**
@@ -52,12 +51,12 @@ curl \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
 ```shell
-curl $APP_URL/signup
+curl $BELINSKY_URL/signup
 ``` 
 
 **Response**
@@ -69,7 +68,7 @@ curl $APP_URL/signup
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
@@ -77,7 +76,7 @@ curl $APP_URL/signup
 curl \ 
   --header "Content-Type: application/json" \
   --data '{"username": "your_username"}' \
-  $APP_URL/signup
+  $BELINSKY_URL/signup
 ``` 
 
 **Response**
@@ -89,7 +88,7 @@ curl \
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
@@ -97,7 +96,7 @@ curl \
 curl \ 
   --header "Content-Type: application/json" \
   --data '{"username": "your_username", "password": "your_password"}' \
-  $APP_URL/signup
+  $BELINSKY_URL/signup
 ``` 
 
 **Response**
@@ -109,9 +108,11 @@ curl \
 }
 ```
 
-## 2. login
+----------------
 
-### 200
+### 2. login
+
+#### 200
 
 **Request**
 
@@ -119,7 +120,7 @@ curl \
 curl \ 
   --header "Content-Type: application/json" \
   --data '{"username": "your_username", "password": "your_password"}' \
-  $APP_URL/login
+  $BELINSKY_URL/login
 ``` 
 
 **Response**
@@ -131,12 +132,12 @@ curl \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
 ```shell
-curl $APP_URL/login
+curl $BELINSKY_URL/login
 ``` 
 
 **Response**
@@ -148,7 +149,7 @@ curl $APP_URL/login
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
@@ -156,7 +157,7 @@ curl $APP_URL/login
 curl \ 
   --header "Content-Type: application/json" \
   --data '{"username": "your_username"}' \
-  $APP_URL/login
+  $BELINSKY_URL/login
 ``` 
 
 **Response**
@@ -168,7 +169,7 @@ curl \
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
@@ -176,7 +177,7 @@ curl \
 curl \ 
   --header "Content-Type: application/json" \
   --data '{"username": "not_your_username", "password": "your_password"}' \
-  $APP_URL/login
+  $BELINSKY_URL/login
 ``` 
 
 **Response**
@@ -188,7 +189,7 @@ curl \
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
@@ -196,7 +197,7 @@ curl \
 curl \ 
   --header "Content-Type: application/json" \
   --data '{"username": "your_username", "password": "not_your_password"}' \
-  $APP_URL/login
+  $BELINSKY_URL/login
 ``` 
 
 **Response**
@@ -208,15 +209,16 @@ curl \
 }
 ```
 
+----------------
 
-## 3. logout
+### 3. logout
 
-### 200
+#### 200
 
 **Request**
 
 ```shell
-curl $APP_URL/logout
+curl $BELINSKY_URL/logout
 ``` 
 
 **Response**
@@ -228,12 +230,12 @@ curl $APP_URL/logout
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
 ```shell
-curl $APP_URL/logout
+curl $BELINSKY_URL/logout
 ``` 
 
 **Response**
@@ -245,9 +247,9 @@ curl $APP_URL/logout
 }
 ```
 
-## 4. delete-user
+### 4. delete-user
 
-### 200
+#### 200
 
 **Request**
 
@@ -255,7 +257,7 @@ curl $APP_URL/logout
 curl \ 
   --header "Content-Type: application/json" \
   --data '{"username": "your_username", "password": "your_password"}' \
-  $APP_URL/delete-user
+  $BELINSKY_URL/delete-user
 ``` 
 
 **Response**
@@ -267,12 +269,12 @@ curl \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
 ```shell
-curl $APP_URL/delete-user
+curl $BELINSKY_URL/delete-user
 ``` 
 
 **Response**
@@ -284,7 +286,7 @@ curl $APP_URL/delete-user
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
@@ -292,7 +294,7 @@ curl $APP_URL/delete-user
 curl \ 
   --header "Content-Type: application/json" \
   --data '{"username": "your_username"}' \
-  $APP_URL/delete-user
+  $BELINSKY_URL/delete-user
 ``` 
 
 **Response**
@@ -304,7 +306,7 @@ curl \
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
@@ -312,7 +314,7 @@ curl \
 curl \ 
   --header "Content-Type: application/json" \
   --data '{"username": "not_your_username", "password": "your_password"}' \
-  $APP_URL/delete-user
+  $BELINSKY_URL/delete-user
 ``` 
 
 **Response**
@@ -324,7 +326,7 @@ curl \
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
@@ -332,7 +334,7 @@ curl \
 curl \ 
   --header "Content-Type: application/json" \
   --data '{"username": "your_username", "password": "not_your_password"}' \
-  $APP_URL/delete-user
+  $BELINSKY_URL/delete-user
 ``` 
 
 **Response**
@@ -345,11 +347,11 @@ curl \
 ```
 
 
-# Phrase finder requests
+## Phrase finder requests
 
-## 1. find-phrases
+### 1. find-phrases
 
-### 200
+#### 200
 
 **Request**
 
@@ -357,7 +359,7 @@ curl \
 curl --request POST \
   --header "Content-Type: application/json" \
   --data '{"text": "мама по-любому любит banan"}' \
-  $APP_URL/find-phrases
+  $BELINSKY_URL/find-phrases
 ``` 
 
 **Response**
@@ -388,7 +390,7 @@ curl --request POST \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
@@ -396,7 +398,7 @@ curl --request POST \
 curl --request POST \
   --header "Content-Type: application/json" \
   --data '{"no_text": "мама любит по-любому бананы"}' \
-  $APP_URL/find-phrases
+  $BELINSKY_URL/find-phrases
 ``` 
 
 **Response**
@@ -408,13 +410,13 @@ curl --request POST \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
 ```bash
 curl --request POST \
-  $APP_URL/find-phrases
+  $BELINSKY_URL/find-phrases
 ``` 
 
 **Response**
@@ -428,9 +430,9 @@ curl --request POST \
 
 ----------------
 
-## 2. add-phrase
+### 2. add-phrase
 
-### 200
+#### 200
 
 **Request**
 
@@ -438,7 +440,7 @@ curl --request POST \
 curl --request POST \
   --header "Content-Type: application/json" \
   --data '{"phrase": "Privet банану"}' \
-  $APP_URL/add-phrase
+  $BELINSKY_URL/add-phrase
 ``` 
 
 **Response**
@@ -450,14 +452,14 @@ curl --request POST \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 ```bash
 curl --request POST \
   --header "Content-Type: application/json" \
   --data '{"no_phrase": "Privet банану"}' \
-  $APP_URL/add-phrase
+  $BELINSKY_URL/add-phrase
 ``` 
 
 **Response**
@@ -469,13 +471,13 @@ curl --request POST \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
 ```bash
 curl --request POST \
-  $APP_URL/add-phrase
+  $BELINSKY_URL/add-phrase
 ``` 
 
 **Response**
@@ -487,7 +489,7 @@ curl --request POST \
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
@@ -495,7 +497,7 @@ curl --request POST \
 curl --request POST \
   --header "Content-Type: application/json" \
   --data '{"phrase": "Privet банану"}' \
-  $APP_URL/add-phrase
+  $BELINSKY_URL/add-phrase
 ``` 
 
 **Response**
@@ -509,14 +511,14 @@ curl --request POST \
 
 ----------------
 
-## 3. get-known-phrases
+### 3. get-known-phrases
 
-### 200
+#### 200
 
 **Request**
 
 ```bash
-curl $APP_URL/get-known-phrases
+curl $BELINSKY_URL/get-known-phrases
 ``` 
 
 **Response**
@@ -534,15 +536,15 @@ curl $APP_URL/get-known-phrases
 
 ----------------
 
-## 4. clear-known-phrases
+### 4. clear-known-phrases
 
-### 200
+#### 200
 
 **Request**
 
 ```bash
 curl --request POST \
-  $APP_URL/add-phrase
+  $BELINSKY_URL/add-phrase
 ``` 
 
 **Response**
