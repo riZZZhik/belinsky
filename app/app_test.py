@@ -68,7 +68,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
 
     def test_signup(self, client):
         delete_user(self.app, 'unittester_1')
-        
+
         response = client.post('/signup', json={'username': 'unittester_1', 'password': 'test_password'})
         correct_response = {
             'result': "Successfully signed up as unittester_1.",
