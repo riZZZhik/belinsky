@@ -1,8 +1,6 @@
 [![Tests](https://github.com/riZZZhik/belinsky/actions/workflows/tests.yaml/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/tests.yaml)
 [![Build and push](https://github.com/riZZZhik/belinsky/actions/workflows/push.yaml/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/push.yaml)
 
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/18220726-51689aa2-6ff2-4ffa-a278-e46ae40c6965?action=collection%2Ffork&collection-url=entityId%3D18220726-51689aa2-6ff2-4ffa-a278-e46ae40c6965%26entityType%3Dcollection%26workspaceId%3Def145b73-8364-42bb-bcd4-f7bce58058e2)
-
 # How to use
 
 ## Run production
@@ -28,11 +26,14 @@
 ## Run tests
 `docker-compose -f docker-compose.test.yaml up --build --abort-on-container-exit`
 
-# Authentication requests
+# API routes
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/18220726-51689aa2-6ff2-4ffa-a278-e46ae40c6965?action=collection%2Ffork&collection-url=entityId%3D18220726-51689aa2-6ff2-4ffa-a278-e46ae40c6965%26entityType%3Dcollection%26workspaceId%3Def145b73-8364-42bb-bcd4-f7bce58058e2)
 
-## 1. signup
+## Authentication requests
 
-### 200
+### 1. signup
+
+#### 200
 
 **Request**
 
@@ -52,7 +53,7 @@ curl \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
@@ -69,7 +70,7 @@ curl $APP_URL/signup
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
@@ -89,7 +90,7 @@ curl \
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
@@ -109,9 +110,11 @@ curl \
 }
 ```
 
-## 2. login
+----------------
 
-### 200
+### 2. login
+
+#### 200
 
 **Request**
 
@@ -131,7 +134,7 @@ curl \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
@@ -148,7 +151,7 @@ curl $APP_URL/login
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
@@ -168,7 +171,7 @@ curl \
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
@@ -188,7 +191,7 @@ curl \
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
@@ -208,10 +211,11 @@ curl \
 }
 ```
 
+----------------
 
-## 3. logout
+### 3. logout
 
-### 200
+#### 200
 
 **Request**
 
@@ -228,7 +232,7 @@ curl $APP_URL/logout
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
@@ -245,9 +249,9 @@ curl $APP_URL/logout
 }
 ```
 
-## 4. delete-user
+### 4. delete-user
 
-### 200
+#### 200
 
 **Request**
 
@@ -267,7 +271,7 @@ curl \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
@@ -284,7 +288,7 @@ curl $APP_URL/delete-user
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
@@ -304,7 +308,7 @@ curl \
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
@@ -324,7 +328,7 @@ curl \
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
@@ -345,11 +349,11 @@ curl \
 ```
 
 
-# Phrase finder requests
+## Phrase finder requests
 
-## 1. find-phrases
+### 1. find-phrases
 
-### 200
+#### 200
 
 **Request**
 
@@ -388,7 +392,7 @@ curl --request POST \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
@@ -408,7 +412,7 @@ curl --request POST \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
@@ -428,9 +432,9 @@ curl --request POST \
 
 ----------------
 
-## 2. add-phrase
+### 2. add-phrase
 
-### 200
+#### 200
 
 **Request**
 
@@ -450,7 +454,7 @@ curl --request POST \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 ```bash
@@ -469,7 +473,7 @@ curl --request POST \
 }
 ```
 
-### 400
+#### 400
 
 **Request**
 
@@ -487,7 +491,7 @@ curl --request POST \
 }
 ```
 
-### 406
+#### 406
 
 **Request**
 
@@ -509,9 +513,9 @@ curl --request POST \
 
 ----------------
 
-## 3. get-known-phrases
+### 3. get-known-phrases
 
-### 200
+#### 200
 
 **Request**
 
@@ -534,9 +538,9 @@ curl $APP_URL/get-known-phrases
 
 ----------------
 
-## 4. clear-known-phrases
+### 4. clear-known-phrases
 
-### 200
+#### 200
 
 **Request**
 
