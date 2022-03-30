@@ -21,11 +21,134 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
-  "iteration": 1647737148594,
+  "iteration": 1648669123976,
   "links": [],
   "liveNow": false,
   "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "exemplar": true,
+          "expr": "rate(signup_latency_sum[$interval]) / \nrate(signup_latency_count[$interval])",
+          "interval": "",
+          "legendFormat": "signup",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "exemplar": true,
+          "expr": "rate(login_latency_sum[$interval]) / \nrate(login_latency_count[$interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "login",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "exemplar": true,
+          "expr": "rate(logout_latency_sum[$interval]) / \nrate(logout_latency_count[$interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "logout",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "exemplar": true,
+          "expr": "rate(delete_user_latency_sum[$interval]) / \nrate(delete_user_latency_count[$interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "delete-user",
+          "refId": "D"
+        }
+      ],
+      "title": "Authentication Requests' latency ",
+      "type": "timeseries"
+    },
     {
       "fieldConfig": {
         "defaults": {
@@ -81,12 +204,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 23,
+        "h": 12,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 12
       },
-      "id": 2,
+      "id": 3,
       "options": {
         "legend": {
           "calcs": [],
@@ -147,7 +270,7 @@
           "refId": "D"
         }
       ],
-      "title": "Requests' latency ",
+      "title": "Phrase Finder Requests' latency ",
       "type": "timeseries"
     }
   ],
@@ -232,13 +355,13 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Belinsky",
   "uid": "MmhXGLPnk",
-  "version": 1,
+  "version": 3,
   "weekStart": ""
 }
