@@ -1,5 +1,5 @@
 # Create base target
-FROM --platform=linux/amd64 python:3.8 as base
+FROM --platform=linux/amd64 python:3.10.4 as base
 LABEL MAINTAINER="Dmitry Barsukoff <t.me/riZZZhik>"
 
 # Define default environments
