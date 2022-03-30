@@ -7,16 +7,26 @@ from belinsky import create_app, database, models
 from belinsky.routes.phrase_finder.phrase_comparer import PhraseComparer, Token
 
 
+def add_user(app, username, password):
+    with app.app_context():
+        if database.get_instance(models.User, username=username) is None:
+            database.add_instance(models.User, lambda instance: instance.set_password(password),
+                                  username=username)
+
+
+def delete_user(app, username):
+    with app.app_context():
+        if database.get_instance(models.User, username=username) is not None:
+            database.delete_instance(models.User, username=username)
+
+
 class PhraseFinderTest(flask_unittest.ClientTestCase):
     # Initialize app
     credentials = {'username': 'unittester', 'password': 'test_password'}
     app = create_app()
 
     # Create test user
-    with app.app_context():
-        if database.get_instance(models.User, username='unittester') is None:
-            database.add_instance(models.User, lambda instance: instance.set_password('test_password'),
-                                  username='unittester')
+    add_user(app, credentials['username'], credentials['password'])
 
     # Initialize plugins
     comparer = PhraseComparer()
@@ -57,6 +67,8 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         self.assertEqual(response, correct_response)
 
     def test_signup(self, client):
+        delete_user(self.app, 'unittester_1')
+        
         response = client.post('/signup', json={'username': 'unittester_1', 'password': 'test_password'})
         correct_response = {
             'result': "Successfully signed up as unittester_1.",
@@ -65,6 +77,8 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         self.assertEqual(response.json, correct_response)
 
     def test_delete(self, client):
+        add_user(self.app, 'unittester_1', 'test_password')
+
         response = client.post('delete-user', json={'username': 'unittester_1', 'password': 'test_password'})
         correct_response = {
             'result': "Successfully deleted unittester_1 user.",
