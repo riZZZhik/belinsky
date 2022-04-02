@@ -24,7 +24,8 @@ class PhraseComparer:
             'ru': 'ru_core_news_sm',
             'en': 'en_core_web_sm'
         }
-        self.lemmatizers = dict([(key, spacy.load(value)) for key, value in spacy_languages.items()])
+        self.lemmatizers = dict([(key, spacy.load(value, disable=['parser', 'ner']))
+                                 for key, value in spacy_languages.items()])
 
     def lemmatize(self, word, language):
         """ Lemmatize word.
@@ -40,7 +41,10 @@ class PhraseComparer:
 
         if language == 'ru':
             word = translit(word, 'ru')
-            return self.lemmatizers[language](word)[-1].lemma_
+            if '-' in word:
+                return self.lemmatizers[language](self.lemmatizers[language](word)[-1].lemma_)[-1].lemma_
+            else:
+                return self.lemmatizers[language](word)[-1].lemma_
         elif language == 'en':
             return self.lemmatizers[language](word)[-1].lemma_
         else:
