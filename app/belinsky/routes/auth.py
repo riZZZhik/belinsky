@@ -2,7 +2,7 @@ from flask import Blueprint, request
 from flask_login import LoginManager, current_user, login_user, logout_user
 from prometheus_client import Summary
 
-from ..database import add_instance, get_instance, delete_instance
+from ..database import add_instance, get_instance, delete_instance, edit_instance
 from ..models import User
 
 # Initialize login manager
@@ -13,6 +13,24 @@ SIGNUP_LATENCY = Summary('signup_latency', 'Latency of "signup" request')
 LOGIN_LATENCY = Summary('login_latency', 'Latency of "login" request')
 LOGOUT_LATENCY = Summary('logout_latency', 'Latency of "logout" request')
 DELETE_USER_LATENCY = Summary('delete_user_latency', 'Latency of "delete-user" request')
+CHANGE_LANGUAGE_LATENCY = Summary('change_language_latency', 'Latency of "change-language" request')
+
+
+def check_request_body(required_keys):
+    """Check request input body."""
+    if not request.json:
+        response = {
+            'error': "Json body not found in request.",
+            'status': 400
+        }
+        return response, 400
+
+    if not all([key in request.json.keys() for key in required_keys]):
+        response = {
+            'error': 'Not enough keys in request. Required keys: %s.' % ", ".join(required_keys),
+            'status': 400
+        }
+        return response, 400
 
 
 @SIGNUP_LATENCY.time()
@@ -22,6 +40,7 @@ def signup():
     Body (JSON):
         - username: Username.
         - password: Password.
+        - language: Language ['ru', 'en'].
 
     Responses:
         200:
@@ -30,7 +49,7 @@ def signup():
                 result: 'Successfully signed up'
                 status: 200
         400:
-            description: Json body or 'username', 'password' keys not found in request body.
+            description: Json body or 'username', 'password', 'language' keys not found in request body.
             schema:
                 error: Error description.
                 status: 400
@@ -42,17 +61,16 @@ def signup():
     """
 
     # Check input body
-    if not request.json:
-        response = {
-            'error': "Json body not found in request.",
-            'status': 400
-        }
-        return response, 400
+    required_keys = ['username', 'password', 'language']
+    check = check_request_body(required_keys)
+    if check:
+        return check
 
-    required_keys = ['username', 'password']
-    if not all([key in required_keys for key in request.json.keys()]):
+    known_languages = ['ru', 'en']
+    if request.json['language'].lower() not in known_languages:
         response = {
-            'error': 'Not enough keys in request. Required keys: %s.' % ", ".join(required_keys),
+            'error': 'Unknown language: %s. Please use one of: %s.' %
+                     (request.json['language'], ", ".join(known_languages)),
             'status': 400
         }
         return response, 400
@@ -68,7 +86,8 @@ def signup():
 
     # Add user to database
     instance_func = lambda instance: instance.set_password(request.json['password'])
-    user = add_instance(User, instance_func, username=request.json['username'])
+    user = add_instance(User, instance_func,
+                        username=request.json['username'], language=request.json['language'].lower())
     login_user(user, remember=True)
 
     response = {
@@ -113,20 +132,10 @@ def login():
         return response, 200
 
     # Check input body
-    if not request.json:
-        response = {
-            'error': "Json body not found in request.",
-            'status': 400
-        }
-        return response, 400
-
     required_keys = ['username', 'password']
-    if not all([key in required_keys for key in request.json.keys()]):
-        response = {
-            'error': 'Not enough keys in request. Required keys: %s.' % ", ".join(required_keys),
-            'status': 400
-        }
-        return response, 400
+    check = check_request_body(required_keys)
+    if check:
+        return check
 
     # Check if user exists and password correct
     user = get_instance(User, username=request.json['username'])
@@ -170,9 +179,10 @@ def logout():
                 status: 406
     """
 
+    # Bypass if user is logged in
     if not current_user.is_authenticated:
         response = {
-            'error': 'You are not logged in.',
+            'error': "You are not logged in.",
             'status': 406
         }
         return response, 406
@@ -212,20 +222,10 @@ def delete_user():
     """
 
     # Check input body
-    if not request.json:
-        response = {
-            'error': "Json body not found in request.",
-            'status': 400
-        }
-        return response, 400
-
     required_keys = ['username', 'password']
-    if not all([key in required_keys for key in request.json.keys()]):
-        response = {
-            'error': 'Not enough keys in request. Required keys: %s.' % ", ".join(required_keys),
-            'status': 400
-        }
-        return response, 400
+    check = check_request_body(required_keys)
+    if check:
+        return check
 
     # Check if user exists and password correct
     user = get_instance(User, username=request.json['username'])
@@ -257,6 +257,64 @@ def delete_user():
     return response, 200
 
 
+@CHANGE_LANGUAGE_LATENCY.time()
+def change_language():
+    """ Change user language.
+    ---
+    Body (JSON):
+        - language: Language ['ru', 'en'].
+
+    Responses:
+        200:
+            description: Return that request processed properly.
+            schema:
+                result: 'Successfully signed up'
+                status: 200
+        400:
+            description: Json body or 'language' key not found in request body.
+            schema:
+                error: Error description.
+                status: 400
+        406:
+            description: User is not authenticated.
+            schema:
+                error: Error description.
+                status: 406
+    """
+
+    # Bypass if user is logged in
+    if not current_user.is_authenticated:
+        response = {
+            'error': "You are not logged in.",
+            'status': 406
+        }
+        return response, 406
+
+    # Check input body
+    required_keys = ['language']
+    check = check_request_body(required_keys)
+    if check:
+        return check
+
+    known_languages = ['ru', 'en']
+    if request.json['language'].lower() not in known_languages:
+        response = {
+            'error': 'Unknown language: %s. Please use one of: %s.' %
+                     (request.json['language'], ", ".join(known_languages)),
+            'status': 400
+        }
+        return response, 400
+
+    # Change user language
+    edit_instance(User, query_filter={'id': current_user.id}, language=request.json['language'])
+
+    response = {
+        'result': 'Successfully changed language to %s.' % request.json['language'],
+        'status': 200
+    }
+    return response, 200
+
+
 @login_manager.user_loader
 def load_user(user_id):
     """Check if user is logged-in on every page load."""
@@ -281,5 +339,6 @@ def create_blueprint_auth():
     auth_bp.add_url_rule('/login', view_func=login, methods=['GET', 'POST'])
     auth_bp.add_url_rule('/logout', view_func=logout, methods=['GET', 'POST'])
     auth_bp.add_url_rule('/delete-user', view_func=delete_user, methods=['GET', 'POST'])
+    auth_bp.add_url_rule('/change-language', view_func=change_language, methods=['POST'])
 
     return auth_bp

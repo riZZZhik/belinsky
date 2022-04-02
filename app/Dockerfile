@@ -10,8 +10,9 @@ WORKDIR /belinsky
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# Download pymystem weights
-RUN python -c "from pymystem3 import autoinstall; autoinstall()"
+# Download spacy weights
+RUN python -m spacy download en_core_web_sm
+RUN python -m spacy download ru_core_news_sm
 
 # Copy default work files
 COPY belinsky belinsky

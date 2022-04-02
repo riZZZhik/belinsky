@@ -7,11 +7,11 @@ from belinsky import create_app, database, models
 from belinsky.routes.phrase_finder.phrase_comparer import PhraseComparer, Token
 
 
-def add_user(app, username, password):
+def add_user(app, username, password, language):
     with app.app_context():
         if database.get_instance(models.User, username=username) is None:
             database.add_instance(models.User, lambda instance: instance.set_password(password),
-                                  username=username)
+                                  username=username, language=language)
 
 
 def delete_user(app, username):
@@ -26,7 +26,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
     app = create_app()
 
     # Create test user
-    add_user(app, credentials['username'], credentials['password'])
+    add_user(app, credentials['username'], credentials['password'], 'ru')
 
     # Initialize plugins
     comparer = PhraseComparer()
@@ -38,17 +38,22 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         database.edit_instance(models.User, {'username': 'unittester'}, known_phrases=[])
 
     def test_lemmatizer(self, _):
-        response = self.comparer.lemmatize('Апельсины')
+        response = self.comparer.lemmatize('Апельсины', 'ru')
         correct_response = 'апельсин'
         self.assertEqual(response, correct_response)
 
     def test_lemmatizer_hyphen(self, _):
-        response = self.comparer.lemmatize('по-любому')
+        response = self.comparer.lemmatize('по-любому', 'ru')
         correct_response = 'любой'
         self.assertEqual(response, correct_response)
 
+    def test_lemmatizer_en(self, _):
+        response = self.comparer.lemmatize('stunned', 'en')
+        correct_response = 'stun'
+        self.assertEqual(response, correct_response)
+
     def test_tokenizer(self, _):
-        response = [token.to_list() for token in self.comparer.tokenize('Мама по-любому обожает апельсины')]
+        response = [token.to_list() for token in self.comparer.tokenize('Мама по-любому обожает апельсины', 'ru')]
         correct_response = [
             Token("мама", "мама", (0, 3)).to_list(),
             Token('по-любому', 'любой', (5, 13)).to_list(),
@@ -58,8 +63,8 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         self.assertEqual(response, correct_response)
 
     def test_compare_phrases(self, _):
-        phrases = ([[self.comparer.lemmatize('я '), self.comparer.lemmatize('папа')]])
-        response = self.comparer.compare_phrases('Привет, я Папа', phrases)
+        phrases = ([[self.comparer.lemmatize('я ', 'ru'), self.comparer.lemmatize('папа', 'ru')]])
+        response = self.comparer.compare_phrases('Привет, я Папа', phrases, 'ru')
 
         correct_response = {
             'я папа': [[8, 13]]
@@ -69,7 +74,9 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
     def test_signup(self, client):
         delete_user(self.app, 'unittester_1')
 
-        response = client.post('/signup', json={'username': 'unittester_1', 'password': 'test_password'})
+        response = client.post('/signup', json={'username': 'unittester_1',
+                                                'password': 'test_password',
+                                                'language': 'ru'})
         correct_response = {
             'result': "Successfully signed up as unittester_1.",
             'status': 200
@@ -77,7 +84,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         self.assertEqual(response.json, correct_response)
 
     def test_delete(self, client):
-        add_user(self.app, 'unittester_1', 'test_password')
+        add_user(self.app, 'unittester_1', 'test_password', 'ru')
 
         response = client.post('delete-user', json={'username': 'unittester_1', 'password': 'test_password'})
         correct_response = {
@@ -126,7 +133,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         client.post(
             '/add-phrase',
             json={
-                'phrase': 'хочу bananu'
+                'phrase': 'хочу banana'
             }
         )
 
@@ -178,7 +185,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
 
         response = client.post(
             '/find-phrases',
-            json={'text': 'маме и папе по bananu'}
+            json={'text': 'маме и папе по banana'}
         )
         correct_response = {
             'result': {'банан': [[15, 20]]},
