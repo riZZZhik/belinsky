@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String())
 
     # User data
+    language = db.Column(db.String())
     known_phrases = db.Column(db.ARRAY(db.String()), default=[])
 
     def set_password(self, password):
