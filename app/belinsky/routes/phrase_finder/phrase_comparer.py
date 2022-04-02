@@ -1,4 +1,4 @@
-from pymystem3 import Mystem
+import spacy
 from transliterate import translit
 
 
@@ -18,27 +18,40 @@ class PhraseComparer:
     """Compare phrases"""
 
     def __init__(self):
-        self.lemmatizer = Mystem()
+        """Initialize class variables."""
 
-    def lemmatize(self, word):
+        spacy_languages = {
+            'ru': 'ru_core_news_sm',
+            'en': 'en_core_web_sm'
+        }
+        self.lemmatizers = dict([(key, spacy.load(value)) for key, value in spacy_languages.items()])
+
+    def lemmatize(self, word, language):
         """ Lemmatize word.
 
         Arguments:
              word (str): Word to be lemmatized.
+             language (str): Language.
 
         Returns:
             str:
                 Lemmatized word.
         """
 
-        word = translit(word, 'ru')
-        return self.lemmatizer.lemmatize(word)[-2]
+        if language == 'ru':
+            word = translit(word, 'ru')
+            return self.lemmatizers[language](word)[-1].lemma_
+        elif language == 'en':
+            return self.lemmatizers[language](word)[-1].lemma_
+        else:
+            raise ValueError('Invalid language: %s' % language)
 
-    def tokenize(self, text):
+    def tokenize(self, text, language):
         """ Tokenize text.
 
         Arguments:
             text (str): Text to be tokenized.
+            language (str): Language.
 
         Returns:
             List:
@@ -47,9 +60,10 @@ class PhraseComparer:
 
         delta = 0
         tokenized = []
-        for word in translit(text.lower(), 'ru').split():
+        text = translit(text.lower(), 'ru') if language == 'ru' else text
+        for word in text.split():
             # Process word
-            lemma = self.lemmatize(word)
+            lemma = self.lemmatize(word, language)
             position = (delta, delta + len(word) - 1)
             delta += len(word) + 1
 
@@ -58,19 +72,20 @@ class PhraseComparer:
 
         return tokenized
 
-    def compare_phrases(self, text, words):
+    def compare_phrases(self, text, words, language):
         """ Compare text with known phrases.
 
         Arguments:
             text (str): Text to compare.
             words (list): List of words and phrases to compare with.
+            language (str): Language.
 
         Returns:
             Dict:
                 Return highlighted words and their indexes in text.
         """
 
-        tokenized = self.tokenize(text)
+        tokenized = self.tokenize(text, language)
         lemmatized = [x.lemma for x in tokenized]
 
         result = {}
