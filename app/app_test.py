@@ -47,6 +47,11 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         correct_response = 'любой'
         self.assertEqual(response, correct_response)
 
+    def test_lemmatizer_punctuation(self, _):
+        response = self.comparer.lemmatize('-, ["обожает"]?!', 'ru')
+        correct_response = 'обожать'
+        self.assertEqual(response, correct_response)
+
     def test_lemmatizer_en(self, _):
         response = self.comparer.lemmatize('stunned', 'en')
         correct_response = 'stun'
