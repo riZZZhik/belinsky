@@ -47,18 +47,22 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         correct_response = 'любой'
         self.assertEqual(response, correct_response)
 
+    def test_lemmatizer_punctuation(self, _):
+        response = self.comparer.lemmatize('-, ["обожает"]?!', 'ru')
+        correct_response = 'обожать'
+        self.assertEqual(response, correct_response)
+
     def test_lemmatizer_en(self, _):
         response = self.comparer.lemmatize('stunned', 'en')
         correct_response = 'stun'
         self.assertEqual(response, correct_response)
 
     def test_tokenizer(self, _):
-        response = [token.to_list() for token in self.comparer.tokenize('Мама по-любому обожает апельсины', 'ru')]
+        response = [token.to_list() for token in self.comparer.tokenize('Мама обожает апельсины', 'ru')]
         correct_response = [
             Token("мама", "мама", (0, 3)).to_list(),
-            Token('по-любому', 'любой', (5, 13)).to_list(),
-            Token('обожает', 'обожать', (15, 21)).to_list(),
-            Token('апельсины', 'апельсин', (23, 31)).to_list()
+            Token('обожает', 'обожать', (5, 11)).to_list(),
+            Token('апельсины', 'апельсин', (13, 21)).to_list()
         ]
         self.assertEqual(response, correct_response)
 
@@ -185,7 +189,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
 
         response = client.post(
             '/find-phrases',
-            json={'text': 'маме и папе по banana'}
+            json={'text': 'маме и папе по bananu'}
         )
         correct_response = {
             'result': {'банан': [[15, 20]]},
@@ -203,10 +207,10 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
 
         response = client.post(
             '/find-phrases',
-            json={'text': 'банану мама любит бананы'}
+            json={'text': 'банан мама любит бананы'}
         )
         correct_response = {
-            'result': {'банан': [[0, 5], [18, 23]]},
+            'result': {'банан': [[0, 4], [17, 22]]},
             'status': 200
         }
         self.assertEqual(response.json, correct_response)

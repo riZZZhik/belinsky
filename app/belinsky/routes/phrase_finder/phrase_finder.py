@@ -94,7 +94,7 @@ class PhraseFinder:
         """
 
         response = {
-            'result': [' '.join(x) for x in current_user.known_phrases],
+            'result': [' '.join(phrase) for phrase in current_user.known_phrases],
             'status': 200
         }
         return response, 200
