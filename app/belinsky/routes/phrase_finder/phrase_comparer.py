@@ -27,7 +27,6 @@ class PhraseComparer:
         self.lemmatizers = dict([(key, spacy.load(value, disable=['parser', 'ner']))
                                  for key, value in spacy_languages.items()])
 
-
     def lemmatize(self, text, language):
         """ Lemmatize text.
 
@@ -51,13 +50,12 @@ class PhraseComparer:
 
         # Clear punctuation and other marks from text.
         tokens = self._filter_spacy_tokens(tokens)
-        if tokens:
-            lemmatized = tokens[-1].lemma_
+        lemmatized = tokens[-1].lemma_
 
-            if language == 'ru':
-                lemmatized = self.lemmatizers[language](lemmatized)[-1].lemma_
+        if language == 'ru':
+            lemmatized = self.lemmatizers[language](lemmatized)[-1].lemma_
 
-            return lemmatized
+        return lemmatized
 
     @staticmethod
     def _filter_spacy_tokens(tokens):
@@ -77,17 +75,14 @@ class PhraseComparer:
                 Words' tokens as 'phrase_comparer.Token' structure.
         """
 
-        delta = 0
-        tokenized = []
+        # Translit text if ru language
         text = translit(text.lower(), 'ru') if language == 'ru' else text
-        for word in text.split():
-            # Process word
-            lemma = self.lemmatize(word, language)
-            position = (delta, delta + len(word) - 1)
-            delta += len(word) + 1
 
-            # Create token from data
-            tokenized.append(Token(word, lemma, position))
+        # Generate spaCy tokens
+        tokens = self._filter_spacy_tokens(self.lemmatizers[language](text))
+
+        # Generate tokens from spaCy
+        tokenized = [Token(token.text, token.lemma_, (token.idx, token.idx + len(token.text) - 1)) for token in tokens]
 
         return tokenized
 
