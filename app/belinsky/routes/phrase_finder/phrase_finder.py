@@ -62,8 +62,7 @@ class PhraseFinder:
             return response, 400
 
         # Check if phrase already exists
-        lemmatized = [self.comparer.lemmatize(phrase, current_user.language)
-                      for phrase in request.json['phrase'].split()]
+        lemmatized = self.comparer.lemmatize(request.json['phrase'], current_user.language)
         if lemmatized in current_user.known_phrases:
             response = {
                 'error': "Phrase already in database.",
