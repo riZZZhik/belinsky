@@ -441,7 +441,7 @@ curl \
 ```shell
 curl --request POST \
   --header "Content-Type: application/json" \
-  --data '{"text": "мама по-любому любит banan"}' \
+  --data '{"text": "мама по-любому любит banan", "phrases": ["банан"]]}' \
   $BELINSKY_URL/find-phrases
 ``` 
 
@@ -450,18 +450,6 @@ curl --request POST \
 ```json
 {
   "result": {
-    "мама": [
-      [
-        0,
-        3
-      ]
-    ],
-    "любой любить": [
-      [
-        5,
-        19
-      ]
-    ],
     "банан": [
       [
         21,
@@ -480,7 +468,7 @@ curl --request POST \
 ```bash
 curl --request POST \
   --header "Content-Type: application/json" \
-  --data '{"no_text": "мама любит по-любому бананы"}' \
+  --data '{"text": "мама любит по-любому бананы"}' \
   $BELINSKY_URL/find-phrases
 ``` 
 
@@ -488,7 +476,7 @@ curl --request POST \
 
 ```json
 {
-  "error": "item 'text' not found in request body",
+  "error": "Required keys not found in request body: text, phrases.",
   "status": 400
 }
 ```
@@ -508,133 +496,5 @@ curl --request POST \
 {
   "error": "json body not found in request",
   "status": 400
-}
-```
-
-----------------
-
-### 2. add-phrase
-
-#### 200
-
-**Request**
-
-```bash
-curl --request POST \
-  --header "Content-Type: application/json" \
-  --data '{"phrase": "Privet банану"}' \
-  $BELINSKY_URL/add-phrase
-``` 
-
-**Response**
-
-```json
-{
-  "result": "ok",
-  "status": 200
-}
-```
-
-#### 400
-
-**Request**
-```bash
-curl --request POST \
-  --header "Content-Type: application/json" \
-  --data '{"no_phrase": "Privet банану"}' \
-  $BELINSKY_URL/add-phrase
-``` 
-
-**Response**
-
-```json
-{
-  "error": "item 'phrase' not found in request body",
-  "status": 400
-}
-```
-
-#### 400
-
-**Request**
-
-```bash
-curl --request POST \
-  $BELINSKY_URL/add-phrase
-``` 
-
-**Response**
-
-```json
-{
-  "error": "json body not found in request",
-  "status": 400
-}
-```
-
-#### 406
-
-**Request**
-
-```bash
-curl --request POST \
-  --header "Content-Type: application/json" \
-  --data '{"phrase": "Privet банану"}' \
-  $BELINSKY_URL/add-phrase
-``` 
-
-**Response**
-
-```json
-{
-  "error": "phrase already in database",
-  "status": 406
-}
-```
-
-----------------
-
-### 3. get-known-phrases
-
-#### 200
-
-**Request**
-
-```bash
-curl $BELINSKY_URL/get-known-phrases
-``` 
-
-**Response**
-
-```json
-{
-  "result": [
-    "любой любить",
-    "мама",
-    "банан"
-  ],
-  "status": 200
-}
-```
-
-----------------
-
-### 4. clear-known-phrases
-
-#### 200
-
-**Request**
-
-```bash
-curl --request POST \
-  $BELINSKY_URL/add-phrase
-``` 
-
-**Response**
-
-```json
-{
-  "result": "ok",
-  "status": 200
 }
 ```
