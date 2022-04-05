@@ -441,7 +441,7 @@ curl \
 ```shell
 curl --request POST \
   --header "Content-Type: application/json" \
-  --data '{"text": "мама по-любому любит banan"}' \
+  --data '{"text": "мама по-любому любит banan", "phrases": ["банан"]]}' \
   $BELINSKY_URL/find-phrases
 ``` 
 
@@ -450,18 +450,6 @@ curl --request POST \
 ```json
 {
   "result": {
-    "мама": [
-      [
-        0,
-        3
-      ]
-    ],
-    "любой любить": [
-      [
-        5,
-        19
-      ]
-    ],
     "банан": [
       [
         21,
@@ -480,7 +468,7 @@ curl --request POST \
 ```bash
 curl --request POST \
   --header "Content-Type: application/json" \
-  --data '{"no_text": "мама любит по-любому бананы"}' \
+  --data '{"text": "мама любит по-любому бананы"}' \
   $BELINSKY_URL/find-phrases
 ``` 
 
@@ -488,7 +476,7 @@ curl --request POST \
 
 ```json
 {
-  "error": "item 'text' not found in request body",
+  "error": "Required keys not found in request body: text, phrases.",
   "status": 400
 }
 ```

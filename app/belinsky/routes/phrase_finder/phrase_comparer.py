@@ -27,31 +27,6 @@ class PhraseComparer:
         self.lemmatizers = dict([(key, spacy.load(value, disable=['parser', 'ner']))
                                  for key, value in spacy_languages.items()])
 
-    @staticmethod
-    def _preprocess_text(text, language):
-        if language == 'ru':
-            # Transliterate ru language
-            text = translit(text, 'ru')
-
-            # Split hyphened words
-            processed_text = []
-            for word in text.split():
-                if '-' in word and not all(symbol == '-' for symbol in word):
-                    split = word.split('-')
-                    word = " " * len("".join(split[:-1])) + ' ' + split[-1]
-
-                processed_text.append(word)
-
-            text = " ".join(processed_text)
-
-        return text
-
-    @staticmethod
-    def _filter_spacy_tokens(tokens):
-        filtered_tokens = [token for token in tokens
-                           if not token.is_punct and not token.is_space and not token.is_quote and not token.is_bracket]
-        return filtered_tokens
-
     def lemmatize(self, text, language):
         """ Lemmatize text.
 
@@ -60,16 +35,11 @@ class PhraseComparer:
              language (str): Language.
 
         Returns:
-            str:
+            list:
                 Lemmatized text.
         """
 
-        # Lemmatize text using spaCy
-        text = self._preprocess_text(text, language)
-        tokens = self.lemmatizers[language](text)
-
-        # Clear punctuation and other marks from text.
-        tokens = self._filter_spacy_tokens(tokens)
+        tokens = self._process_text(text, language)
         lemmatized = [token.lemma_ for token in tokens]
 
         return lemmatized
@@ -86,44 +56,62 @@ class PhraseComparer:
                 Words' tokens as 'phrase_comparer.Token' structure.
         """
 
-        # Translit text if ru language
-        text = self._preprocess_text(text, language)
-
-        # Generate spaCy tokens
-        tokens = self._filter_spacy_tokens(self.lemmatizers[language](text))
-
-        # Generate tokens from spaCy
+        tokens = self._process_text(text, language)
         tokenized = [Token(token.text, token.lemma_, (token.idx, token.idx + len(token.text) - 1)) for token in tokens]
 
         return tokenized
 
-    def compare_phrases(self, text, known_lemmas, language):
-        """ Compare text with known phrases.
+    def find_phrases(self, text, phrases, language):
+        """ Find phrases in text.
 
         Arguments:
-            text (str): Text to compare.
-            known_lemmas (list): List of known lemmas to compare with.
+            text (str): Text to find in.
+            phrases (list): Phrases to be found.
             language (str): Language.
 
         Returns:
             Dict:
-                Return highlighted words and their indexes in text.
+                Return phrases and their indexes in text.
         """
 
         tokenized = self.tokenize(text, language)
-        lemmatized = [x.lemma for x in tokenized]
+        lemmatized_text = [x.lemma for x in tokenized]
 
-        result = {}
-        for known_lemma in known_lemmas:
-            for index in self._find_sublist_indexes(known_lemma, lemmatized):
-                key = ' '.join(known_lemma)
-                position = [tokenized[index].position[0], tokenized[index + len(known_lemma) - 1].position[1]]
-                if key in result.keys():
-                    result[key].append(position)
-                else:
-                    result[key] = [position]
+        result = {key: [] for key in phrases}
+        for phrase in phrases:
+            lemmatized_phrase = self.lemmatize(phrase, language)
+            index_delta = len(lemmatized_phrase) - 1
+            for index in self._find_sublist_indexes(lemmatized_phrase, lemmatized_text):
+                position = [tokenized[index].position[0], tokenized[index + index_delta].position[1]]
+                result[phrase].append(position)
 
         return result
+
+    def _process_text(self, text, language):
+        # Preprocess russian text
+        if language == 'ru':
+            # Transliterate ru language
+            text = translit(text, 'ru')
+
+            # Split hyphened words
+            processed_text = []
+            for word in text.split():
+                if '-' in word and not all(symbol == '-' for symbol in word):
+                    split = word.split('-')
+                    word = " " * len("".join(split[:-1])) + ' ' + split[-1]
+
+                processed_text.append(word)
+
+            text = " ".join(processed_text)
+
+        # Get tokens from spaCy
+        tokens = self.lemmatizers[language](text)
+
+        # Clean tokens
+        tokens = [token for token in tokens
+                  if not token.is_punct and not token.is_space and not token.is_quote and not token.is_bracket]
+
+        return tokens
 
     @staticmethod
     def _find_sublist_indexes(sub, bigger):
