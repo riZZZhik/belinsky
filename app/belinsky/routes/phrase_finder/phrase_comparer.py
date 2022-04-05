@@ -27,6 +27,31 @@ class PhraseComparer:
         self.lemmatizers = dict([(key, spacy.load(value, disable=['parser', 'ner']))
                                  for key, value in spacy_languages.items()])
 
+    @staticmethod
+    def _preprocess_text(text, language):
+        if language == 'ru':
+            # Transliterate ru language
+            text = translit(text, 'ru')
+
+            # Split hyphened words
+            processed_text = []
+            for word in text.split():
+                if '-' in word and not all(symbol == '-' for symbol in word):
+                    split = word.split('-')
+                    word = " " * len("".join(split[:-1])) + ' ' + split[-1]
+
+                processed_text.append(word)
+
+            text = " ".join(processed_text)
+
+        return text
+
+    @staticmethod
+    def _filter_spacy_tokens(tokens):
+        filtered_tokens = [token for token in tokens
+                           if not token.is_punct and not token.is_space and not token.is_quote and not token.is_bracket]
+        return filtered_tokens
+
     def lemmatize(self, text, language):
         """ Lemmatize text.
 
@@ -40,28 +65,14 @@ class PhraseComparer:
         """
 
         # Lemmatize text using spaCy
-        if language == 'ru':
-            text = translit(text, 'ru')
-            tokens = self.lemmatizers[language](text)
-        elif language == 'en':
-            tokens = self.lemmatizers[language](text)
-        else:
-            raise ValueError('Invalid language: %s' % language)
+        text = self._preprocess_text(text, language)
+        tokens = self.lemmatizers[language](text)
 
         # Clear punctuation and other marks from text.
         tokens = self._filter_spacy_tokens(tokens)
         lemmatized = tokens[-1].lemma_
 
-        if language == 'ru':
-            lemmatized = self.lemmatizers[language](lemmatized)[-1].lemma_
-
         return lemmatized
-
-    @staticmethod
-    def _filter_spacy_tokens(tokens):
-        filtered_tokens = [token for token in tokens
-                           if not token.is_punct and not token.is_space and not token.is_quote and not token.is_bracket]
-        return filtered_tokens
 
     def tokenize(self, text, language):
         """ Tokenize text.
@@ -76,7 +87,7 @@ class PhraseComparer:
         """
 
         # Translit text if ru language
-        text = translit(text.lower(), 'ru') if language == 'ru' else text
+        text = self._preprocess_text(text, language)
 
         # Generate spaCy tokens
         tokens = self._filter_spacy_tokens(self.lemmatizers[language](text))

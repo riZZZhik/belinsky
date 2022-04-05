@@ -60,7 +60,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
     def test_tokenizer(self, _):
         response = [token.to_list() for token in self.comparer.tokenize('Мама обожает апельсины', 'ru')]
         correct_response = [
-            Token("мама", "мама", (0, 3)).to_list(),
+            Token("Мама", "мама", (0, 3)).to_list(),
             Token('обожает', 'обожать', (5, 11)).to_list(),
             Token('апельсины', 'апельсин', (13, 21)).to_list()
         ]
