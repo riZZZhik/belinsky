@@ -70,7 +70,7 @@ class PhraseComparer:
 
         # Clear punctuation and other marks from text.
         tokens = self._filter_spacy_tokens(tokens)
-        lemmatized = tokens[-1].lemma_
+        lemmatized = [token.lemma_ for token in tokens]
 
         return lemmatized
 

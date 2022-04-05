@@ -39,22 +39,27 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
 
     def test_lemmatizer(self, _):
         response = self.comparer.lemmatize('Апельсины', 'ru')
-        correct_response = 'апельсин'
+        correct_response = ['апельсин']
         self.assertEqual(response, correct_response)
 
     def test_lemmatizer_hyphen(self, _):
         response = self.comparer.lemmatize('по-любому', 'ru')
-        correct_response = 'любой'
+        correct_response = ['любой']
+        self.assertEqual(response, correct_response)
+
+    def test_lemmatizer_phrase(self, _):
+        response = self.comparer.lemmatize('а он обожает', 'ru')
+        correct_response = ['а', 'он', 'обожать']
         self.assertEqual(response, correct_response)
 
     def test_lemmatizer_punctuation(self, _):
-        response = self.comparer.lemmatize('-, ["обожает"]?!', 'ru')
-        correct_response = 'обожать'
+        response = self.comparer.lemmatize('а, -- [он], обожает?!', 'ru')
+        correct_response = ['а', 'он', 'обожать']
         self.assertEqual(response, correct_response)
 
     def test_lemmatizer_en(self, _):
         response = self.comparer.lemmatize('stunned', 'en')
-        correct_response = 'stun'
+        correct_response = ['stun']
         self.assertEqual(response, correct_response)
 
     def test_tokenizer(self, _):
@@ -67,8 +72,8 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         self.assertEqual(response, correct_response)
 
     def test_compare_phrases(self, _):
-        phrases = ([[self.comparer.lemmatize('я ', 'ru'), self.comparer.lemmatize('папа', 'ru')]])
-        response = self.comparer.compare_phrases('Привет, я Папа', phrases, 'ru')
+        known_phrases = [self.comparer.lemmatize('я папа', 'ru')]
+        response = self.comparer.compare_phrases('Привет, я Папа', known_phrases, 'ru')
 
         correct_response = {
             'я папа': [[8, 13]]
@@ -137,7 +142,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         client.post(
             '/add-phrase',
             json={
-                'phrase': 'хочу banana'
+                'phrase': 'хочу banan'
             }
         )
 
