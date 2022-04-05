@@ -1,5 +1,5 @@
 # API requirements
-Flask==2.1.0
+Flask==2.1.1
 Flask-Login==0.6.0
 Flask-SQLAlchemy==2.5.1
 psycopg2==2.9.3
