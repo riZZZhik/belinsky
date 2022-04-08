@@ -3,6 +3,13 @@ from spacy_langdetect import LanguageDetector
 from transliterate import translit
 
 
+class UnknownLanguageError(Exception):
+    def __init__(self, language, known_languages):
+        self.language = language
+        self.message = 'Unknown language: %s. Please use one of: %s.' % (language, ", ".join(known_languages))
+        super().__init__(self.message)
+
+
 class Token:
     """Word token structure."""
 
@@ -35,7 +42,7 @@ class PhraseComparer:
         self.lemmatizers['en'].add_pipe("language_detector", last=True)
 
     def detect_language(self, text):
-        # TODO: Split text into sentences
+        # TODO: Split text into sentences (mb using https://pypi.org/project/pycld2)
         tokens = self.lemmatizers['en'](text)
         language = tokens._.language['language']
         return language
@@ -87,6 +94,14 @@ class PhraseComparer:
                 Return phrases and their indexes in text.
         """
 
+        # Detect language
+        if language is None:
+            language = self.detect_language(text)
+
+        if language not in self.lemmatizers:
+            raise UnknownLanguageError(language, self.lemmatizers.keys())
+
+        # Find phrases
         tokenized = self.tokenize(text, language)
         lemmatized_text = [x.lemma for x in tokenized]
 
