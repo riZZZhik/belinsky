@@ -98,11 +98,11 @@ class PhraseComparer:
             for word in text.split():
                 if '-' in word and not all(symbol == '-' for symbol in word):
                     split = word.split('-')
-                    word = " " * len("".join(split[:-1])) + ' ' + split[-1]
+                    word = ' ' * len(''.join(split[:-1])) + ' ' + split[-1]
 
                 processed_text.append(word)
 
-            text = " ".join(processed_text)
+            text = ' '.join(processed_text)
 
         # Get tokens from spaCy
         tokens = self.lemmatizers[language](text)
