@@ -1,4 +1,5 @@
 import spacy
+from spacy_langdetect import LanguageDetector
 from transliterate import translit
 
 
@@ -20,12 +21,24 @@ class PhraseComparer:
     def __init__(self):
         """Initialize class variables."""
 
+        # Initialize spaCy
         spacy_languages = {
             'ru': 'ru_core_news_sm',
             'en': 'en_core_web_sm'
         }
         self.lemmatizers = dict([(key, spacy.load(value, disable=['parser', 'ner']))
                                  for key, value in spacy_languages.items()])
+
+        # Initialize spaCy language detector
+        spacy.Language.factory("language_detector", func=lambda nlp, name: LanguageDetector())
+        self.lemmatizers['en'].add_pipe('sentencizer')
+        self.lemmatizers['en'].add_pipe("language_detector", last=True)
+
+    def detect_language(self, text):
+        # TODO: Split text into sentences
+        tokens = self.lemmatizers['en'](text)
+        language = tokens._.language['language']
+        return language
 
     def lemmatize(self, text, language):
         """ Lemmatize text.

@@ -38,7 +38,7 @@
 ```shell
 curl \ 
   --header "Content-Type: application/json" \
-  --data '{"username": "your_username", "password": "your_password"}, "language": "ru"' \
+  --data '{"username": "your_username", "password": "your_password"}' \
   $BELINSKY_URL/signup
 ``` 
 
@@ -83,7 +83,7 @@ curl \
 
 ```json
 {
-  "error": "Not enough keys in request. Required keys: username, password, language.",
+  "error": "Not enough keys in request. Required keys: username, password.",
   "status": 400
 }
 ```
@@ -348,91 +348,11 @@ curl \
 
 ----------------
 
-### 5. change-language
-
-#### 200
-
-**Request**
-
-```shell
-curl \ 
-  --header "Content-Type: application/json" \
-  --data '{"language": "ru"}' \
-  $BELINSKY_URL/change-language
-``` 
-
-**Response**
-
-```json
-{
-  "result": "Successfully changed language to ru.",
-  "status": 200
-}
-```
-
-#### 400
-
-**Request**
-
-```shell
-curl $BELINSKY_URL/change-language
-``` 
-
-**Response**
-
-```json
-{
-  "error": "json body not found in request",
-  "status": 400
-}
-```
-
-#### 400
-
-**Request**
-
-```shell
-curl \ 
-  --header "Content-Type: application/json" \
-  --data '{"not_language": "ru"}' \
-  $BELINSKY_URL/change-language
-``` 
-
-**Response**
-
-```json
-{
-  "error": "Not enough keys in request. Required keys: language.",
-  "status": 400
-}
-```
-
-#### 406
-
-**Request**
-
-```shell
-curl \ 
-  --header "Content-Type: application/json" \
-  --data '{"language": "ru"}' \
-  $BELINSKY_URL/change-language
-``` 
-
-**Response**
-
-```json
-{
-  "result": "You are not logged in.",
-  "status": 406
-}
-```
-
-----------------
-
 
 ## Phrase finder requests
 
 ### 1. find-phrases
+* "language" key - optional
 
 #### 200
 
@@ -441,7 +361,7 @@ curl \
 ```shell
 curl --request POST \
   --header "Content-Type: application/json" \
-  --data '{"text": "мама по-любому любит banan", "phrases": ["банан"]]}' \
+  --data '{"text": "мама по-любому любит banan", "phrases": ["банан"]], "languages": "ru"]}' \
   $BELINSKY_URL/find-phrases
 ``` 
 

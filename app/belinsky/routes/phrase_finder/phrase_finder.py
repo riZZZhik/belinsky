@@ -58,11 +58,26 @@ class PhraseFinder:
             }
             return response, 400
 
+        # Get text language
+        if 'language' in request.json:
+            language = request.json['language']
+        else:
+            language = self.comparer.detect_language(request.json['text'])
+
+        known_languages = ['ru', 'en']
+        if language not in known_languages:
+            response = {
+                'error': 'Unknown language: %s. Please use one of: %s.' %
+                         (language, ", ".join(known_languages)),
+                'status': 400
+            }
+            return response, 400
+
         # Process text
         response = {
             'result': self.comparer.find_phrases(request.json['text'],
                                                  request.json['phrases'],
-                                                 current_user.language),
+                                                 language),
             'status': 200
         }
         return response, 200

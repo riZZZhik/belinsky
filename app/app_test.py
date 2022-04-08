@@ -7,11 +7,10 @@ from belinsky import create_app, database, models
 from belinsky.routes.phrase_finder.phrase_comparer import PhraseComparer, Token
 
 
-def add_user(app, username, password, language):
+def add_user(app, username, password):
     with app.app_context():
         if database.get_instance(models.User, username=username) is None:
-            database.add_instance(models.User, lambda instance: instance.set_password(password),
-                                  username=username, language=language)
+            database.add_instance(models.User, lambda instance: instance.set_password(password), username=username)
 
 
 def delete_user(app, username):
@@ -26,7 +25,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
     app = create_app()
 
     # Create test user
-    add_user(app, credentials['username'], credentials['password'], 'ru')
+    add_user(app, credentials['username'], credentials['password'])
 
     # Initialize plugins
     comparer = PhraseComparer()
@@ -62,6 +61,16 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         correct_response = ['stun']
         self.assertEqual(response, correct_response)
 
+    def test_detect_language_ru(self, _):
+        response = self.comparer.detect_language('Это русский текст')
+        correct_response = 'ru'
+        self.assertEqual(response, correct_response)
+
+    def test_detect_language_en(self, _):
+        response = self.comparer.detect_language('This is english text')
+        correct_response = 'en'
+        self.assertEqual(response, correct_response)
+
     def test_tokenizer(self, _):
         response = [token.to_list() for token in self.comparer.tokenize('Мама обожает апельсины', 'ru')]
         correct_response = [
@@ -82,9 +91,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
     def test_signup(self, client):
         delete_user(self.app, 'unittester_1')
 
-        response = client.post('/signup', json={'username': 'unittester_1',
-                                                'password': 'test_password',
-                                                'language': 'ru'})
+        response = client.post('/signup', json={'username': 'unittester_1', 'password': 'test_password'})
         correct_response = {
             'result': "Successfully signed up as unittester_1.",
             'status': 200
@@ -92,7 +99,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         self.assertEqual(response.json, correct_response)
 
     def test_delete(self, client):
-        add_user(self.app, 'unittester_1', 'test_password', 'ru')
+        add_user(self.app, 'unittester_1', 'test_password')
 
         response = client.post('delete-user', json={'username': 'unittester_1', 'password': 'test_password'})
         correct_response = {
@@ -132,7 +139,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
     def test_find_phrase_translit(self, client):
         response = client.get(
             '/find-phrases',
-            json={'text': 'маме и папе по bananu', 'phrases': ['бананы']}
+            json={'text': 'маме и папе по bananu', 'phrases': ['бананы'], 'language': 'ru'}
         )
         correct_response = {
             'result': {'бананы': [[15, 20]]},
@@ -170,6 +177,17 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         correct_response = {
             'result': {'обожает любой': [[5, 21]]},
             'status': 200
+        }
+        self.assertEqual(response.json, correct_response)
+
+    def test_find_phrase_unknown_language(self, client):
+        response = client.get(
+            '/find-phrases',
+            json={'text': 'Dies ist ein deutsch.', 'phrases': []}
+        )
+        correct_response = {
+            'error': 'Unknown language: de. Please use one of: ru, en.',
+            'status': 400
         }
         self.assertEqual(response.json, correct_response)
 
