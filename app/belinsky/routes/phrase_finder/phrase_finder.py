@@ -1,8 +1,8 @@
 from flask import request
-from flask_login import current_user, login_required
+from flask_login import login_required
 from prometheus_client import Summary
 
-from .phrase_comparer import PhraseComparer
+from .phrase_comparer import PhraseComparer, UnknownLanguageError
 
 # Initialize prometheus metrics
 FIND_PHRASES_LATENCY = Summary('pf_find_phrases_latency', 'Latency of "find-phrases" request')
@@ -21,8 +21,9 @@ class PhraseFinder:
         """ Find known phrases in text.
         ---
         Body (JSON):
-            - text (str): Text to process.
-            - phrases (list or tuple): Phrases to find.
+            - text (str): Text to be processed.
+            - phrases (List[str]): Phrases to be found.
+            - language (str): Language.
 
         Responses:
             200:
@@ -59,10 +60,18 @@ class PhraseFinder:
             return response, 400
 
         # Process text
+        try:
+            result = self.comparer.find_phrases(request.json['text'], request.json['phrases'],
+                                                request.json['language'] if 'language' in request.json else None)
+        except UnknownLanguageError as e:
+            response = {
+                'error': str(e),
+                'status': 400
+            }
+            return response
+
         response = {
-            'result': self.comparer.find_phrases(request.json['text'],
-                                                 request.json['phrases'],
-                                                 current_user.language),
+            'result': result,
             'status': 200
         }
         return response, 200

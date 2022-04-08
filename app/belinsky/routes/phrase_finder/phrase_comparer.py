@@ -1,5 +1,13 @@
 import spacy
+from spacy_langdetect import LanguageDetector
 from transliterate import translit
+
+
+class UnknownLanguageError(Exception):
+    def __init__(self, language, known_languages):
+        self.language = language
+        self.message = 'Unknown language: %s. Please use one of: %s.' % (language, ", ".join(known_languages))
+        super().__init__(self.message)
 
 
 class Token:
@@ -20,12 +28,34 @@ class PhraseComparer:
     def __init__(self):
         """Initialize class variables."""
 
+        # Initialize spaCy
         spacy_languages = {
             'ru': 'ru_core_news_sm',
             'en': 'en_core_web_sm'
         }
         self.lemmatizers = dict([(key, spacy.load(value, disable=['parser', 'ner']))
                                  for key, value in spacy_languages.items()])
+
+        # Initialize spaCy language detector
+        spacy.Language.factory("language_detector", func=lambda nlp, name: LanguageDetector())
+        self.lemmatizers['en'].add_pipe('sentencizer')
+        self.lemmatizers['en'].add_pipe("language_detector", last=True)
+
+    def detect_language(self, text):
+        """ Detect text language
+
+        Args:
+            text (str): Text to be processed.
+
+        Returns:
+            str:
+                Language code as https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
+        """
+
+        # TODO: Split text into sentences (mb using https://pypi.org/project/pycld2)
+        tokens = self.lemmatizers['en'](text)
+        language = tokens._.language['language']
+        return language
 
     def lemmatize(self, text, language):
         """ Lemmatize text.
@@ -65,7 +95,7 @@ class PhraseComparer:
         """ Find phrases in text.
 
         Arguments:
-            text (str): Text to find in.
+            text (str): Text to be processed.
             phrases (list): Phrases to be found.
             language (str): Language.
 
@@ -74,6 +104,14 @@ class PhraseComparer:
                 Return phrases and their indexes in text.
         """
 
+        # Detect language
+        if language is None:
+            language = self.detect_language(text)
+
+        if language not in self.lemmatizers:
+            raise UnknownLanguageError(language, self.lemmatizers.keys())
+
+        # Find phrases
         tokenized = self.tokenize(text, language)
         lemmatized_text = [x.lemma for x in tokenized]
 
@@ -98,11 +136,11 @@ class PhraseComparer:
             for word in text.split():
                 if '-' in word and not all(symbol == '-' for symbol in word):
                     split = word.split('-')
-                    word = " " * len("".join(split[:-1])) + ' ' + split[-1]
+                    word = ' ' * len(''.join(split[:-1])) + ' ' + split[-1]
 
                 processed_text.append(word)
 
-            text = " ".join(processed_text)
+            text = ' '.join(processed_text)
 
         # Get tokens from spaCy
         tokens = self.lemmatizers[language](text)
