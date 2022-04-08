@@ -5,6 +5,7 @@ import flask_unittest
 
 from belinsky import create_app, database, models
 from belinsky.routes.phrase_finder.phrase_comparer import PhraseComparer, Token
+from belinsky.routes.utils import translit
 
 
 def add_user(app, username, password):
@@ -59,6 +60,11 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
     def test_lemmatizer_en(self, _):
         response = self.comparer.lemmatize('stunned', 'en')
         correct_response = ['stun']
+        self.assertEqual(response, correct_response)
+
+    def test_translit_ru(self, _):
+        response = translit('banan', 'ru')
+        correct_response = 'банан'
         self.assertEqual(response, correct_response)
 
     def test_detect_language_ru(self, _):
