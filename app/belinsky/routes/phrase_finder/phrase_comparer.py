@@ -42,6 +42,16 @@ class PhraseComparer:
         self.lemmatizers['en'].add_pipe("language_detector", last=True)
 
     def detect_language(self, text):
+        """ Detect text language
+
+        Args:
+            text (str): Text to be processed.
+
+        Returns:
+            str:
+                Language code as https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
+        """
+
         # TODO: Split text into sentences (mb using https://pypi.org/project/pycld2)
         tokens = self.lemmatizers['en'](text)
         language = tokens._.language['language']
@@ -85,7 +95,7 @@ class PhraseComparer:
         """ Find phrases in text.
 
         Arguments:
-            text (str): Text to find in.
+            text (str): Text to be processed.
             phrases (list): Phrases to be found.
             language (str): Language.
 

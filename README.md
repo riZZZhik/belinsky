@@ -31,6 +31,10 @@
 
 ### 1. signup
 
+#### JSON Body:
+* username (str): Username.
+* password (str): Password.
+
 #### 200
 
 **Request**
@@ -111,6 +115,10 @@ curl \
 ----------------
 
 ### 2. login
+
+#### JSON Body:
+* username (str): Username.
+* password (str): Password.
 
 #### 200
 
@@ -249,6 +257,10 @@ curl $BELINSKY_URL/logout
 
 ### 4. delete-user
 
+#### JSON Body:
+* username (str): Username.
+* password (str): Password.
+
 #### 200
 
 **Request**
@@ -352,7 +364,11 @@ curl \
 ## Phrase finder requests
 
 ### 1. find-phrases
-* "language" key - optional
+
+#### JSON Body:
+* text (str): Text to be processed.
+* phrases (List[str]): Phrases to be found.
+* language (str)[Optional] - Language.
 
 #### 200
 

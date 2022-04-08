@@ -21,8 +21,9 @@ class PhraseFinder:
         """ Find known phrases in text.
         ---
         Body (JSON):
-            - text (str): Text to process.
-            - phrases (list or tuple): Phrases to find.
+            - text (str): Text to be processed.
+            - phrases (List[str]): Phrases to be found.
+            - language (str): Language.
 
         Responses:
             200:
