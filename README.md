@@ -1,5 +1,5 @@
 [![Tests](https://github.com/riZZZhik/belinsky/actions/workflows/tests.yaml/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/tests.yaml)
-[![Build and push](https://github.com/riZZZhik/belinsky/actions/workflows/push.yaml/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/push.yaml)
+[![Build and push](https://github.com/riZZZhik/belinsky/actions/workflows/push_docker_image.yaml/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/push.yaml)
 
 # How to use
 
