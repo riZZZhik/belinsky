@@ -13,7 +13,9 @@ def add_user(app, username, password):
     """Add user model to database."""
     with app.app_context():
         if database.get_instance(models.User, username=username) is None:
-            database.add_instance(models.User, lambda instance: instance.set_password(password), username=username)
+            database.add_instance(models.User,
+                                  lambda instance: instance.set_password(password),
+                                  username=username)
 
 
 def delete_user(app, username):
@@ -23,6 +25,7 @@ def delete_user(app, username):
             database.delete_instance(models.User, username=username)
 
 
+# pylint: disable=too-many-public-methods
 class PhraseFinderTest(flask_unittest.ClientTestCase):
     """Unittest Belinsky application."""
     # Initialize app
@@ -89,7 +92,8 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
 
     def test_tokenizer(self, _):
         """Test tokenizer from PhraseFinder."""
-        response = [token.to_list() for token in self.comparer.tokenize('Мама обожает апельсины', 'ru')]
+        response = [token.to_list() for token in
+                    self.comparer.tokenize('Мама обожает апельсины', 'ru')]
         correct_response = [
             Token("Мама", "мама", (0, 3)).to_list(),
             Token('обожает', 'обожать', (5, 11)).to_list(),
@@ -110,7 +114,9 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         """Test signup method."""
         delete_user(self.app, 'unittester_1')
 
-        response = client.post('/signup', json={'username': 'unittester_1', 'password': 'test_password'})
+        response = client.post('/signup',
+                               json={'username': 'unittester_1', 'password': 'test_password'})
+
         correct_response = {
             'result': "Successfully signed up as unittester_1.",
             'status': 200
@@ -131,7 +137,9 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         """Test delete method."""
         add_user(self.app, 'unittester_1', 'test_password')
 
-        response = client.post('delete-user', json={'username': 'unittester_1', 'password': 'test_password'})
+        response = client.post('delete-user',
+                               json={'username': 'unittester_1', 'password': 'test_password'})
+
         correct_response = {
             'result': "Successfully deleted unittester_1 user.",
             'status': 200
