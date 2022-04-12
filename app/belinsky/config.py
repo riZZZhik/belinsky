@@ -1,3 +1,4 @@
+"""Belinsky configuration file."""
 import os
 import secrets
 
@@ -5,7 +6,7 @@ import secrets
 SECRET_KEY = os.environ.get("BELINSKY_SECRET_KEY", secrets.token_hex(16))
 
 # Database config
-if 'BELINSKY_POSTGRES_URI' in os.environ.keys():
+if 'BELINSKY_POSTGRES_URI' in os.environ:
     BELINSKY_POSTGRES_URI = os.environ['BELINSKY_POSTGRES_URI']
 else:
     user = os.environ.get('BELINSKY_POSTGRES_USER', 'admin')

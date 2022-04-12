@@ -1,3 +1,4 @@
+"""Belinsky configuration for WSGI application."""
 from belinsky import create_app
 
 app = create_app()

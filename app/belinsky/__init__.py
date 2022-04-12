@@ -1,3 +1,4 @@
+"""Initialize belinsky Flask application."""
 # Import Flask
 from flask import Flask
 
@@ -9,13 +10,14 @@ from .routes import login_manager
 
 
 def create_app():
-    # Create Flask belinsky
+    """Initialize belinsky Flask application."""
     app = Flask("Belinsky")
     app.config['SECRET_KEY'] = config.SECRET_KEY
 
+    # pylint: disable=import-outside-toplevel
     with app.app_context():
         # Import routes
-        from .routes import create_blueprint_auth, create_blueprint_observability, create_blueprint_phrase_finder
+        from . import routes
 
         # Initialize database
         app.config['SQLALCHEMY_DATABASE_URI'] = config.BELINSKY_POSTGRES_URI
@@ -27,9 +29,9 @@ def create_app():
         login_manager.init_app(app)
 
         # Register blueprints
-        app.register_blueprint(create_blueprint_auth())
-        app.register_blueprint(create_blueprint_observability())
-        app.register_blueprint(create_blueprint_phrase_finder())
+        app.register_blueprint(routes.create_blueprint_auth())
+        app.register_blueprint(routes.create_blueprint_observability())
+        app.register_blueprint(routes.create_blueprint_phrase_finder())
 
     return app
 

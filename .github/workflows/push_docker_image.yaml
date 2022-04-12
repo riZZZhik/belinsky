@@ -5,7 +5,7 @@ on:
     types: [published]
 
 jobs:
-  docker:
+  build_and_push:
     name: Build and push
     runs-on: ubuntu-latest
 
