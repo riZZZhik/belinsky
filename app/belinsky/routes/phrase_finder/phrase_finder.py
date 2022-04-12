@@ -38,6 +38,7 @@ class PhraseFinder:
         self.lemmatizers['en'].add_pipe('sentencizer')
         self.lemmatizers['en'].add_pipe("language_detector", last=True)
 
+    # pylint: disable=fixme
     def detect_language(self, text):
         """ Detect text language
 

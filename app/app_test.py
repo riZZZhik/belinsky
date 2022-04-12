@@ -38,6 +38,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
     # Initialize plugins
     comparer = PhraseFinder()
 
+    # pylint: disable=invalid-name
     def setUp(self, client):
         """Login as test user."""
         client.post('login', json=self.credentials)
