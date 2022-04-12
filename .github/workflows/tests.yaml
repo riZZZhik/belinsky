@@ -1,4 +1,4 @@
-name: Unittest belinsky
+name: Unittests
 
 on:
   push:
