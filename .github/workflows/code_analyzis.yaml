@@ -1,4 +1,4 @@
-name: CodeQL code analysis
+name: Code analyzis
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ master, stage ]
 
 jobs:
-  analyze:
-    name: Analyze
+  analyze_codeql:
+    name: CodeQL Analyze
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -32,3 +32,26 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
+
+  analyze_pylint:
+    name: PyLint analyze
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Python@3.10.4
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.10.4
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+
+      - name: Analysing the code with pylint
+        run: |
+          find . -type f -name "*.py" | xargs pylint --disable=import-error
+

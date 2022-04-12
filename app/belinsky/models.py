@@ -1,11 +1,13 @@
-"""Database models."""
+"""Belinsky Database models."""
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from .database import db
 
 
+# pylint: disable=no-member
 class User(UserMixin, db.Model):
+    """Belinsky User model."""
     __tablename__ = 'belinsky_db'
     # User info
     id = db.Column(db.Integer(), primary_key=True)
@@ -21,4 +23,4 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password, password)
 
     def __repr__(self):
-        return '<User %s>' % self.username
+        return f'<User {self.username}>'

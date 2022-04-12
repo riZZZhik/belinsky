@@ -1,8 +1,9 @@
+"""Belinsky authentication blueprint."""
 from flask import Blueprint, request
 from flask_login import LoginManager, current_user, login_user, logout_user
 from prometheus_client import Summary
 
-from ..database import add_instance, get_instance, delete_instance, edit_instance
+from ..database import add_instance, get_instance, delete_instance
 from ..models import User
 
 # Initialize login manager
@@ -24,12 +25,14 @@ def check_request_body(required_keys):
         }
         return response, 400
 
-    if not all([key in request.json.keys() for key in required_keys]):
+    if not all(key in request.json.keys() for key in required_keys):
         response = {
-            'error': 'Not enough keys in request. Required keys: %s.' % ", ".join(required_keys),
+            'error': f"Not enough keys in request. Required keys: {', '.join(required_keys)}.",
             'status': 400
         }
         return response, 400
+
+    return False
 
 
 @SIGNUP_LATENCY.time()
@@ -68,7 +71,7 @@ def signup():
     user = get_instance(User, username=request.json['username'])
     if user:
         response = {
-            'error': 'User with %s username already exists.' % request.json['username'],
+            'error': f"User with {request.json['username']} username already exists.",
             'status': 406
         }
         return response, 406
@@ -79,7 +82,7 @@ def signup():
     login_user(user, remember=True)
 
     response = {
-        'result': 'Successfully signed up as %s.' % user.username,
+        'result': f"Successfully signed up as {user.username}.",
         'status': 200
     }
     return response, 200
@@ -114,7 +117,7 @@ def login():
     # Bypass if user is logged in
     if current_user.is_authenticated:
         response = {
-            'result': 'Already logged in as %s.' % current_user.username,
+            'result': f"Already logged in as {current_user.username}.",
             'status': 200
         }
         return response, 200
@@ -129,14 +132,14 @@ def login():
     user = get_instance(User, username=request.json['username'])
     if not user:
         response = {
-            'error': 'User with %s username not found. Please signup first.' % request.json['username'],
+            'error': f"User with {request.json['username']} username not found.",
             'status': 406
         }
         return response, 406
 
     if not user.check_password(request.json['password']):
         response = {
-            'error': 'Invalid password. Please try again.',
+            'error': "Invalid password. Please try again.",
             'status': 406
         }
         return response, 406
@@ -144,7 +147,7 @@ def login():
     # Login user
     login_user(user, remember=True)
     response = {
-        'result': 'Successfully logged in as %s.' % user.username,
+        'result': f"Successfully logged in as {user.username}.",
         'status': 200
     }
     return response, 200
@@ -177,7 +180,7 @@ def logout():
 
     logout_user()
     response = {
-        'result': 'Successfully logged out.',
+        'result': "Successfully logged out.",
         'status': 200
     }
     return response, 200
@@ -219,14 +222,14 @@ def delete_user():
     user = get_instance(User, username=request.json['username'])
     if not user:
         response = {
-            'error': 'User with %s username not found.' % request.json['username'],
+            'error': f"User with {request.json['username']} username not found.",
             'status': 406
         }
         return response, 406
 
     if not user.check_password(request.json['password']):
         response = {
-            'error': 'Invalid password. Please try again.',
+            'error': "Invalid password. Please try again.",
             'status': 406
         }
         return response, 406
@@ -239,7 +242,7 @@ def delete_user():
     delete_instance(User, username=request.json['username'])
 
     response = {
-        'result': "Successfully deleted %s user." % request.json['username'],
+        'result': f"Successfully deleted {request.json['username']} user.",
         'status': 200
     }
     return response, 200
@@ -255,6 +258,7 @@ def load_user(user_id):
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
+    """401 Unauthorized handler."""
     response = {
         'error': "Unauthorized request. Please login first.",
         'status': 401
@@ -263,6 +267,7 @@ def unauthorized_handler():
 
 
 def create_blueprint_auth():
+    """Create authentication blueprint."""
     auth_bp = Blueprint('auth_bp', __name__)
 
     auth_bp.add_url_rule('/signup', view_func=signup, methods=['GET', 'POST'])
