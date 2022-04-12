@@ -3,6 +3,7 @@ from flask import Blueprint, request
 from flask_login import LoginManager, current_user, login_user, logout_user
 from prometheus_client import Summary
 
+from .utils import check_request_keys
 from ..database import add_instance, get_instance, delete_instance
 from ..models import User
 
@@ -14,25 +15,6 @@ SIGNUP_LATENCY = Summary('signup_latency', 'Latency of "signup" request')
 LOGIN_LATENCY = Summary('login_latency', 'Latency of "login" request')
 LOGOUT_LATENCY = Summary('logout_latency', 'Latency of "logout" request')
 DELETE_USER_LATENCY = Summary('delete_user_latency', 'Latency of "delete-user" request')
-
-
-def check_request_body(required_keys):
-    """Check request input body."""
-    if not request.json:
-        response = {
-            'error': "Json body not found in request.",
-            'status': 400
-        }
-        return response, 400
-
-    if not all(key in request.json.keys() for key in required_keys):
-        response = {
-            'error': f"Not enough keys in request. Required keys: {', '.join(required_keys)}.",
-            'status': 400
-        }
-        return response, 400
-
-    return False
 
 
 @SIGNUP_LATENCY.time()
@@ -62,8 +44,8 @@ def signup():
     """
 
     # Check input body
-    required_keys = ['username', 'password']
-    check = check_request_body(required_keys)
+    required_keys = {'username', 'password'}
+    check = check_request_keys(required_keys)
     if check:
         return check
 
@@ -123,8 +105,8 @@ def login():
         return response, 200
 
     # Check input body
-    required_keys = ['username', 'password']
-    check = check_request_body(required_keys)
+    required_keys = {'username', 'password'}
+    check = check_request_keys(required_keys)
     if check:
         return check
 
@@ -213,8 +195,8 @@ def delete_user():
     """
 
     # Check input body
-    required_keys = ['username', 'password']
-    check = check_request_body(required_keys)
+    required_keys = {'username', 'password'}
+    check = check_request_keys(required_keys)
     if check:
         return check
 

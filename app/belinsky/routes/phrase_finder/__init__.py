@@ -5,6 +5,7 @@ from flask_login import login_required
 from prometheus_client import Summary
 
 from .phrase_finder import PhraseFinder, UnknownLanguageError
+from ..utils import check_request_keys
 
 # Initialize prometheus metrics.
 FIND_PHRASES_LATENCY = Summary('pf_find_phrases_latency', 'Latency of "find-phrases" request')
@@ -42,20 +43,10 @@ def find_phrases():
     """
 
     # Check request body
-    if not request.json:
-        response = {
-            'error': "Json body not found in request",
-            'status': 400
-        }
-        return response, 400
-
-    required_keys = ['text', 'phrases']
-    if not all(key in request.json for key in required_keys):
-        response = {
-            'error': f"Required keys not found in request body :{', '.join(required_keys)}.",
-            'status': 400
-        }
-        return response, 400
+    required_keys = {'text', 'phrases'}
+    check = check_request_keys(required_keys)
+    if check:
+        return check
 
     # Process text
     try:
