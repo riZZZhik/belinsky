@@ -24,11 +24,11 @@ class PhraseComparer:
 
         # Initialize spaCy
         spacy_languages = {
-            'ru': 'ru_core_news_sm',
-            'en': 'en_core_web_sm'
+            'en': 'en_core_web_sm',
+            'ru': 'ru_core_news_sm'
         }
-        self.lemmatizers = dict([(key, spacy.load(value, disable=['parser', 'ner']))
-                                 for key, value in spacy_languages.items()])
+        self.lemmatizers = {lang: spacy.load(model_name, disable=['parser', 'ner'])
+                            for lang, model_name in spacy_languages.items()}
 
         # Initialize spaCy language detector
         spacy.Language.factory("language_detector", func=lambda nlp, name: LanguageDetector())
@@ -46,7 +46,7 @@ class PhraseComparer:
                 Language code as https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
         """
 
-        # TODO: Split text into sentences (mb using https://pypi.org/project/pycld2)
+        # TODO: Split text into sentences.
         tokens = self.lemmatizers['en'](text)
         language = tokens._.language['language']
         return language
@@ -140,8 +140,8 @@ class PhraseComparer:
         tokens = self.lemmatizers[language](text)
 
         # Clean tokens
-        tokens = [token for token in tokens
-                  if not token.is_punct and not token.is_space and not token.is_quote and not token.is_bracket]
+        check_attrs = ("is_punct", "is_left_punct", "is_right_punct", "is_space", "is_quote", "is_bracket")
+        tokens = [token for token in tokens if all(not getattr(token, attr) for attr in check_attrs)]
 
         return tokens
 

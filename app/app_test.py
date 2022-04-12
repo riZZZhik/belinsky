@@ -192,7 +192,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
             json={'text': 'Dies ist ein deutsch.', 'phrases': []}
         )
         correct_response = {
-            'error': 'Unknown language: de. Please use one of: ru, en.',
+            'error': 'Unknown language: de. Please use one of: en, ru.',
             'status': 400
         }
         self.assertEqual(response.json, correct_response)
