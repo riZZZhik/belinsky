@@ -1,3 +1,4 @@
+"""Belinsky PhraseFinder nlp worker."""
 import spacy
 from spacy_langdetect import LanguageDetector
 
@@ -16,7 +17,7 @@ class Token:
         return self.word, self.lemma, self.position
 
 
-class PhraseComparer:
+class PhraseFinder:
     """Compare phrases"""
 
     def __init__(self):
@@ -48,7 +49,7 @@ class PhraseComparer:
 
         # TODO: Split text into sentences.
         tokens = self.lemmatizers['en'](text)
-        language = tokens._.language['language']
+        language = tokens._.lang['language']
         return language
 
     def lemmatize(self, text, language):
@@ -81,7 +82,8 @@ class PhraseComparer:
         """
 
         tokens = self._process_text(text, language)
-        tokenized = [Token(token.text, token.lemma_, (token.idx, token.idx + len(token.text) - 1)) for token in tokens]
+        tokenized = [Token(token.text, token.lemma_, (token.idx, token.idx + len(token.text) - 1))
+                     for token in tokens]
 
         return tokenized
 
@@ -114,7 +116,8 @@ class PhraseComparer:
             lemmatized_phrase = self.lemmatize(phrase, language)
             index_delta = len(lemmatized_phrase) - 1
             for index in self._find_sublist_indexes(lemmatized_phrase, lemmatized_text):
-                position = [tokenized[index].position[0], tokenized[index + index_delta].position[1]]
+                position = [tokenized[index].position[0],
+                            tokenized[index + index_delta].position[1]]
                 result[phrase].append(position)
 
         return result
@@ -140,8 +143,9 @@ class PhraseComparer:
         tokens = self.lemmatizers[language](text)
 
         # Clean tokens
-        check_attrs = ("is_punct", "is_left_punct", "is_right_punct", "is_space", "is_quote", "is_bracket")
-        tokens = [token for token in tokens if all(not getattr(token, attr) for attr in check_attrs)]
+        to_check = ("is_punct", "is_left_punct", "is_right_punct",
+                    "is_space", "is_quote", "is_bracket")
+        tokens = [token for token in tokens if all(not getattr(token, attr) for attr in to_check)]
 
         return tokens
 

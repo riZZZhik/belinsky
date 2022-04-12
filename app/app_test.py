@@ -5,7 +5,7 @@ import unittest
 import flask_unittest
 
 from belinsky import create_app, database, models
-from belinsky.routes.phrase_finder.phrase_comparer import PhraseComparer, Token
+from belinsky.routes.phrase_finder.phrase_comparer import PhraseFinder, Token
 from belinsky.routes.utils import translit
 
 
@@ -36,7 +36,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
     add_user(app, credentials['username'], credentials['password'])
 
     # Initialize plugins
-    comparer = PhraseComparer()
+    comparer = PhraseFinder()
 
     def setUp(self, client):
         """Login as test user."""
