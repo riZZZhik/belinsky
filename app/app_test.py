@@ -5,7 +5,7 @@ import unittest
 import flask_unittest
 
 from belinsky import create_app, database, models
-from belinsky.routes.phrase_finder.phrase_comparer import PhraseFinder, Token
+from belinsky.routes.phrase_finder.phrase_finder import PhraseFinder, Token
 from belinsky.routes.utils import translit
 
 

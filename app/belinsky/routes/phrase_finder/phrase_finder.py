@@ -1,79 +1,176 @@
-"""Belinsky PhraseFinder request worker."""
-from flask import request
-from flask_login import login_required
-from prometheus_client import Summary
+"""Belinsky PhraseFinder nlp worker."""
+from dataclasses import dataclass
 
-from .phrase_comparer import PhraseFinder, UnknownLanguageError
+import spacy
+from spacy_langdetect import LanguageDetector
 
-# Initialize prometheus metrics
-FIND_PHRASES_LATENCY = Summary('pf_find_phrases_latency', 'Latency of "find-phrases" request')
+from ..utils import translit, UnknownLanguageError
 
 
-# pylint: disable=too-few-public-methods
-class PhraseFinderAPI:
-    """ PhraseFinder API worker."""
+@dataclass(slots=True, frozen=True)
+class Token:
+    """Word token structure."""
+    word: str
+    lemma: str
+    position: list[int] or tuple[int]
+
+    def to_list(self):
+        """Convert token structure to list of values."""
+        return self.word, self.lemma, self.position
+
+
+class PhraseFinder:
+    """Compare phrases"""
 
     def __init__(self):
-        """Initialize Belinsky's Phrase Finder API worker."""
-        self.comparer = PhraseFinder()
+        """Initialize class variables."""
 
-    @FIND_PHRASES_LATENCY.time()
-    @login_required
-    def find_phrases(self):
-        """ Find known phrases in text.
-        ---
-        Body (JSON):
-            - text (str): Text to be processed.
-            - phrases (List[str]): Phrases to be found.
-            - language (str): Language.
+        # Initialize spaCy
+        spacy_languages = {
+            'en': 'en_core_web_sm',
+            'ru': 'ru_core_news_sm'
+        }
+        self.lemmatizers = {lang: spacy.load(model_name, disable=['parser', 'ner'])
+                            for lang, model_name in spacy_languages.items()}
 
-        Responses:
-            200:
-                description: Return found phrases and their indexes in text.
-                schema:
-                    result: Dictionary with found phrases and their indexes.
-                    status: 200
-            400:
-                description: Json body or 'text' key not found in request body.
-                schema:
-                    error: Error description.
-                    status: 400
-            500:
-                description: Unexpected error while processing request.
-                schema:
-                    error: Error description.
-                    status: 500
+        # Initialize spaCy language detector
+        spacy.Language.factory("language_detector", func=lambda nlp, name: LanguageDetector())
+        self.lemmatizers['en'].add_pipe('sentencizer')
+        self.lemmatizers['en'].add_pipe("language_detector", last=True)
+
+    def detect_language(self, text):
+        """ Detect text language
+
+        Args:
+            text (str): Text to be processed.
+
+        Returns:
+            str:
+                Language code as https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
         """
 
-        # Check request body
-        if not request.json:
-            response = {
-                'error': "Json body not found in request",
-                'status': 400
-            }
-            return response, 400
+        # TODO: Split text into sentences.
+        tokens = self.lemmatizers['en'](text)
+        language = tokens._.language['language']
+        return language
 
-        required_keys = ['text', 'phrases']
-        if not all(key in request.json for key in required_keys):
-            response = {
-                'error': f"Required keys not found in request body :{', '.join(required_keys)}.",
-                'status': 400
-            }
-            return response, 400
+    def lemmatize(self, text, language):
+        """ Lemmatize text.
 
-        # Process text
+        Arguments:
+             text (str): Text to be lemmatized.
+             language (str): Language.
+
+        Returns:
+            list:
+                Lemmatized text.
+        """
+
+        tokens = self._process_text(text, language)
+        lemmatized = [token.lemma_ for token in tokens]
+
+        return lemmatized
+
+    def tokenize(self, text, language):
+        """ Tokenize text.
+
+        Arguments:
+            text (str): Text to be tokenized.
+            language (str): Language.
+
+        Returns:
+            List:
+                Words' tokens as 'phrase_comparer.Token' structure.
+        """
+
+        tokens = self._process_text(text, language)
+        tokenized = [Token(token.text, token.lemma_, (token.idx, token.idx + len(token.text) - 1))
+                     for token in tokens]
+
+        return tokenized
+
+    def find_phrases(self, text, phrases, language):
+        """ Find phrases in text.
+
+        Arguments:
+            text (str): Text to be processed.
+            phrases (list): Phrases to be found.
+            language (str): Language.
+
+        Returns:
+            Dict:
+                Return phrases and their indexes in text.
+        """
+
+        # Detect language
+        if language is None:
+            language = self.detect_language(text)
+
+        if language not in self.lemmatizers:
+            raise UnknownLanguageError(language, self.lemmatizers.keys())
+
+        # Find phrases
+        tokenized = self.tokenize(text, language)
+        lemmatized_text = [x.lemma for x in tokenized]
+
+        result = {key: [] for key in phrases}
+        for phrase in phrases:
+            lemmatized_phrase = self.lemmatize(phrase, language)
+            index_delta = len(lemmatized_phrase) - 1
+            for index in self._find_sublist_indexes(lemmatized_phrase, lemmatized_text):
+                position = [tokenized[index].position[0],
+                            tokenized[index + index_delta].position[1]]
+                result[phrase].append(position)
+
+        return result
+
+    def _process_text(self, text, language):
+        # Preprocess russian text
+        if language == 'ru':
+            # Transliterate ru language
+            text = translit(text, 'ru')
+
+            # Split hyphened words
+            processed_text = []
+            for word in text.split():
+                if '-' in word and not all(symbol == '-' for symbol in word):
+                    split = word.split('-')
+                    word = ' ' * len(''.join(split[:-1])) + ' ' + split[-1]
+
+                processed_text.append(word)
+
+            text = ' '.join(processed_text)
+
+        # Get tokens from spaCy
+        tokens = self.lemmatizers[language](text)
+
+        # Clean tokens
+        to_check = ("is_punct", "is_left_punct", "is_right_punct",
+                    "is_space", "is_quote", "is_bracket")
+        tokens = [token for token in tokens if all(not getattr(token, attr) for attr in to_check)]
+
+        return tokens
+
+    @staticmethod
+    def _find_sublist_indexes(sub, bigger):
+        """ Find indexes of sublist first items in list.
+
+        Arguments:
+            sub (list): Sublist to find in main list.
+            bigger (list): Main list.
+
+        Returns:
+            List:
+                Indexes of sublist first items in list.
+        """
+
+        first, rest = sub[0], sub[1:]
+        pos = 0
+        result = []
         try:
-            lang = request.json['language'] if 'language' in request.json else None
-            result = self.comparer.find_phrases(request.json['text'], request.json['phrases'], lang)
-        except UnknownLanguageError as exception:
-            response = {
-                'error': str(exception),
-                'status': 400
-            }
-            return response
-
-        response = {
-            'result': result,
-            'status': 200
-        }
-        return response, 200
+            while True:
+                pos = bigger.index(first, pos) + 1
+                if not rest or bigger[pos:pos + len(rest)] == rest:
+                    result.append(pos - 1)
+        except ValueError:
+            return result

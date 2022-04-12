@@ -1,8 +1,8 @@
 """Belinsky PhraseFinder blueprint."""
 from flask import Blueprint
 
-from .phrase_comparer import PhraseFinder
-from .phrase_finder import PhraseFinderAPI
+from .phrase_finder import PhraseFinder
+from .phrase_finder_api import PhraseFinderAPI
 
 
 def create_blueprint_phrase_finder():
