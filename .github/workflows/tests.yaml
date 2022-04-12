@@ -7,7 +7,7 @@ on:
     branches: [ master, stage ]
 
 jobs:
-  docker:
+  run_tests:
     name: Run Unittests
     runs-on: ubuntu-latest
     env:
