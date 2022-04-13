@@ -12,7 +12,7 @@ from .routes import login_manager
 def create_app() -> Flask:
     """Initialize belinsky Flask application."""
     app = Flask("Belinsky")
-    app.config['SECRET_KEY'] = config.SECRET_KEY
+    app.config["SECRET_KEY"] = config.SECRET_KEY
 
     # pylint: disable=import-outside-toplevel
     with app.app_context():
@@ -20,8 +20,8 @@ def create_app() -> Flask:
         from . import routes
 
         # Initialize database
-        app.config['SQLALCHEMY_DATABASE_URI'] = config.BELINSKY_POSTGRES_URI
-        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        app.config["SQLALCHEMY_DATABASE_URI"] = config.BELINSKY_POSTGRES_URI
+        app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
         db.init_app(app)
         db.create_all()
 
@@ -36,4 +36,4 @@ def create_app() -> Flask:
     return app
 
 
-__all__ = ['create_app', 'db', 'login_manager']
+__all__ = ["create_app", "db", "login_manager"]

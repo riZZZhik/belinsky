@@ -3,22 +3,22 @@ from flask import Blueprint, request
 from flask_login import LoginManager, current_user, login_user, logout_user
 from prometheus_client import Summary
 
-from .utils import check_request_keys
 from .. import database, models
+from .utils import check_request_keys
 
 # Initialize login manager
 login_manager = LoginManager()
 
 # Initialize prometheus metrics
-SIGNUP_LATENCY = Summary('signup_latency', 'Latency of "signup" request')
-LOGIN_LATENCY = Summary('login_latency', 'Latency of "login" request')
-LOGOUT_LATENCY = Summary('logout_latency', 'Latency of "logout" request')
-DELETE_USER_LATENCY = Summary('delete_user_latency', 'Latency of "delete-user" request')
+SIGNUP_LATENCY = Summary("signup_latency", 'Latency of "signup" request')
+LOGIN_LATENCY = Summary("login_latency", 'Latency of "login" request')
+LOGOUT_LATENCY = Summary("logout_latency", 'Latency of "logout" request')
+DELETE_USER_LATENCY = Summary("delete_user_latency", 'Latency of "delete-user" request')
 
 
 @SIGNUP_LATENCY.time()
 def signup() -> tuple[dict[str, str | int], int]:
-    """ Sign up.
+    """Sign up.
     ---
     Body (JSON):
         - username: Username.
@@ -43,37 +43,35 @@ def signup() -> tuple[dict[str, str | int], int]:
     """
 
     # Check input body
-    required_keys = {'username', 'password'}
+    required_keys = {"username", "password"}
     check = check_request_keys(required_keys)
     if check:
         return check
 
     # Check if user with given username already exists
-    user = database.get_instance(models.User, username=request.json['username'])
+    user = database.get_instance(models.User, username=request.json["username"])
     if user:
         response = {
-            'error': f"User with {request.json['username']} username already exists.",
-            'status': 406
+            "error": f"User with {request.json['username']} username already exists.",
+            "status": 406,
         }
         return response, 406
 
     # Add user to database
-    user = database.add_instance(models.User,
-                                 lambda i: i.set_password(request.json['password']),
-                                 username=request.json['username']
-                                 )
+    user = database.add_instance(
+        models.User,
+        lambda i: i.set_password(request.json["password"]),
+        username=request.json["username"],
+    )
     login_user(user, remember=True)
 
-    response = {
-        'result': f"Successfully signed up as {user.username}.",
-        'status': 200
-    }
+    response = {"result": f"Successfully signed up as {user.username}.", "status": 200}
     return response, 200
 
 
 @LOGIN_LATENCY.time()
 def login() -> tuple[dict[str, str | int], int]:
-    """ Login.
+    """Login.
     ---
     Body (JSON):
         - username: Username.
@@ -100,45 +98,39 @@ def login() -> tuple[dict[str, str | int], int]:
     # Bypass if user is logged in
     if current_user.is_authenticated:
         response = {
-            'result': f"Already logged in as {current_user.username}.",
-            'status': 200
+            "result": f"Already logged in as {current_user.username}.",
+            "status": 200,
         }
         return response, 200
 
     # Check input body
-    required_keys = {'username', 'password'}
+    required_keys = {"username", "password"}
     check = check_request_keys(required_keys)
     if check:
         return check
 
     # Check if user exists and password correct
-    user = database.get_instance(models.User, username=request.json['username'])
+    user = database.get_instance(models.User, username=request.json["username"])
     if not user:
         response = {
-            'error': f"User with {request.json['username']} username not found.",
-            'status': 406
+            "error": f"User with {request.json['username']} username not found.",
+            "status": 406,
         }
         return response, 406
 
-    if not user.check_password(request.json['password']):
-        response = {
-            'error': "Invalid password. Please try again.",
-            'status': 406
-        }
+    if not user.check_password(request.json["password"]):
+        response = {"error": "Invalid password. Please try again.", "status": 406}
         return response, 406
 
     # Login user
     login_user(user, remember=True)
-    response = {
-        'result': f"Successfully logged in as {user.username}.",
-        'status': 200
-    }
+    response = {"result": f"Successfully logged in as {user.username}.", "status": 200}
     return response, 200
 
 
 @LOGOUT_LATENCY.time()
 def logout() -> tuple[dict[str, str | int], int]:
-    """ Logout.
+    """Logout.
     ---
     Responses:
         200:
@@ -155,23 +147,17 @@ def logout() -> tuple[dict[str, str | int], int]:
 
     # Bypass if user is logged in
     if not current_user.is_authenticated:
-        response = {
-            'error': "You are not logged in.",
-            'status': 406
-        }
+        response = {"error": "You are not logged in.", "status": 406}
         return response, 406
 
     logout_user()
-    response = {
-        'result': "Successfully logged out.",
-        'status': 200
-    }
+    response = {"result": "Successfully logged out.", "status": 200}
     return response, 200
 
 
 @DELETE_USER_LATENCY.time()
 def delete_user() -> tuple[dict[str, str | int], int]:
-    """ Delete user.
+    """Delete user.
     ---
     Body (JSON):
         - username: Username.
@@ -196,37 +182,37 @@ def delete_user() -> tuple[dict[str, str | int], int]:
     """
 
     # Check input body
-    required_keys = {'username', 'password'}
+    required_keys = {"username", "password"}
     check = check_request_keys(required_keys)
     if check:
         return check
 
     # Check if user exists and password correct
-    user = database.get_instance(models.User, username=request.json['username'])
+    user = database.get_instance(models.User, username=request.json["username"])
     if not user:
         response = {
-            'error': f"User with {request.json['username']} username not found.",
-            'status': 406
+            "error": f"User with {request.json['username']} username not found.",
+            "status": 406,
         }
         return response, 406
 
-    if not user.check_password(request.json['password']):
-        response = {
-            'error': "Invalid password. Please try again.",
-            'status': 406
-        }
+    if not user.check_password(request.json["password"]):
+        response = {"error": "Invalid password. Please try again.", "status": 406}
         return response, 406
 
     # Logout if it is current user
-    if current_user.is_authenticated and current_user.username == request.json['username']:
+    if (
+        current_user.is_authenticated
+        and current_user.username == request.json["username"]
+    ):
         logout_user()
 
     # Delete user
-    database.delete_instance(models.User, username=request.json['username'])
+    database.delete_instance(models.User, username=request.json["username"])
 
     response = {
-        'result': f"Successfully deleted {request.json['username']} user.",
-        'status': 200
+        "result": f"Successfully deleted {request.json['username']} user.",
+        "status": 200,
     }
     return response, 200
 
@@ -242,20 +228,17 @@ def load_user(user_id) -> database.db or None:
 @login_manager.unauthorized_handler
 def unauthorized_handler() -> tuple[dict[str, str | int], int]:
     """401 Unauthorized handler."""
-    response = {
-        'error': "Unauthorized request. Please login first.",
-        'status': 401
-    }
+    response = {"error": "Unauthorized request. Please login first.", "status": 401}
     return response, 401
 
 
 def create_blueprint_auth() -> Blueprint:
     """Create authentication blueprint."""
-    auth_bp = Blueprint('auth_bp', __name__)
+    auth_bp = Blueprint("auth_bp", __name__)
 
-    auth_bp.add_url_rule('/signup', view_func=signup, methods=['GET', 'POST'])
-    auth_bp.add_url_rule('/login', view_func=login, methods=['GET', 'POST'])
-    auth_bp.add_url_rule('/logout', view_func=logout, methods=['GET', 'POST'])
-    auth_bp.add_url_rule('/delete-user', view_func=delete_user, methods=['GET', 'POST'])
+    auth_bp.add_url_rule("/signup", view_func=signup, methods=["GET", "POST"])
+    auth_bp.add_url_rule("/login", view_func=login, methods=["GET", "POST"])
+    auth_bp.add_url_rule("/logout", view_func=logout, methods=["GET", "POST"])
+    auth_bp.add_url_rule("/delete-user", view_func=delete_user, methods=["GET", "POST"])
 
     return auth_bp
