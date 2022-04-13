@@ -2,9 +2,9 @@ name: Unittests
 
 on:
   push:
-    branches: [ master, stage ]
+    branches: [ master, dev/stage ]
   pull_request:
-    branches: [ master, stage ]
+    branches: [ master, dev/stage ]
 
 jobs:
   run_tests:

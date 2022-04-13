@@ -3,22 +3,25 @@ import sys
 import unittest
 
 import flask_unittest
+from flask import Flask
+from flask.testing import FlaskClient
 
 from belinsky import create_app, database, models
 from belinsky.routes.phrase_finder.phrase_finder import PhraseFinder, Token
 from belinsky.routes.utils import translit
 
 
-def add_user(app, username, password):
+def add_user(app: Flask, username: str, password: str) -> None:
     """Add user model to database."""
     with app.app_context():
         if database.get_instance(models.User, username=username) is None:
             database.add_instance(models.User,
                                   lambda instance: instance.set_password(password),
-                                  username=username)
+                                  username=username
+                                  )
 
 
-def delete_user(app, username):
+def delete_user(app: Flask, username: str) -> None:
     """Delete user model from database."""
     with app.app_context():
         if database.get_instance(models.User, username=username) is not None:
@@ -39,59 +42,59 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
     comparer = PhraseFinder()
 
     # pylint: disable=invalid-name
-    def setUp(self, client):
+    def setUp(self, client: FlaskClient) -> None:
         """Login as test user."""
         client.post('login', json=self.credentials)
 
-    def test_lemmatizer(self, _):
+    def test_lemmatizer(self, _: FlaskClient) -> None:
         """Test lemmatizer russian word."""
         response = self.comparer.lemmatize('Апельсины', 'ru')
         correct_response = ['апельсин']
         self.assertEqual(response, correct_response)
 
-    def test_lemmatizer_hyphen(self, _):
+    def test_lemmatizer_hyphen(self, _: FlaskClient) -> None:
         """Test lemmatizer with russian hyphened word."""
         response = self.comparer.lemmatize('по-любому', 'ru')
         correct_response = ['любой']
         self.assertEqual(response, correct_response)
 
-    def test_lemmatizer_phrase(self, _):
+    def test_lemmatizer_phrase(self, _: FlaskClient) -> None:
         """Test lemmatizer with russian phrase."""
         response = self.comparer.lemmatize('а он обожает', 'ru')
         correct_response = ['а', 'он', 'обожать']
         self.assertEqual(response, correct_response)
 
-    def test_lemmatizer_punctuation(self, _):
+    def test_lemmatizer_punctuation(self, _: FlaskClient) -> None:
         """Test lemmatizer with russian phrase with punctuation."""
         response = self.comparer.lemmatize('а, -- [он], обожает?!', 'ru')
         correct_response = ['а', 'он', 'обожать']
         self.assertEqual(response, correct_response)
 
-    def test_lemmatizer_en(self, _):
+    def test_lemmatizer_en(self, _: FlaskClient) -> None:
         """Test lemmatizer with english word."""
         response = self.comparer.lemmatize('stunned', 'en')
         correct_response = ['stun']
         self.assertEqual(response, correct_response)
 
-    def test_translit_ru(self, _):
+    def test_translit_ru(self, _: FlaskClient) -> None:
         """Test lemmatizers with russian word using english translit."""
         response = translit('banan', 'ru')
         correct_response = 'банан'
         self.assertEqual(response, correct_response)
 
-    def test_detect_language_ru(self, _):
+    def test_detect_language_ru(self, _: FlaskClient) -> None:
         """Test detect language with russian phrase."""
         response = self.comparer.detect_language('Это русский текст')
         correct_response = 'ru'
         self.assertEqual(response, correct_response)
 
-    def test_detect_language_en(self, _):
+    def test_detect_language_en(self, _: FlaskClient) -> None:
         """Test detect language with english phrase."""
         response = self.comparer.detect_language('This is english text')
         correct_response = 'en'
         self.assertEqual(response, correct_response)
 
-    def test_tokenizer(self, _):
+    def test_tokenizer(self, _: FlaskClient) -> None:
         """Test tokenizer from PhraseFinder."""
         response = [token.to_list() for token in
                     self.comparer.tokenize('Мама обожает апельсины', 'ru')]
@@ -102,7 +105,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         ]
         self.assertEqual(response, correct_response)
 
-    def test_compare_phrases(self, _):
+    def test_compare_phrases(self, _: FlaskClient) -> None:
         """Test compare phrases from PhraseFinder."""
         response = self.comparer.find_phrases('Привет, я Папа', ['я папа'], 'ru')
 
@@ -111,7 +114,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response, correct_response)
 
-    def test_signup(self, client):
+    def test_signup(self, client: FlaskClient) -> None:
         """Test signup method."""
         delete_user(self.app, 'unittester_1')
 
@@ -124,7 +127,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_login(self, client):
+    def test_login(self, client: FlaskClient) -> None:
         """Test login method."""
         client.post('/logout')
         response = client.post('login', json=self.credentials)
@@ -134,7 +137,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_delete(self, client):
+    def test_delete(self, client: FlaskClient) -> None:
         """Test delete method."""
         add_user(self.app, 'unittester_1', 'test_password')
 
@@ -147,7 +150,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_logout(self, client):
+    def test_logout(self, client: FlaskClient) -> None:
         """Test logout method."""
         response = client.post('/logout')
         correct_response = {
@@ -156,7 +159,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_find_phrase(self, client):
+    def test_find_phrase(self, client: FlaskClient) -> None:
         """Test find phrase method with russian text."""
         response = client.get(
             '/find-phrases',
@@ -168,7 +171,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_find_phrase_translit(self, client):
+    def test_find_phrase_translit(self, client: FlaskClient) -> None:
         """Test find phrase method with russian text in english translit."""
         response = client.get(
             '/find-phrases',
@@ -180,7 +183,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_find_phrase_multiple_in_text(self, client):
+    def test_find_phrase_multiple_in_text(self, client: FlaskClient) -> None:
         """Test find phrase method with russian text and multiple phrases in text."""
         response = client.get(
             '/find-phrases',
@@ -192,7 +195,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_find_phrase_multiple_phrases(self, client):
+    def test_find_phrase_multiple_phrases(self, client: FlaskClient) -> None:
         """Test find phrase method with russian text and multiple phrases in text."""
         response = client.get(
             '/find-phrases',
@@ -204,7 +207,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_find_phrase_hyphen(self, client):
+    def test_find_phrase_hyphen(self, client: FlaskClient) -> None:
         """Test find phrase method with russian text and hyphened word."""
         response = client.get(
             '/find-phrases',
@@ -216,7 +219,7 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         }
         self.assertEqual(response.json, correct_response)
 
-    def test_find_phrase_unknown_language(self, client):
+    def test_find_phrase_unknown_language(self, client: FlaskClient) -> None:
         """Test find phrase with unknown language."""
         response = client.get(
             '/find-phrases',
@@ -229,7 +232,12 @@ class PhraseFinderTest(flask_unittest.ClientTestCase):
         self.assertEqual(response.json, correct_response)
 
 
-if __name__ == '__main__':
+def main() -> None:
+    """Run Belinsky unittest."""
     runner = unittest.TextTestRunner()
     result = runner.run(unittest.makeSuite(PhraseFinderTest))
     sys.exit(not result.wasSuccessful())
+
+
+if __name__ == '__main__':
+    main()
