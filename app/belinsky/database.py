@@ -7,14 +7,14 @@ db = SQLAlchemy()
 
 
 # pylint: disable=no-member
-def get_instance(model: SQLAlchemy, **kwargs) -> SQLAlchemy:
+def get_instance(model: db.Model, **kwargs) -> db.Model:
     """Get instance using model query."""
     instance = model.query.filter_by(**kwargs).first()
     return instance
 
 
 # pylint: disable=no-member
-def get_all(model: SQLAlchemy) -> SQLAlchemy:
+def get_all(model: db.Model) -> db.Model:
     """Get all instances of a model."""
     instances = model.query.all()
     return instances
@@ -22,8 +22,8 @@ def get_all(model: SQLAlchemy) -> SQLAlchemy:
 
 # pylint: disable=no-member
 def add_instance(
-    model: SQLAlchemy, instance_func: Callable[[SQLAlchemy], None] = None, **kwargs
-) -> SQLAlchemy:
+    model: db.Model, instance_func: Callable[[db.Model], None] = None, **kwargs
+) -> db.Model:
     """Add an instance to the database."""
     instance = model(**kwargs)
     if instance_func:
@@ -34,16 +34,14 @@ def add_instance(
 
 
 # pylint: disable=no-member
-def delete_instance(model: SQLAlchemy, **kwargs) -> None:
+def delete_instance(model: db.Model, **kwargs) -> None:
     """Delete an instance from the database."""
     db.session.delete(get_instance(model, **kwargs))
     commit_changes()
 
 
 # pylint: disable=no-member
-def edit_instance(
-    model: SQLAlchemy, query_filter: dict[str, Any], **kwargs
-) -> SQLAlchemy:
+def edit_instance(model: db.Model, query_filter: dict[str, Any], **kwargs) -> db.Model:
     """Edit instance attributes in database"""
     instance = get_instance(model, **query_filter)
     for attr, new_value in kwargs.items():
