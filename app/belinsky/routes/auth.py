@@ -4,8 +4,7 @@ from flask_login import LoginManager, current_user, login_user, logout_user
 from prometheus_client import Summary
 
 from .utils import check_request_keys
-from ..database import add_instance, get_instance, delete_instance
-from ..models import User
+from .. import database, models
 
 # Initialize login manager
 login_manager = LoginManager()
@@ -18,7 +17,7 @@ DELETE_USER_LATENCY = Summary('delete_user_latency', 'Latency of "delete-user" r
 
 
 @SIGNUP_LATENCY.time()
-def signup():
+def signup() -> tuple[dict[str, str | int], int]:
     """ Sign up.
     ---
     Body (JSON):
@@ -50,7 +49,7 @@ def signup():
         return check
 
     # Check if user with given username already exists
-    user = get_instance(User, username=request.json['username'])
+    user = database.get_instance(models.User, username=request.json['username'])
     if user:
         response = {
             'error': f"User with {request.json['username']} username already exists.",
@@ -59,8 +58,8 @@ def signup():
         return response, 406
 
     # Add user to database
-    instance_func = lambda instance: instance.set_password(request.json['password'])
-    user = add_instance(User, instance_func, username=request.json['username'])
+    user = database.add_instance(models.User, lambda i: i.set_password(request.json['password']),
+                                 username=request.json['username'])
     login_user(user, remember=True)
 
     response = {
@@ -71,7 +70,7 @@ def signup():
 
 
 @LOGIN_LATENCY.time()
-def login():
+def login() -> tuple[dict[str, str | int], int]:
     """ Login.
     ---
     Body (JSON):
@@ -111,7 +110,7 @@ def login():
         return check
 
     # Check if user exists and password correct
-    user = get_instance(User, username=request.json['username'])
+    user = database.get_instance(models.User, username=request.json['username'])
     if not user:
         response = {
             'error': f"User with {request.json['username']} username not found.",
@@ -136,7 +135,7 @@ def login():
 
 
 @LOGOUT_LATENCY.time()
-def logout():
+def logout() -> tuple[dict[str, str | int], int]:
     """ Logout.
     ---
     Responses:
@@ -169,7 +168,7 @@ def logout():
 
 
 @DELETE_USER_LATENCY.time()
-def delete_user():
+def delete_user() -> tuple[dict[str, str | int], int]:
     """ Delete user.
     ---
     Body (JSON):
@@ -201,7 +200,7 @@ def delete_user():
         return check
 
     # Check if user exists and password correct
-    user = get_instance(User, username=request.json['username'])
+    user = database.get_instance(models.User, username=request.json['username'])
     if not user:
         response = {
             'error': f"User with {request.json['username']} username not found.",
@@ -221,7 +220,7 @@ def delete_user():
         logout_user()
 
     # Delete user
-    delete_instance(User, username=request.json['username'])
+    database.delete_instance(models.User, username=request.json['username'])
 
     response = {
         'result': f"Successfully deleted {request.json['username']} user.",
@@ -231,15 +230,15 @@ def delete_user():
 
 
 @login_manager.user_loader
-def load_user(user_id):
+def load_user(user_id) -> database.db or None:
     """Check if user is logged-in on every page load."""
     if user_id is not None:
-        return get_instance(User, id=user_id)
+        return database.get_instance(models.User, id=user_id)
     return None
 
 
 @login_manager.unauthorized_handler
-def unauthorized_handler():
+def unauthorized_handler() -> tuple[dict[str, str | int], int]:
     """401 Unauthorized handler."""
     response = {
         'error': "Unauthorized request. Please login first.",
@@ -248,7 +247,7 @@ def unauthorized_handler():
     return response, 401
 
 
-def create_blueprint_auth():
+def create_blueprint_auth() -> Blueprint:
     """Create authentication blueprint."""
     auth_bp = Blueprint('auth_bp', __name__)
 

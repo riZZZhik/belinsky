@@ -1,8 +1,10 @@
 """Belinsky checks."""
+from typing import Iterable
+
 from flask import request
 
 
-def check_request_keys(required_keys):
+def check_request_keys(required_keys: Iterable[str]) -> tuple[dict[str, str | int], int] or False:
     """Check request input body."""
     if not request.json:
         response = {

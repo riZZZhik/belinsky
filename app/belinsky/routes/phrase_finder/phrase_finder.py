@@ -1,5 +1,6 @@
 """Belinsky PhraseFinder nlp worker."""
 from dataclasses import dataclass
+from typing import Any, Sequence
 
 import spacy
 from spacy_langdetect import LanguageDetector
@@ -12,7 +13,7 @@ class Token:
     """Word token structure."""
     word: str
     lemma: str
-    position: list[int] or tuple[int]
+    position: Sequence[int]
 
     def to_list(self):
         """Convert token structure to list of values."""
@@ -39,7 +40,7 @@ class PhraseFinder:
         self.lemmatizers['en'].add_pipe("language_detector", last=True)
 
     # pylint: disable=fixme
-    def detect_language(self, text):
+    def detect_language(self, text: str) -> str:
         """ Detect text language
 
         Args:
@@ -55,7 +56,7 @@ class PhraseFinder:
         language = tokens._.language['language']
         return language
 
-    def lemmatize(self, text, language):
+    def lemmatize(self, text: str, language: str) -> list[str]:
         """ Lemmatize text.
 
         Arguments:
@@ -72,7 +73,7 @@ class PhraseFinder:
 
         return lemmatized
 
-    def tokenize(self, text, language):
+    def tokenize(self, text: str, language: str) -> list[Token]:
         """ Tokenize text.
 
         Arguments:
@@ -90,13 +91,13 @@ class PhraseFinder:
 
         return tokenized
 
-    def find_phrases(self, text, phrases, language):
+    def find_phrases(self, text: str, phrases: Sequence[str], lang: str) -> dict[str, list[int]]:
         """ Find phrases in text.
 
         Arguments:
             text (str): Text to be processed.
             phrases (list): Phrases to be found.
-            language (str): Language.
+            lang (str): Language.
 
         Returns:
             Dict:
@@ -104,19 +105,19 @@ class PhraseFinder:
         """
 
         # Detect language
-        if language is None:
-            language = self.detect_language(text)
+        if lang is None:
+            lang = self.detect_language(text)
 
-        if language not in self.lemmatizers:
-            raise UnknownLanguageError(language, self.lemmatizers.keys())
+        if lang not in self.lemmatizers:
+            raise UnknownLanguageError(lang, self.lemmatizers.keys())
 
         # Find phrases
-        tokenized = self.tokenize(text, language)
+        tokenized = self.tokenize(text, lang)
         lemmatized_text = [x.lemma for x in tokenized]
 
         result = {key: [] for key in phrases}
         for phrase in phrases:
-            lemmatized_phrase = self.lemmatize(phrase, language)
+            lemmatized_phrase = self.lemmatize(phrase, lang)
             index_delta = len(lemmatized_phrase) - 1
             for index in self._find_sublist_indexes(lemmatized_phrase, lemmatized_text):
                 position = [tokenized[index].position[0],
@@ -125,7 +126,7 @@ class PhraseFinder:
 
         return result
 
-    def _process_text(self, text, language):
+    def _process_text(self, text: str, language: str) -> list:
         # Preprocess russian text
         if language == 'ru':
             # Transliterate ru language
@@ -153,7 +154,7 @@ class PhraseFinder:
         return tokens
 
     @staticmethod
-    def _find_sublist_indexes(sub, bigger):
+    def _find_sublist_indexes(sub: Sequence[Any], bigger: Sequence[Any]) -> list[int]:
         """ Find indexes of sublist first items in list.
 
         Arguments:

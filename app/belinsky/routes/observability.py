@@ -8,14 +8,14 @@ from ..models import User
 
 
 # Create healthcheck function
-def check_database():
+def check_database() -> tuple[bool, str]:
     """Check database is available."""
     get_all(User)
     return True, 'Belinsky database is ok'
 
 
 # Create observability function
-def metrics_prometheus():
+def metrics_prometheus() -> tuple[bytes, int]:
     """Generate prometheus metrics response."""
     registry = CollectorRegistry()
     multiprocess.MultiProcessCollector(registry)
@@ -23,7 +23,7 @@ def metrics_prometheus():
     return data, 200
 
 
-def create_blueprint_observability():
+def create_blueprint_observability() -> Blueprint:
     """Create observability blueprint."""
     # Create blueprint
     observability_bp = Blueprint('observability', __name__)

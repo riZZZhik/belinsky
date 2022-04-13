@@ -16,7 +16,7 @@ phrase_finder = PhraseFinder()
 
 @FIND_PHRASES_LATENCY.time()
 @login_required
-def find_phrases():
+def find_phrases() -> tuple[dict[str, str | int], int]:
     """ Find known phrases in text.
     ---
     Body (JSON):
@@ -57,7 +57,7 @@ def find_phrases():
             'error': str(exception),
             'status': 400
         }
-        return response
+        return response, 400
 
     response = {
         'result': result,
@@ -66,7 +66,7 @@ def find_phrases():
     return response, 200
 
 
-def create_blueprint_phrase_finder():
+def create_blueprint_phrase_finder() -> Blueprint:
     """Create PhraseFinder blueprint."""
     # Create Flask blueprint
     phrase_finder_bp = Blueprint('phrase_finder', __name__)

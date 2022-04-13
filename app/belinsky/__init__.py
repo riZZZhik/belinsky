@@ -9,7 +9,7 @@ from .models import User
 from .routes import login_manager
 
 
-def create_app():
+def create_app() -> Flask:
     """Initialize belinsky Flask application."""
     app = Flask("Belinsky")
     app.config['SECRET_KEY'] = config.SECRET_KEY
