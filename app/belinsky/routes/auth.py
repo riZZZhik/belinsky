@@ -58,8 +58,10 @@ def signup() -> tuple[dict[str, str | int], int]:
         return response, 406
 
     # Add user to database
-    user = database.add_instance(models.User, lambda i: i.set_password(request.json['password']),
-                                 username=request.json['username'])
+    user = database.add_instance(models.User,
+                                 lambda i: i.set_password(request.json['password']),
+                                 username=request.json['username']
+                                 )
     login_user(user, remember=True)
 
     response = {

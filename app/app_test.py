@@ -17,7 +17,8 @@ def add_user(app: Flask, username: str, password: str) -> None:
         if database.get_instance(models.User, username=username) is None:
             database.add_instance(models.User,
                                   lambda instance: instance.set_password(password),
-                                  username=username)
+                                  username=username
+                                  )
 
 
 def delete_user(app: Flask, username: str) -> None:

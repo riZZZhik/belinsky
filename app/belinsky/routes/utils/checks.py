@@ -4,7 +4,7 @@ from typing import Iterable
 from flask import request
 
 
-def check_request_keys(required_keys: Iterable[str]) -> tuple[dict[str, str | int], int] or False:
+def check_request_keys(required_keys: Iterable[str]) -> tuple[dict[str, str | int], int] or bool:
     """Check request input body."""
     if not request.json:
         response = {

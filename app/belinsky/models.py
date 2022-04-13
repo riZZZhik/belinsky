@@ -4,7 +4,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from .database import db
 
-
 # pylint: disable=no-member
 class User(UserMixin, db.Model):
     """Belinsky User model."""
@@ -23,4 +22,5 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password, password)
 
     def __repr__(self) -> str:
+        """Return a string representation of user."""
         return f'<User {self.username}>'

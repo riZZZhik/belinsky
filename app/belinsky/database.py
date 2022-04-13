@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-# pylint: disable=E1101
+# pylint: disable=no-member
 def get_instance(model: db.Model, **kwargs) -> db.Model:
     """Get instance using model query."""
     instance = model.query.filter_by(**kwargs).first()
@@ -21,9 +21,11 @@ def get_all(model: db.Model) -> db.Model:
 
 
 # pylint: disable=no-member
-def add_instance(model: db.Model,
-                 instance_func: Callable[[db.Model], None] = None,
-                 **kwargs) -> db.Model:
+def add_instance(
+        model: db.Model,
+        instance_func: Callable[[db.Model], None] = None,
+        **kwargs
+) -> db.Model:
     """Add an instance to the database."""
     instance = model(**kwargs)
     if instance_func:
