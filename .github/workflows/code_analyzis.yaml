@@ -2,9 +2,9 @@ name: Code analyzis
 
 on:
   push:
-    branches: [ master, stage ]
+    branches: [ master, dev/stage ]
   pull_request:
-    branches: [ master, stage ]
+    branches: [ master, dev/stage ]
 
 jobs:
   analyze_codeql:
