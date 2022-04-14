@@ -1,6 +1,6 @@
-[![Tests](https://github.com/riZZZhik/belinsky/actions/workflows/tests.yaml/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/tests.yaml)
-[![Code analyzis](https://github.com/riZZZhik/belinsky/actions/workflows/code_analyzis.yaml/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/code_analyzis.yaml)
-[![Build and push](https://github.com/riZZZhik/belinsky/actions/workflows/push_docker_image.yaml/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/push_docker_image.yaml)
+[![Tests](https://github.com/riZZZhik/belinsky/workflows/Tests/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/tests.yaml)
+[![Code analyzis](https://github.com/riZZZhik/belinsky/workflows/Code%20analyzis/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/code_analyzis.yaml)
+[![Build and push](https://github.com/riZZZhik/belinsky/workflows/Push%20new%20release%20to%20Docker%20Hub/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/push_docker_image.yaml)
 
 # How to use
 
