@@ -22,9 +22,7 @@ def get_all(model: db.Model) -> db.Model:
 
 # pylint: disable=no-member
 def add_instance(
-        model: db.Model,
-        instance_func: Callable[[db.Model], None] = None,
-        **kwargs
+    model: db.Model, instance_func: Callable[[db.Model], None] = None, **kwargs
 ) -> db.Model:
     """Add an instance to the database."""
     instance = model(**kwargs)

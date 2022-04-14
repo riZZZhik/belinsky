@@ -6,7 +6,7 @@ app = create_app()
 
 def main() -> None:
     """Run Belinsky application."""
-    app.run(host='localhost', port=4958)
+    app.run(host="localhost", port=4958)
 
 
 if __name__ == "__main__":
