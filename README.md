@@ -28,6 +28,7 @@
 # API routes
 
 ## Authentication requests
+You can add _raw=true_ to any request body to receive response as json instead of web page.
 
 ### 1. signup
 

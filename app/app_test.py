@@ -273,7 +273,8 @@ def test_find_phrase_hyphen(client: FlaskClient) -> None:
 def test_find_phrase_unknown_language(client: FlaskClient) -> None:
     """Test find phrase with unknown language."""
     response = client.post(
-        "/phrase-finder", data={"text": "Dies ist ein deutsch.", "phrases": "deutschland"}
+        "/phrase-finder",
+        data={"text": "Dies ist ein deutsch.", "phrases": "deutschland"},
     )
 
     assert response.status_code == 200

@@ -17,7 +17,7 @@ phrase_finder_worker = PhraseFinder()
 
 @FIND_PHRASES_LATENCY.time()
 @login_required
-def phrase_finder():
+def phrase_finder() -> str | tuple[dict[str, str | list | int], int]:
     """Generate Phrase Finder home page.
     Returns:
         str: HTMl source of Phrase Finder page.
@@ -30,7 +30,7 @@ def phrase_finder():
     # Process text
     text = request.form.get("text")
     phrases = [p for p in request.form.get("phrases").split("\r\n") if p != ""]
-    result = None
+    found_phrases = None
 
     if not text:
         flash("No text given. Try again please.")
@@ -38,16 +38,25 @@ def phrase_finder():
         flash("No phrases given. Try again please.")
     else:
         try:
-            result = phrase_finder_worker.find_phrases(
+            found_phrases = phrase_finder_worker.find_phrases(
                 text, phrases, request.form.get("language")
             )
-            result = bold_phrases(text, result)
+            found_phrases = bold_phrases(text, found_phrases)
         except UnknownLanguageError as exception:
             flash(str(exception))
 
+    if request.form.get("raw"):
+        response = {
+            "text": text,
+            "phrases": phrases,
+            "found_phrases": found_phrases,
+            "status": 200,
+        }
+        return response, 200
+
     return render_template(
         "phrase_finder.html",
-        result=result,
+        found_phrases=found_phrases,
         text=text,
         phrases="\n".join(phrases),
     )
@@ -64,6 +73,7 @@ def create_blueprint_phrase_finder() -> Blueprint:
     phrase_finder_bp.add_url_rule(
         "/phrase-finder", view_func=phrase_finder, methods=["GET", "POST"]
     )
+
     return phrase_finder_bp
 
 

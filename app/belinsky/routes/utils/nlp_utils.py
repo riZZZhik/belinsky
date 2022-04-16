@@ -4,7 +4,7 @@ import typing as t
 import iso639
 
 
-def format_language_name(langs: str | t.Iterable) -> t.Iterable:
+def format_language_name(langs: str | t.Iterable) -> list:
     """Format a language name from iso639 to full.
 
     Args:

@@ -18,6 +18,7 @@ def home():
     return redirect(url_for("auth.login"))
 
 
+# pylint: disable=fixme
 def create_app() -> Flask:
     """Initialize belinsky Flask application."""
     app = Flask("Belinsky")

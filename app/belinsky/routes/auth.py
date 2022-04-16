@@ -18,7 +18,7 @@ DELETE_USER_LATENCY = Summary("delete_user_latency", 'Latency of "delete-user" r
 
 
 @SIGNUP_LATENCY.time()
-def signup() -> Response | str:
+def signup() -> Response | str | tuple[dict[str, str | int], int]:
     """Sign up"""
 
     # Bypass if user is logged in
@@ -43,11 +43,18 @@ def signup() -> Response | str:
     )
     login_user(user, remember=True)
 
+    if request.form.get("raw"):
+        response = {
+            "info": f'Successfully signed up as {request.form.get("username")}.',
+            "status": 200,
+        }
+        return response, 200
+
     return redirect(url_for("home"))
 
 
 @LOGIN_LATENCY.time()
-def login() -> Response | str:
+def login() -> Response | str | tuple[dict[str, str | int], int]:
     """Login"""
 
     # Bypass if user is logged in
@@ -71,16 +78,27 @@ def login() -> Response | str:
     # Login user
     login_user(user, remember=request.form.get("remember") == "on")
 
+    if request.form.get("raw"):
+        response = {
+            "info": f'Successfully logged in as {request.form.get("username")}.',
+            "status": 200,
+        }
+        return response, 200
+
     return redirect(url_for("home"))
 
 
 @LOGOUT_LATENCY.time()
-def logout() -> Response:
+def logout() -> tuple[dict[str, str | int], int] | Response:
     """Logout"""
 
     # Bypass if user is logged in
     if current_user.is_authenticated:
         logout_user()
+
+    if request.form.get("raw"):
+        response = {"info": "Successfully logged out.", "status": 200}
+        return response, 200
 
     return redirect(url_for("home"))
 
@@ -156,8 +174,12 @@ def load_user(user_id) -> database.db or None:
 
 
 @login_manager.unauthorized_handler
-def unauthorized_handler() -> Response:
+def unauthorized_handler() -> tuple[dict[str, str | int], int] | Response:
     """401 Unauthorized handler."""
+    if request.form.get("raw"):
+        response = {"error": "Unauthorized. Please login first.", "status": 401}
+        return response, 401
+
     return redirect(url_for("home"))
 
 
