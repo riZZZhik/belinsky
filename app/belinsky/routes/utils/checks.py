@@ -1,13 +1,24 @@
 """Belinsky checks."""
-from typing import Iterable
+import typing as t
 
 from flask import request
 
 
 def check_request_keys(
-    required_keys: Iterable[str],
+    required_keys: t.Iterable[str],
 ) -> tuple[dict[str, str | int], int] or bool:
-    """Check request input body."""
+    """Check request input body.
+
+    Args:
+        required_keys (t.Iterable[str]): Required keys.
+
+    Returns:
+        tuple[dict[str, str | int], int] or bool
+    """
+
+    if not isinstance(required_keys, t.Iterable):
+        raise TypeError(f"Unknown required_keys type: {type(required_keys)}. Required: Iterable")
+
     if not request.json:
         response = {"error": "Json body not found in request.", "status": 400}
         return response, 400
