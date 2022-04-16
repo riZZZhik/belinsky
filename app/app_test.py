@@ -1,9 +1,10 @@
 """Unittest Belinsky application."""
 # pylint: disable=redefined-outer-name
 import typing as t
+from contextlib import contextmanager
 
 import pytest
-from flask import Flask
+from flask import Flask, template_rendered
 from flask.testing import FlaskClient
 
 from belinsky import create_app, database, models
@@ -28,6 +29,23 @@ def _delete_user(_app: Flask, username: str) -> None:
     with _app.app_context():
         if database.get_instance(models.User, username=username) is not None:
             database.delete_instance(models.User, username=username)
+
+
+# Utils to assert rendered template
+@contextmanager
+def captured_templates(app):
+    """Get rendered_template information."""
+    recorded = []
+
+    # pylint: disable=unused-argument
+    def record(sender, template, context, **extra):
+        recorded.append((template, context))
+
+    template_rendered.connect(record, app)
+    try:
+        yield recorded
+    finally:
+        template_rendered.disconnect(record, app)
 
 
 # Initialize pytest fixtures
@@ -142,41 +160,47 @@ def test_compare_phrases() -> None:
 
 
 # Test auth routes
-def test_signup(client: FlaskClient) -> None:
-    """Test signup method."""
-    client.post("/logout")
-    response = client.get("/signup")
-
-    assert response.status_code == 200
-    assert '<h3 class="title">Sign Up</h3>' in response.get_data(as_text=True)
-
-
-def test_signup_post(app: Flask, client: FlaskClient) -> None:
+def test_signup(app: Flask, client: FlaskClient) -> None:
     """Test signup method with filled form."""
     client.post("/logout")
     response = client.post(
-        "/signup", data={"username": "unittester_1", "password": "test_password"}
+        "/signup",
+        data={"username": "unittester_1", "password": "test_password", "raw": True},
     )
     _delete_user(app, "unittester_1")
 
-    assert response.status_code == 302
+    assert response.status_code == 200
+
+
+def test_signup_template(app: Flask, client: FlaskClient) -> None:
+    """Test signup method."""
+    client.post("/logout")
+
+    with captured_templates(app) as templates:
+        response = client.get("/signup")
+        assert response.status_code == 200
+        assert len(templates) == 1
+        template, _ = templates[0]
+        assert template.name == "signup.html"
 
 
 def test_login(client: FlaskClient) -> None:
-    """Test login method."""
-    client.post("/logout")
-    response = client.get("login")
-
-    assert response.status_code == 200
-    assert '<h3 class="title">Login</h3>' in response.get_data(as_text=True)
-
-
-def test_login_post(client: FlaskClient) -> None:
     """Test login method with filled form."""
     client.post("/logout")
-    response = client.post("login", data=credentials)
+    response = client.post("login", data=credentials | {"raw": True})
 
-    assert response.status_code == 302
+    assert response.status_code == 200
+
+
+def test_login_template(app: Flask, client: FlaskClient) -> None:
+    """Test login method."""
+    client.post("/logout")
+    with captured_templates(app) as templates:
+        response = client.get("/login")
+        assert response.status_code == 200
+        assert len(templates) == 1
+        template, _ = templates[0]
+        assert template.name == "login.html"
 
 
 def test_delete(app: Flask, client: FlaskClient) -> None:
@@ -188,38 +212,39 @@ def test_delete(app: Flask, client: FlaskClient) -> None:
         json={"username": "unittester_1", "password": "test_password"},
     )
 
-    correct_response = {
-        "result": "Successfully deleted unittester_1 user.",
-        "status": 200,
-    }
-    assert response.json == correct_response
+    assert response.status_code == 200
 
 
 def test_logout(client: FlaskClient) -> None:
     """Test logout method."""
-    response = client.post("/logout")
+    response = client.post("/logout", data={"raw": True})
 
-    assert response.status_code == 302
+    assert response.status_code == 200
 
 
 # Test phrase finder
-def test_find_phrase(client: FlaskClient) -> None:
+def test_find_phrase_template(app: Flask, client: FlaskClient) -> None:
     """Test find phrase method."""
-    response = client.get("/phrase-finder")
+    with captured_templates(app) as templates:
+        response = client.get("/phrase-finder")
+        assert response.status_code == 200
+        assert len(templates) == 1
+        template, _ = templates[0]
+        assert template.name == "phrase_finder.html"
 
-    assert response.status_code == 200
-    assert '<h3 class="title">Phrase Finder</h3>' in response.get_data(as_text=True)
 
-
-def test_find_phrase_post(client: FlaskClient) -> None:
+def test_find_phrase_post(app: Flask, client: FlaskClient) -> None:
     """Test find phrase method with russian text."""
-    response = client.post(
-        "/phrase-finder",
-        data={"text": "Клара у карла украла кораллы", "phrases": "коралл"},
-    )
-
-    assert response.status_code == 200
-    assert "<b>кораллы</b>" in response.get_data(as_text=True)
+    with captured_templates(app) as templates:
+        response = client.post(
+            "/phrase-finder",
+            data={"text": "Клара у карла украла кораллы", "phrases": "коралл"},
+        )
+        assert response.status_code == 200
+        assert len(templates) == 1
+        template, context = templates[0]
+        assert template.name == "phrase_finder.html"
+        assert "<b>кораллы</b>" in context["found_phrases"]
 
 
 def test_find_phrase_translit(client: FlaskClient) -> None:
@@ -230,11 +255,12 @@ def test_find_phrase_translit(client: FlaskClient) -> None:
             "text": "маме и папе по bananu",
             "phrases": "бананы",
             "language": "ru",
+            "raw": True,
         },
     )
 
     assert response.status_code == 200
-    assert "<b>bananu</b>" in response.get_data(as_text=True)
+    assert {"бананы": [[15, 20]]} == response.json["found_phrases"]
 
 
 def test_find_phrase_multiple_in_text(client: FlaskClient) -> None:
@@ -252,22 +278,26 @@ def test_find_phrase_multiple_phrases(client: FlaskClient) -> None:
     """Test find phrase method with russian text and multiple phrases in text."""
     response = client.post(
         "/phrase-finder",
-        data={"text": "мама любит бананы", "phrases": "банан\r\nлюбит"},
+        data={"text": "мама любит бананы", "phrases": "банан\r\nлюбит", "raw": True},
     )
 
     assert response.status_code == 200
-    assert "<b>любит</b> <b>бананы</b>" in response.get_data(as_text=True)
+    assert {"банан": [[11, 16]], "любит": [[5, 9]]} == response.json["found_phrases"]
 
 
 def test_find_phrase_hyphen(client: FlaskClient) -> None:
     """Test find phrase method with russian text and hyphened word."""
     response = client.post(
         "/phrase-finder",
-        data={"text": "мама обожает по-любому тебя", "phrases": "обожает любой"},
+        data={
+            "text": "мама обожает по-любому тебя",
+            "phrases": "обожает любой",
+            "raw": True,
+        },
     )
 
     assert response.status_code == 200
-    assert "<b>обожает по-любому</b>" in response.get_data(as_text=True)
+    assert {"обожает любой": [[5, 21]]} == response.json["found_phrases"]
 
 
 def test_find_phrase_unknown_language(client: FlaskClient) -> None:

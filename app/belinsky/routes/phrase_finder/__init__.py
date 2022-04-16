@@ -27,11 +27,12 @@ def phrase_finder() -> str | tuple[dict[str, str | list | int], int]:
     if request.method == "GET":
         return render_template("phrase_finder.html", result=None)
 
-    # Process text
+    # Process input data
     text = request.form.get("text")
     phrases = [p for p in request.form.get("phrases").split("\r\n") if p != ""]
     found_phrases = None
 
+    # Process text
     if not text:
         flash("No text given. Try again please.")
     elif not phrases:
@@ -41,10 +42,10 @@ def phrase_finder() -> str | tuple[dict[str, str | list | int], int]:
             found_phrases = phrase_finder_worker.find_phrases(
                 text, phrases, request.form.get("language")
             )
-            found_phrases = bold_phrases(text, found_phrases)
         except UnknownLanguageError as exception:
             flash(str(exception))
 
+    # Response with raw data if required
     if request.form.get("raw"):
         response = {
             "text": text,
@@ -53,6 +54,10 @@ def phrase_finder() -> str | tuple[dict[str, str | list | int], int]:
             "status": 200,
         }
         return response, 200
+
+    # Format found_phrases for html
+    if found_phrases is not None:
+        found_phrases = bold_phrases(text, found_phrases)
 
     return render_template(
         "phrase_finder.html",

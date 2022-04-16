@@ -32,7 +32,7 @@ CMD ["sh", "start_gunicorn.sh"]
 FROM base as test
 
 # Install test requirements
-RUN pip install pytest==7.1.1
+RUN pip install pytest==7.1.1 blinker==1.4
 
 # Copy test work files
 COPY app_test.py .
