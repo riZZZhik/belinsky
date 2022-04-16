@@ -5,11 +5,11 @@
 {% block content %}
     <h3 class="title">Phrase Finder</h3>
     {% with messages = get_flashed_messages() %}
-        {% if messages %}
+        {% for message in messages %}
             <div class="notification is-danger">
-                {{ messages[0] }}
+                {{ message }}
             </div>
-        {% endif %}
+        {% endfor %}
     {% endwith %}
 
     <div class="box">

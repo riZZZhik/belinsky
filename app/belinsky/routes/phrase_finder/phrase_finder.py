@@ -98,19 +98,23 @@ class PhraseFinder:
         return tokenized
 
     def find_phrases(
-        self, text: str, phrases: t.Sequence[str], lang: str
+        self, text: str, phrases: t.Iterable[str], lang: str
     ) -> dict[str, list[list[int]]]:
         """Find phrases in text.
 
         Arguments:
             text (str): Text to be processed.
-            phrases (list): Phrases to be found.
+            phrases (t.Iterable): Phrases to be found.
             lang (str): Language.
 
         Returns:
             Dict:
                 Return phrases and their indexes in text.
         """
+
+        # Check input data
+        if not isinstance(phrases, set):
+            phrases = set(phrases)
 
         # Detect language
         if lang is None:

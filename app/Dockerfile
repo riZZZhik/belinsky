@@ -31,11 +31,11 @@ CMD ["sh", "start_gunicorn.sh"]
 # Create test target
 FROM base as test
 
-# Install unittest dependencies
-RUN pip install flask-unittest==0.1.2
+# Install test requirements
+RUN pip install pytest==7.1.1
 
 # Copy test work files
 COPY app_test.py .
 
 # Default execute
-CMD ["python", "app_test.py"]
+CMD ["pytest", "-W ignore::DeprecationWarning"]

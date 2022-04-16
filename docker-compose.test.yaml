@@ -3,7 +3,7 @@ services:
     build:
       context: app/
       target: test
-    command: python app_test.py
+    command: pytest -W ignore::DeprecationWarning
     restart: "no"
 
     environment:
@@ -26,6 +26,9 @@ services:
       POSTGRES_USER: belinsky
       POSTGRES_PASSWORD: belinsky_db_password
       POSTGRES_DB: belinsky_db
+
+    ports:
+      - "5432:5432"
 
     volumes:
       - belinsky_db_test_volume:/var/lib/postgresql

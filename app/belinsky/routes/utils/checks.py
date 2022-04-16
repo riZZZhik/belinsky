@@ -17,7 +17,9 @@ def check_request_keys(
     """
 
     if not isinstance(required_keys, t.Iterable):
-        raise TypeError(f"Unknown required_keys type: {type(required_keys)}. Required: Iterable")
+        raise TypeError(
+            f"Unknown required_keys type: {type(required_keys)}. Required: Iterable"
+        )
 
     if not request.json:
         response = {"error": "Json body not found in request.", "status": 400}
