@@ -71,7 +71,7 @@ def login() -> Response | str:
     # Login user
     login_user(user, remember=request.form.get("remember") == "on")
 
-    return redirect(url_for("phrase_finder.phrase_finder"))
+    return redirect(url_for("home"))
 
 
 @LOGOUT_LATENCY.time()

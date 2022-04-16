@@ -26,6 +26,7 @@ def create_app() -> Flask:
     # pylint: disable=import-outside-toplevel
     with app.app_context():
         # Import routes
+        # TODO: JSON  Responses for cURL requests
         from . import routes
 
         # Initialize database
