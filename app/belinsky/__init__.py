@@ -1,12 +1,21 @@
 """Initialize belinsky Flask application."""
 # Import Flask
-from flask import Flask
+from flask import Flask, url_for, redirect
+from flask_login import current_user
 
 # Module imports
 from . import config
 from .database import db
 from .models import User
 from .routes import login_manager
+
+
+def home():
+    """Redirect to home page."""
+    if current_user.is_authenticated:
+        return redirect(url_for("phrase_finder.phrase_finder"))
+
+    return redirect(url_for("auth.login"))
 
 
 def create_app() -> Flask:
@@ -29,6 +38,7 @@ def create_app() -> Flask:
         login_manager.init_app(app)
 
         # Register blueprints
+        app.add_url_rule("/", view_func=home)
         app.register_blueprint(routes.create_blueprint_auth())
         app.register_blueprint(routes.create_blueprint_observability())
         app.register_blueprint(routes.create_blueprint_phrase_finder())
