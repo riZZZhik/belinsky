@@ -25,7 +25,7 @@ def phrase_finder() -> str | tuple[dict[str, str | list | int], int]:
 
     # Check request method
     if request.method == "GET":
-        return render_template("phrase_finder.html", result=None)
+        return render_template("phrase_finder.html", found_phrases=None)
 
     # Process input data
     text = request.form.get("text")
