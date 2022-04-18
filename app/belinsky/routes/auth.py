@@ -1,10 +1,11 @@
 """Belinsky authentication blueprint."""
-from flask import Blueprint, request
+from flask import Blueprint, request, render_template, flash, redirect, url_for
 from flask_login import LoginManager, current_user, login_user, logout_user
 from prometheus_client import Summary
+from werkzeug import Response
 
-from .. import database, models
 from .utils import check_request_keys
+from .. import database, models
 
 # Initialize login manager
 login_manager = LoginManager()
@@ -17,142 +18,89 @@ DELETE_USER_LATENCY = Summary("delete_user_latency", 'Latency of "delete-user" r
 
 
 @SIGNUP_LATENCY.time()
-def signup() -> tuple[dict[str, str | int], int]:
-    """Sign up.
-    ---
-    Body (JSON):
-        - username: Username.
-        - password: Password.
+def signup() -> Response | str | tuple[dict[str, str | int], int]:
+    """Sign up"""
 
-    Responses:
-        200:
-            description: Return that request processed properly.
-            schema:
-                result: 'Successfully signed up'
-                status: 200
-        400:
-            description: Json body or 'username', 'password' keys not found in request body.
-            schema:
-                error: Error description.
-                status: 400
-        406:
-            description: User with given username already exists.
-            schema:
-                error: Error description.
-                status: 406
-    """
+    # Bypass if user is logged in
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
 
-    # Check input body
-    required_keys = {"username", "password"}
-    check = check_request_keys(required_keys)
-    if check:
-        return check
+    # Return template if request.method is GET
+    if request.method == "GET":
+        return render_template("signup.html")
 
     # Check if user with given username already exists
-    user = database.get_instance(models.User, username=request.json["username"])
+    user = database.get_instance(models.User, username=request.form.get("username"))
     if user:
-        response = {
-            "error": f"User with {request.json['username']} username already exists.",
-            "status": 406,
-        }
-        return response, 406
+        flash(f"User with {request.form.get('username')} username already exists.")
+        return redirect(url_for("auth.signup"))
 
     # Add user to database
     user = database.add_instance(
         models.User,
-        lambda i: i.set_password(request.json["password"]),
-        username=request.json["username"],
+        lambda i: i.set_password(request.form.get("password")),
+        username=request.form.get("username"),
     )
     login_user(user, remember=True)
 
-    response = {"result": f"Successfully signed up as {user.username}.", "status": 200}
-    return response, 200
-
-
-@LOGIN_LATENCY.time()
-def login() -> tuple[dict[str, str | int], int]:
-    """Login.
-    ---
-    Body (JSON):
-        - username: Username.
-        - password: Password.
-
-    Responses:
-        200:
-            description: Return that request processed properly.
-            schema:
-                result: 'Successfully logged in'
-                status: 200
-        400:
-            description: Json body or ['username', 'password'] keys not found in request body.
-            schema:
-                error: Error description.
-                status: 400
-        406:
-            description: User with given username not found OR Invalid password.
-            schema:
-                error: Error description.
-                status: 406
-    """
-
-    # Bypass if user is logged in
-    if current_user.is_authenticated:
+    if request.form.get("raw"):
         response = {
-            "result": f"Already logged in as {current_user.username}.",
+            "info": f'Successfully signed up as {request.form.get("username")}.',
             "status": 200,
         }
         return response, 200
 
-    # Check input body
-    required_keys = {"username", "password"}
-    check = check_request_keys(required_keys)
-    if check:
-        return check
+    return redirect(url_for("home"))
+
+
+@LOGIN_LATENCY.time()
+def login() -> Response | str | tuple[dict[str, str | int], int]:
+    """Login"""
+
+    # Bypass if user is logged in
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+
+    # Return template if request.method is GET
+    if request.method == "GET":
+        return render_template("login.html")
 
     # Check if user exists and password correct
-    user = database.get_instance(models.User, username=request.json["username"])
+    user = database.get_instance(models.User, username=request.form.get("username"))
     if not user:
-        response = {
-            "error": f"User with {request.json['username']} username not found.",
-            "status": 406,
-        }
-        return response, 406
+        flash(f"User with {request.form.get('username')} username not found.")
+        return redirect(url_for("auth.login"))
 
-    if not user.check_password(request.json["password"]):
-        response = {"error": "Invalid password. Please try again.", "status": 406}
-        return response, 406
+    if not user.check_password(request.form.get("password")):
+        flash("Invalid password. Please try again.")
+        return redirect(url_for("auth.login"))
 
     # Login user
-    login_user(user, remember=True)
-    response = {"result": f"Successfully logged in as {user.username}.", "status": 200}
-    return response, 200
+    login_user(user, remember=request.form.get("remember") == "on")
+
+    if request.form.get("raw"):
+        response = {
+            "info": f'Successfully logged in as {request.form.get("username")}.',
+            "status": 200,
+        }
+        return response, 200
+
+    return redirect(url_for("home"))
 
 
 @LOGOUT_LATENCY.time()
-def logout() -> tuple[dict[str, str | int], int]:
-    """Logout.
-    ---
-    Responses:
-        200:
-            description: Return that request processed properly.
-            schema:
-                result: 'Successfully logged out.'
-                status: 200
-        406:
-            description: User are not logged in.
-            schema:
-                error: You are not logged in.
-                status: 406
-    """
+def logout() -> tuple[dict[str, str | int], int] | Response:
+    """Logout"""
 
     # Bypass if user is logged in
-    if not current_user.is_authenticated:
-        response = {"error": "You are not logged in.", "status": 406}
-        return response, 406
+    if current_user.is_authenticated:
+        logout_user()
 
-    logout_user()
-    response = {"result": "Successfully logged out.", "status": 200}
-    return response, 200
+    if request.form.get("raw"):
+        response = {"info": "Successfully logged out.", "status": 200}
+        return response, 200
+
+    return redirect(url_for("home"))
 
 
 @DELETE_USER_LATENCY.time()
@@ -226,15 +174,18 @@ def load_user(user_id) -> database.db or None:
 
 
 @login_manager.unauthorized_handler
-def unauthorized_handler() -> tuple[dict[str, str | int], int]:
+def unauthorized_handler() -> tuple[dict[str, str | int], int] | Response:
     """401 Unauthorized handler."""
-    response = {"error": "Unauthorized request. Please login first.", "status": 401}
-    return response, 401
+    if request.form.get("raw"):
+        response = {"error": "Unauthorized. Please login first.", "status": 401}
+        return response, 401
+
+    return redirect(url_for("home"))
 
 
 def create_blueprint_auth() -> Blueprint:
     """Create authentication blueprint."""
-    auth_bp = Blueprint("auth_bp", __name__)
+    auth_bp = Blueprint("auth", __name__, template_folder="../templates")
 
     auth_bp.add_url_rule("/signup", view_func=signup, methods=["GET", "POST"])
     auth_bp.add_url_rule("/login", view_func=login, methods=["GET", "POST"])

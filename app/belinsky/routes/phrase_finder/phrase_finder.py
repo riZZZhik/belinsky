@@ -1,6 +1,8 @@
 """Belinsky PhraseFinder nlp worker."""
+import subprocess
+import sys
 from dataclasses import dataclass
-from typing import Any, Sequence
+import typing as t
 
 import spacy
 from spacy_langdetect import LanguageDetector
@@ -14,7 +16,7 @@ class Token:
 
     word: str
     lemma: str
-    position: Sequence[int]
+    position: t.Sequence[int]
 
     def to_list(self):
         """Convert token structure to list of values."""
@@ -28,18 +30,33 @@ class PhraseFinder:
         """Initialize class variables."""
 
         # Initialize spaCy
-        spacy_languages = {"en": "en_core_web_sm", "ru": "ru_core_news_sm"}
+        base_spacy_languages = {"en": "en_core_web_sm", "ru": "ru_core_news_sm"}
+        self.known_spacy_languages = {
+            "da": "da_core_news_sm",
+            "de": "de_core_news_sm",
+            "el": "el_core_news_sm",
+            "es": "es_core_news_sm",
+            "fr": "fr_core_news_sm",
+            "it": "it_core_news_sm",
+            "ja": "ja_core_news_sm",
+            "nl": "nl_core_news_sm",
+            "pl": "pl_core_news_sm",
+            "pt": "pt_core_news_sm",
+            "ro": "ro_core_news_sm",
+            "zh": "zh_core_web_sm",
+        }
+
         self.lemmatizers = {
             lang: spacy.load(model_name, disable=["parser", "ner"])
-            for lang, model_name in spacy_languages.items()
+            for lang, model_name in base_spacy_languages.items()
         }
 
         # Initialize spaCy language detector
         spacy.Language.factory(
             "language_detector", func=lambda nlp, name: LanguageDetector()
         )
-        self.lemmatizers["en"].add_pipe("sentencizer")
-        self.lemmatizers["en"].add_pipe("language_detector", last=True)
+        self._get_lemmatizer("en").add_pipe("sentencizer")
+        self._get_lemmatizer("en").add_pipe("language_detector", last=True)
 
     # pylint: disable=fixme
     def detect_language(self, text: str) -> str:
@@ -54,7 +71,7 @@ class PhraseFinder:
         """
 
         # TODO: Split text into sentences.
-        tokens = self.lemmatizers["en"](text)
+        tokens = self._get_lemmatizer("en")(text)
         language = tokens._.language["language"]
         return language
 
@@ -98,13 +115,13 @@ class PhraseFinder:
         return tokenized
 
     def find_phrases(
-        self, text: str, phrases: Sequence[str], lang: str
-    ) -> dict[str, list[int]]:
+        self, text: str, phrases: t.Iterable[str], lang: str
+    ) -> dict[str, list[list[int]]]:
         """Find phrases in text.
 
         Arguments:
             text (str): Text to be processed.
-            phrases (list): Phrases to be found.
+            phrases (t.Iterable): Phrases to be found.
             lang (str): Language.
 
         Returns:
@@ -112,12 +129,13 @@ class PhraseFinder:
                 Return phrases and their indexes in text.
         """
 
+        # Check input data
+        if not isinstance(phrases, set):
+            phrases = set(phrases)
+
         # Detect language
         if lang is None:
             lang = self.detect_language(text)
-
-        if lang not in self.lemmatizers:
-            raise UnknownLanguageError(lang, self.lemmatizers.keys())
 
         # Find phrases
         tokenized = self.tokenize(text, lang)
@@ -154,7 +172,7 @@ class PhraseFinder:
             text = " ".join(processed_text)
 
         # Get tokens from spaCy
-        tokens = self.lemmatizers[language](text)
+        tokens = self._get_lemmatizer(language)(text)
 
         # Clean tokens
         to_check = (
@@ -173,8 +191,38 @@ class PhraseFinder:
 
         return tokens
 
+    def _get_lemmatizer(self, language: str) -> spacy.Language:
+        """Get lemmatizer for given language."""
+        if language in self.lemmatizers.keys():
+            return self.lemmatizers[language]
+
+        if language in self.known_spacy_languages:
+            # Load model using PyPi
+            language_model = self.known_spacy_languages[language]
+            link = (
+                "https://github.com/explosion/spacy-models/releases/download/"
+                f"{language_model}-3.2.0/{language_model}-3.2.0.tar.gz"
+            )
+            subprocess.check_call(
+                [sys.executable, "-m", "pip", "install", link],
+                stdout=subprocess.DEVNULL,
+            )
+
+            # Initialize model
+            self.lemmatizers[language] = spacy.load(
+                language_model, disable=["parser", "ner"]
+            )
+
+            return self.lemmatizers[language]
+
+        raise UnknownLanguageError(
+            language, self.lemmatizers.keys() | self.known_spacy_languages.keys()
+        )
+
     @staticmethod
-    def _find_sublist_indexes(sub: Sequence[Any], bigger: Sequence[Any]) -> list[int]:
+    def _find_sublist_indexes(
+        sub: t.Sequence[t.Any], bigger: t.Sequence[t.Any]
+    ) -> list[int]:
         """Find indexes of sublist first items in list.
 
         Arguments:

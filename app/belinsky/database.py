@@ -1,5 +1,5 @@
 """Belinsky database worker."""
-from typing import Any, Callable
+import typing as t
 
 from flask_sqlalchemy import SQLAlchemy
 
@@ -22,7 +22,7 @@ def get_all(model: db.Model) -> db.Model:
 
 # pylint: disable=no-member
 def add_instance(
-    model: db.Model, instance_func: Callable[[db.Model], None] = None, **kwargs
+    model: db.Model, instance_func: t.Callable[[db.Model], None] = None, **kwargs
 ) -> db.Model:
     """Add an instance to the database."""
     instance = model(**kwargs)
@@ -41,7 +41,9 @@ def delete_instance(model: db.Model, **kwargs) -> None:
 
 
 # pylint: disable=no-member
-def edit_instance(model: db.Model, query_filter: dict[str, Any], **kwargs) -> db.Model:
+def edit_instance(
+    model: db.Model, query_filter: dict[str, t.Any], **kwargs
+) -> db.Model:
     """Edit instance attributes in database"""
     instance = get_instance(model, **query_filter)
     for attr, new_value in kwargs.items():

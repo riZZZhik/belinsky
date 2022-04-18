@@ -1,9 +1,9 @@
 """Belinsky PhraseFinder blueprint."""
-from flask import Blueprint, request
+from flask import Blueprint, request, render_template, flash
 from flask_login import login_required
 from prometheus_client import Summary
 
-from ..utils import check_request_keys
+from .formatter import bold_phrases
 from .phrase_finder import PhraseFinder, UnknownLanguageError
 
 # Initialize prometheus metrics.
@@ -12,66 +12,73 @@ FIND_PHRASES_LATENCY = Summary(
 )
 
 # Initialize PhraseFinder worker.
-phrase_finder = PhraseFinder()
+phrase_finder_worker = PhraseFinder()
 
 
 @FIND_PHRASES_LATENCY.time()
 @login_required
-def find_phrases() -> tuple[dict[str, str | int], int]:
-    """Find known phrases in text.
-    ---
-    Body (JSON):
-        - text (str): Text to be processed.
-        - phrases (List[str]): Phrases to be found.
-        - language (str): Language.
-
-    Responses:
-        200:
-            description: Return found phrases and their indexes in text.
-            schema:
-                result: Dictionary with found phrases and their indexes.
-                status: 200
-        400:
-            description: Json body or 'text' key not found in request body.
-            schema:
-                error: Error description.
-                status: 400
-        500:
-            description: Unexpected error while processing request.
-            schema:
-                error: Error description.
-                status: 500
+def phrase_finder() -> str | tuple[dict[str, str | list | int], int]:
+    """Generate Phrase Finder home page.
+    Returns:
+        str: HTMl source of Phrase Finder page.
     """
 
-    # Check request body
-    required_keys = {"text", "phrases"}
-    check = check_request_keys(required_keys)
-    if check:
-        return check
+    # Check request method
+    if request.method == "GET":
+        return render_template("phrase_finder.html", found_phrases=None)
+
+    # Process input data
+    text = request.form.get("text")
+    phrases = [p for p in request.form.get("phrases").split("\r\n") if p != ""]
+    found_phrases = None
 
     # Process text
-    try:
-        lang = request.json["language"] if "language" in request.json else None
-        result = phrase_finder.find_phrases(
-            request.json["text"], request.json["phrases"], lang
-        )
-    except UnknownLanguageError as exception:
-        response = {"error": str(exception), "status": 400}
-        return response, 400
+    if not text:
+        flash("No text given. Try again please.")
+    elif not phrases:
+        flash("No phrases given. Try again please.")
+    else:
+        try:
+            found_phrases = phrase_finder_worker.find_phrases(
+                text, phrases, request.form.get("language")
+            )
+        except UnknownLanguageError as exception:
+            flash(str(exception))
 
-    response = {"result": result, "status": 200}
-    return response, 200
+    # Response with raw data if required
+    if request.form.get("raw"):
+        response = {
+            "text": text,
+            "phrases": phrases,
+            "found_phrases": found_phrases,
+            "status": 200,
+        }
+        return response, 200
+
+    # Format found_phrases for html
+    if found_phrases is not None:
+        found_phrases = bold_phrases(text, found_phrases)
+
+    return render_template(
+        "phrase_finder.html",
+        found_phrases=found_phrases,
+        text=text,
+        phrases="\n".join(phrases),
+    )
 
 
 def create_blueprint_phrase_finder() -> Blueprint:
     """Create PhraseFinder blueprint."""
     # Create Flask blueprint
-    phrase_finder_bp = Blueprint("phrase_finder", __name__)
+    phrase_finder_bp = Blueprint(
+        "phrase_finder", __name__, template_folder="../../templates"
+    )
 
     # Add request handlers
     phrase_finder_bp.add_url_rule(
-        "/find-phrases", view_func=find_phrases, methods=["GET"]
+        "/phrase-finder", view_func=phrase_finder, methods=["GET", "POST"]
     )
+
     return phrase_finder_bp
 
 
