@@ -14,3 +14,7 @@ spacy==3.2.4
 spacy_langdetect==0.1.2
 iso639==0.1.4
 transliterate==1.10.2
+
+# spaCy models
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.2.0/en_core_web_sm-3.2.0.tar.gz
+https://github.com/explosion/spacy-models/releases/download/ru_core_news_sm-3.2.0/ru_core_news_sm-3.2.0.tar.gz
