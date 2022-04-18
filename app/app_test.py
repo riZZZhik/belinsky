@@ -300,11 +300,26 @@ def test_find_phrase_hyphen(client: FlaskClient) -> None:
     assert {"обожает любой": [[5, 21]]} == response.json["found_phrases"]
 
 
+def test_find_phrase_de_without_preload(client: FlaskClient) -> None:
+    """Test find phrase with unknown language."""
+    response = client.post(
+        "/phrase-finder",
+        data={
+            "text": "Dies ist ein deutschland.",
+            "phrases": "deutschland",
+            "raw": True,
+        },
+    )
+
+    assert response.status_code == 200
+    assert {"deutschland": [[13, 23]]} == response.json["found_phrases"]
+
+
 def test_find_phrase_unknown_language(client: FlaskClient) -> None:
     """Test find phrase with unknown language."""
     response = client.post(
         "/phrase-finder",
-        data={"text": "Dies ist ein deutsch.", "phrases": "deutschland"},
+        data={"text": "Tai lietuviškas tekstas.", "phrases": ["tekstas"]},
     )
 
     assert response.status_code == 200
