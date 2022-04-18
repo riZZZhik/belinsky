@@ -1,6 +1,6 @@
 """Belinsky PhraseFinder nlp worker."""
 from dataclasses import dataclass
-from typing import Any, Sequence
+import typing as t
 
 import spacy
 from spacy_langdetect import LanguageDetector
@@ -14,7 +14,7 @@ class Token:
 
     word: str
     lemma: str
-    position: Sequence[int]
+    position: t.Sequence[int]
 
     def to_list(self):
         """Convert token structure to list of values."""
@@ -98,19 +98,23 @@ class PhraseFinder:
         return tokenized
 
     def find_phrases(
-        self, text: str, phrases: Sequence[str], lang: str
-    ) -> dict[str, list[int]]:
+        self, text: str, phrases: t.Iterable[str], lang: str
+    ) -> dict[str, list[list[int]]]:
         """Find phrases in text.
 
         Arguments:
             text (str): Text to be processed.
-            phrases (list): Phrases to be found.
+            phrases (t.Iterable): Phrases to be found.
             lang (str): Language.
 
         Returns:
             Dict:
                 Return phrases and their indexes in text.
         """
+
+        # Check input data
+        if not isinstance(phrases, set):
+            phrases = set(phrases)
 
         # Detect language
         if lang is None:
@@ -174,7 +178,9 @@ class PhraseFinder:
         return tokens
 
     @staticmethod
-    def _find_sublist_indexes(sub: Sequence[Any], bigger: Sequence[Any]) -> list[int]:
+    def _find_sublist_indexes(
+        sub: t.Sequence[t.Any], bigger: t.Sequence[t.Any]
+    ) -> list[int]:
         """Find indexes of sublist first items in list.
 
         Arguments:

@@ -12,4 +12,5 @@ prometheus_client==0.14.1
 # NLP requirements
 spacy==3.2.4
 spacy_langdetect==0.1.2
+iso639==0.1.4
 transliterate==1.10.2
