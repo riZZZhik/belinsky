@@ -26,4 +26,4 @@ def format_language_name(langs: str | t.Iterable) -> list:
         except iso639.NonExistentLanguageError:
             formatted_langs.append("Unknown")
 
-    return formatted_langs
+    return sorted(formatted_langs)
