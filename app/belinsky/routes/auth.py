@@ -32,7 +32,10 @@ def signup() -> Response | str | tuple[dict[str, str | int], int]:
     # Check if user with given username already exists
     user = database.get_instance(models.User, username=request.form.get("username"))
     if user:
-        flash(f"User with {request.form.get('username')} username already exists.")
+        flash(
+            f"User with {request.form.get('username')} username already exists.<br>"
+            f'Go to <a href="{url_for("auth.login")}">login page</a>.'
+        )
         return redirect(url_for("auth.signup"))
 
     # Add user to database
