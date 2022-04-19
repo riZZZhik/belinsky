@@ -43,7 +43,8 @@ def create_app() -> Flask:
         app.add_url_rule("/", view_func=home)
         app.register_blueprint(routes.create_blueprint_auth())
         app.register_blueprint(routes.create_blueprint_observability())
-        app.register_blueprint(routes.create_blueprint_phrase_finder())
+        for module in config.MODULES:
+            app.register_blueprint(getattr(routes, "create_blueprint_" + module)())
 
     return app
 
