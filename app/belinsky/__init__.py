@@ -18,16 +18,15 @@ def home():
     return redirect(url_for("auth.login"))
 
 
-# pylint: disable=fixme
+# pylint: disable=import-outside-toplevel
 def create_app() -> Flask:
     """Initialize belinsky Flask application."""
     app = Flask("Belinsky")
     app.config["SECRET_KEY"] = config.SECRET_KEY
 
-    # pylint: disable=import-outside-toplevel
+    # Initialize app modules and routes
     with app.app_context():
         # Import routes
-        # TODO: JSON  Responses for cURL requests
         from . import routes
 
         # Initialize database

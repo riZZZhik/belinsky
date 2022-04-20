@@ -7,7 +7,6 @@ SECRET_KEY = os.environ.get("BELINSKY_SECRET_KEY", secrets.token_hex(16))
 
 MODULES = os.environ.get("BELINSKY_MODULES", "phrase_finder").split(",")
 
-
 # Database config
 if "BELINSKY_POSTGRES_URI" in os.environ:
     BELINSKY_POSTGRES_URI = os.environ["BELINSKY_POSTGRES_URI"]
