@@ -18,16 +18,15 @@ def home():
     return redirect(url_for("auth.login"))
 
 
-# pylint: disable=fixme
+# pylint: disable=import-outside-toplevel
 def create_app() -> Flask:
     """Initialize belinsky Flask application."""
     app = Flask("Belinsky")
     app.config["SECRET_KEY"] = config.SECRET_KEY
 
-    # pylint: disable=import-outside-toplevel
+    # Initialize app modules and routes
     with app.app_context():
         # Import routes
-        # TODO: JSON  Responses for cURL requests
         from . import routes
 
         # Initialize database
@@ -43,7 +42,8 @@ def create_app() -> Flask:
         app.add_url_rule("/", view_func=home)
         app.register_blueprint(routes.create_blueprint_auth())
         app.register_blueprint(routes.create_blueprint_observability())
-        app.register_blueprint(routes.create_blueprint_phrase_finder())
+        for module in config.MODULES:
+            app.register_blueprint(getattr(routes, "create_blueprint_" + module)())
 
     return app
 
