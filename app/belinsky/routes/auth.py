@@ -39,24 +39,27 @@ def signup() -> Response | str | tuple[dict[str, str | int], int]:
     if current_user.is_authenticated:
         return redirect(url_for("home"))
 
-    # Return template if request.method is GET
-    if request.method == "GET":
+    # Process user data
+    try:
+        # Return template if request.method is GET
+        assert request.method != "GET"
+
+        # Process form
+        username, password, remember = _get_auth_form()
+        assert username and password
+
+        # Check if user with given username already exists
+        if database.get_instance(models.User, username=username):
+            flash(
+                f"User with {username} username already exists.<br>"
+                f'Go to <a href="{url_for("auth.login")}">login page</a>.'
+            )
+            assert False
+
+    except AssertionError:
         return render_template("signup.html")
 
-    # Process input data
-    username, password, remember = _get_auth_form()
-    if not username or not password:
-        return render_template("signup.html")
-
-    # Check if user with given username already exists
-    if database.get_instance(models.User, username=username):
-        flash(
-            f"User with {username} username already exists.<br>"
-            f'Go to <a href="{url_for("auth.login")}">login page</a>.'
-        )
-        return render_template("signup.html")
-
-    # Add user to database
+    # Add user to database and login
     user = database.add_instance(
         models.User,
         lambda i: i.set_password(password),
@@ -64,6 +67,7 @@ def signup() -> Response | str | tuple[dict[str, str | int], int]:
     )
     login_user(user, remember=remember)
 
+    # Return json response or redirect to home
     if request.form.get("raw"):
         response = {
             "info": f"Successfully signed up as {username}.",
@@ -82,28 +86,32 @@ def login() -> Response | str | tuple[dict[str, str | int], int]:
     if current_user.is_authenticated:
         return redirect(url_for("home"))
 
-    # Return template if request.method is GET
-    if request.method == "GET":
-        return render_template("login.html")
+    # Process user data
+    try:
+        # Return template if request.method is GET
+        assert request.method != "GET"
 
-    # Process input data
-    username, password, remember = _get_auth_form()
-    if not username or not password:
-        return render_template("login.html")
+        # Process form
+        username, password, remember = _get_auth_form()
+        assert username and password
 
-    # Check if user exists and password correct
-    user = database.get_instance(models.User, username=username)
-    if not user:
-        flash(f"User with {username} username not found.")
-        return render_template("login.html")
+        # Check if user exists and password correct
+        user = database.get_instance(models.User, username=username)
+        if not user:
+            flash(f"User with {username} username not found.")
+            assert False
 
-    if not user.check_password(password):
-        flash("Invalid password. Please try again.")
+        if not user.check_password(password):
+            flash("Invalid password. Please try again.")
+            assert False
+
+    except AssertionError:
         return render_template("login.html")
 
     # Login user
     login_user(user, remember=remember)
 
+    # Return json response or redirect to home
     if request.form.get("raw"):
         response = {
             "info": f"Successfully logged in as {username}.",
