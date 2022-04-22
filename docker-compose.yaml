@@ -3,7 +3,7 @@ services:
     build:
       context: app/
       target: production
-    command: sh start_gunicorn.sh
+    command: gunicorn wsgi:app --config "${BELINSKY_GUNICORN_CONFIG-gunicorn_config.py}"
     container_name: belinsky_app
     restart: unless-stopped
 

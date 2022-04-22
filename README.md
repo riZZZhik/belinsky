@@ -26,7 +26,7 @@
 ## Run observability
 `docker-compose -f docker-compose.observability.yaml up --build`
 
-### Envs:
+### Environments:
 - BELINSKY_OBSERVABILITY_PORT (default: 4800) - Port to forward Grafana on.
 
 ## Run tests

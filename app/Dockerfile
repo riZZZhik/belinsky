@@ -19,10 +19,9 @@ FROM base as production
 # Copy production work files
 COPY wsgi.py .
 COPY gunicorn_config.py .
-COPY start_gunicorn.sh .
 
 # Default execute
-CMD ["sh", "start_gunicorn.sh"]
+CMD ["gunicorn", "wsgi:app", "--config ${BELINSKY_GUNICORN_CONFIG-gunicorn_config.py}"]
 
 # Create test target
 FROM base as test
