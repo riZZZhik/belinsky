@@ -16,6 +16,7 @@
 - BELINSKY_GOOGLE_CLOUD_CREDENTIALS (default: None) - Json string containing the GCP service credentials. Required for "text_analyzer" module.
 
 #### Gunicorn envs:
+- BELINSKY_GUNICORN_CONFIG (defalut: gunicorn_config.py) - Path to Gunicorn config file.
 - BELINSKY_NUM_WORKERS (default: 4) - Number of worker processes for handling requests.
 - BELINSKY_NUM_THREADS (default: 1) - Number of threads.
   - _NB! The suggested maximum number of workers\*threads is (2*CPU)+1_
