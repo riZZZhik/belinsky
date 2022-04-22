@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %} Belinsky {% endblock %}
+
+{% block content %}
+    <div class="column is-half is-offset-one-quarter">
+        <h3 class="title">Belinsky</h3>
+
+        <div class="box">
+            <div class="columns" style="margin: 25px;">
+                {% for module_name, module_link in available_modules.values() %}
+                    <div class="column">
+                        <a class="notification is-info" href="{{ module_link }}">
+                            {{ module_name }}
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

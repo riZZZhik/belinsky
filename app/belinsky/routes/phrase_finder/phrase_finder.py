@@ -24,10 +24,10 @@ class Token:
 
 
 class PhraseFinder:
-    """Compare phrases"""
+    """Belinsky PhraseFinder nlp worker."""
 
     def __init__(self):
-        """Initialize class variables."""
+        """Initialize the PhraseFinder."""
 
         # Initialize spaCy
         base_spacy_languages = {"en": "en_core_web_sm", "ru": "ru_core_news_sm"}

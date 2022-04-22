@@ -1,6 +1,6 @@
 """Initialize belinsky Flask application."""
 # Import Flask
-from flask import Flask, url_for, redirect
+from flask import Flask, url_for, redirect, render_template
 from flask_login import current_user
 
 # Module imports
@@ -12,10 +12,15 @@ from .routes import login_manager
 
 def home():
     """Redirect to home page."""
-    if current_user.is_authenticated:
-        return redirect(url_for("phrase_finder.phrase_finder"))
+    # If user not authenticated redirect to login page.
+    if not current_user.is_authenticated:
+        return redirect(url_for("auth.login"))
 
-    return redirect(url_for("auth.login"))
+    available_modules = {
+        "phrase_finder": ("Phrase Finder", url_for("phrase_finder.phrase_finder"))
+    }
+
+    return render_template("home.html", available_modules=available_modules)
 
 
 # pylint: disable=import-outside-toplevel
