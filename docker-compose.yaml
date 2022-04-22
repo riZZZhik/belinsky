@@ -8,6 +8,9 @@ services:
     restart: unless-stopped
 
     environment:
+      BELINSKY_SECRET_KEY: ${BELINSKY_SECRET_KEY}
+      BELINSKY_GOOGLE_CLOUD_CREDENTIALS: ${BELINSKY_GOOGLE_CLOUD_CREDENTIALS}
+
       BELINSKY_POSTGRES_USER: belinsky
       BELINSKY_POSTGRES_PASSWORD: belinsky_db_password
       BELINSKY_POSTGRES_HOST: belinsky_database
