@@ -159,6 +159,13 @@ def test_compare_phrases() -> None:
     assert response == correct_response
 
 
+# Test application
+def test_healthcheck(client: FlaskClient) -> None:
+    """Test application healthcheck."""
+    response = client.get("/healthcheck")
+    assert response.json["status"] == "success"
+
+
 # Test auth routes
 def test_signup(app: Flask, client: FlaskClient) -> None:
     """Test signup method with filled form."""

@@ -1,4 +1,5 @@
 """Belinsky database worker."""
+# pylint: disable=no-member
 import typing as t
 
 from flask_sqlalchemy import SQLAlchemy
@@ -6,21 +7,18 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-# pylint: disable=no-member
 def get_instance(model: db.Model, **kwargs) -> db.Model:
     """Get instance using model query."""
     instance = model.query.filter_by(**kwargs).first()
     return instance
 
 
-# pylint: disable=no-member
 def get_all(model: db.Model) -> db.Model:
     """Get all instances of a model."""
     instances = model.query.all()
     return instances
 
 
-# pylint: disable=no-member
 def add_instance(
     model: db.Model, instance_func: t.Callable[[db.Model], None] = None, **kwargs
 ) -> db.Model:
@@ -33,14 +31,12 @@ def add_instance(
     return instance
 
 
-# pylint: disable=no-member
 def delete_instance(model: db.Model, **kwargs) -> None:
     """Delete an instance from the database."""
     db.session.delete(get_instance(model, **kwargs))
     commit_changes()
 
 
-# pylint: disable=no-member
 def edit_instance(
     model: db.Model, query_filter: dict[str, t.Any], **kwargs
 ) -> db.Model:
@@ -52,7 +48,6 @@ def edit_instance(
     return instance
 
 
-# pylint: disable=no-member
 def commit_changes() -> None:
     """Commit changes to database."""
     db.session.commit()

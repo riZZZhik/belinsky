@@ -1,6 +1,6 @@
 """Initialize belinsky Flask application."""
 # Import Flask
-from flask import Flask, url_for, redirect
+from flask import Flask, url_for, redirect, render_template
 from flask_login import current_user
 
 # Module imports
@@ -12,22 +12,26 @@ from .routes import login_manager
 
 def home():
     """Redirect to home page."""
-    if current_user.is_authenticated:
-        return redirect(url_for("phrase_finder.phrase_finder"))
+    # If user not authenticated redirect to login page.
+    if not current_user.is_authenticated:
+        return redirect(url_for("auth.login"))
 
-    return redirect(url_for("auth.login"))
+    available_modules = {
+        "phrase_finder": ("Phrase Finder", url_for("phrase_finder.phrase_finder"))
+    }
+
+    return render_template("home.html", available_modules=available_modules)
 
 
-# pylint: disable=fixme
+# pylint: disable=import-outside-toplevel
 def create_app() -> Flask:
     """Initialize belinsky Flask application."""
     app = Flask("Belinsky")
     app.config["SECRET_KEY"] = config.SECRET_KEY
 
-    # pylint: disable=import-outside-toplevel
+    # Initialize app modules and routes
     with app.app_context():
         # Import routes
-        # TODO: JSON  Responses for cURL requests
         from . import routes
 
         # Initialize database
@@ -43,7 +47,8 @@ def create_app() -> Flask:
         app.add_url_rule("/", view_func=home)
         app.register_blueprint(routes.create_blueprint_auth())
         app.register_blueprint(routes.create_blueprint_observability())
-        app.register_blueprint(routes.create_blueprint_phrase_finder())
+        for module in config.MODULES:
+            app.register_blueprint(getattr(routes, "create_blueprint_" + module)())
 
     return app
 

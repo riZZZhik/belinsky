@@ -17,6 +17,20 @@ LOGOUT_LATENCY = Summary("logout_latency", 'Latency of "logout" request')
 DELETE_USER_LATENCY = Summary("delete_user_latency", 'Latency of "delete-user" request')
 
 
+def _get_auth_form():
+    """Process auth form"""
+    username = request.form.get("username", "").lower()
+    password = request.form.get("password")
+    remember = request.form.get("remember") == "on"
+
+    if not username:
+        flash("No username entered.<br>Please try again.")
+    if not password:
+        flash("No password entered.<br>Please try again.")
+
+    return username, password, remember
+
+
 @SIGNUP_LATENCY.time()
 def signup() -> Response | str | tuple[dict[str, str | int], int]:
     """Sign up"""
@@ -25,27 +39,38 @@ def signup() -> Response | str | tuple[dict[str, str | int], int]:
     if current_user.is_authenticated:
         return redirect(url_for("home"))
 
-    # Return template if request.method is GET
-    if request.method == "GET":
+    # Process user data
+    try:
+        # Return template if request.method is GET
+        assert request.method != "GET"
+
+        # Process form
+        username, password, remember = _get_auth_form()
+        assert username and password
+
+        # Check if user with given username already exists
+        if database.get_instance(models.User, username=username):
+            flash(
+                f"User with {username} username already exists.<br>"
+                f'Go to <a href="{url_for("auth.login")}">login page</a>.'
+            )
+            assert False
+
+    except AssertionError:
         return render_template("signup.html")
 
-    # Check if user with given username already exists
-    user = database.get_instance(models.User, username=request.form.get("username"))
-    if user:
-        flash(f"User with {request.form.get('username')} username already exists.")
-        return redirect(url_for("auth.signup"))
-
-    # Add user to database
+    # Add user to database and login
     user = database.add_instance(
         models.User,
-        lambda i: i.set_password(request.form.get("password")),
-        username=request.form.get("username"),
+        lambda i: i.set_password(password),
+        username=username,
     )
-    login_user(user, remember=True)
+    login_user(user, remember=remember)
 
+    # Return json response or redirect to home
     if request.form.get("raw"):
         response = {
-            "info": f'Successfully signed up as {request.form.get("username")}.',
+            "info": f"Successfully signed up as {username}.",
             "status": 200,
         }
         return response, 200
@@ -61,26 +86,35 @@ def login() -> Response | str | tuple[dict[str, str | int], int]:
     if current_user.is_authenticated:
         return redirect(url_for("home"))
 
-    # Return template if request.method is GET
-    if request.method == "GET":
+    # Process user data
+    try:
+        # Return template if request.method is GET
+        assert request.method != "GET"
+
+        # Process form
+        username, password, remember = _get_auth_form()
+        assert username and password
+
+        # Check if user exists and password correct
+        user = database.get_instance(models.User, username=username)
+        if not user:
+            flash(f"User with {username} username not found.")
+            assert False
+
+        if not user.check_password(password):
+            flash("Invalid password. Please try again.")
+            assert False
+
+    except AssertionError:
         return render_template("login.html")
 
-    # Check if user exists and password correct
-    user = database.get_instance(models.User, username=request.form.get("username"))
-    if not user:
-        flash(f"User with {request.form.get('username')} username not found.")
-        return redirect(url_for("auth.login"))
-
-    if not user.check_password(request.form.get("password")):
-        flash("Invalid password. Please try again.")
-        return redirect(url_for("auth.login"))
-
     # Login user
-    login_user(user, remember=request.form.get("remember") == "on")
+    login_user(user, remember=remember)
 
+    # Return json response or redirect to home
     if request.form.get("raw"):
         response = {
-            "info": f'Successfully logged in as {request.form.get("username")}.',
+            "info": f"Successfully logged in as {username}.",
             "status": 200,
         }
         return response, 200
