@@ -14,7 +14,7 @@ MODULES = os.environ.get("BELINSKY_MODULES", "phrase_finder,text_analyzer").spli
 # Text Analyzer
 GOOGLE_CLOUD_CREDENTIALS = os.environ.get("BELINSKY_GOOGLE_CLOUD_CREDENTIALS")
 if GOOGLE_CLOUD_CREDENTIALS:
-    GOOGLE_CLOUD_CREDENTIALS = json.loads(GOOGLE_CLOUD_CREDENTIALS)
+    GOOGLE_CLOUD_CREDENTIALS = json.loads(GOOGLE_CLOUD_CREDENTIALS, strict=False)
 elif "text_analyzer" in MODULES:
     raise ValueError(
         'BELINSKY_GOOGLE_CLOUD_CREDENTIALS required for "text_analyzer" module, '

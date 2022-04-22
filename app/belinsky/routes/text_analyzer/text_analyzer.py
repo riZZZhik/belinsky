@@ -1,5 +1,5 @@
 """Belinsky TextAnalyzer nlp worker."""
-from google.cloud import language_v1beta2 as api
+from google.cloud import language_v1 as api
 from google.oauth2.service_account import Credentials
 
 
@@ -20,9 +20,9 @@ class TextAnalyzer:
     @staticmethod
     def available_analyzis():
         """List of available analyzis."""
-        return ["Classify text"]
+        return {"Classify text": "classify_text"}
 
-    def classify_text(self, text):
+    def classify_text(self, text: str) -> api.ClassifyTextResponse:
         """Classifies a document into categories."""
         document = self._create_document(text)
 

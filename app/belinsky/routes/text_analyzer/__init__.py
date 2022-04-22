@@ -30,11 +30,37 @@ def text_analyzer() -> str | tuple[dict[str, str | list | int], int]:
         return render_template(
             "text_analyzer.html",
             analyzis=None,
-            available_analyzis=available_analyzis
+            available_analyzis=available_analyzis.keys(),
         )
 
-    flash("Not implemented yet. Contact Dmitry Barsukoff <t.me/riZZZhik>")
-    return render_template("text_analyzer.html")
+    # Process input data
+    text = request.form.get("text")
+    analyzis_type = available_analyzis[request.form.get("analyzis_type")]
+    analyzis = None
+
+    # Process text
+    if not text:
+        flash("No text given. Try again please.")
+    else:
+        analyzis = getattr(text_analyzer_worker, analyzis_type)(text)
+    print(analyzis, flush=True)
+
+    # Response with raw data if required
+    if request.form.get("raw"):
+        response = {
+            "text": text,
+            "analyzis_type": analyzis_type,
+            "analyzis_result": analyzis,
+            "status": 200,
+        }
+        return response, 200
+
+    return render_template(
+        "text_analyzer.html",
+        text=text,
+        analyzis=analyzis,
+        available_analyzis=available_analyzis.keys(),
+    )
 
 
 def create_blueprint_text_analyzer() -> Blueprint:
