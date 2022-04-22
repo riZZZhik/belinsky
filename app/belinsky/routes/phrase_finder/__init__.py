@@ -8,7 +8,7 @@ from .phrase_finder import PhraseFinder, UnknownLanguageError
 
 # Initialize prometheus metrics.
 PHRASE_FINDER_LATENCY = Summary(
-    "pf_phrase_finder_latency", 'Latency of "phrase-finder" request'
+    "phrase_finder_latency", 'Latency of "phrase-finder" request'
 )
 
 # Initialize PhraseFinder worker.
@@ -19,6 +19,7 @@ phrase_finder_worker = PhraseFinder()
 @login_required
 def phrase_finder() -> str | tuple[dict[str, str | list | int], int]:
     """Generate Phrase Finder home page.
+
     Returns:
         str: HTMl source of Phrase Finder page.
     """
