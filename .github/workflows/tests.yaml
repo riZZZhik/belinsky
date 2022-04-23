@@ -8,7 +8,7 @@ on:
 
 jobs:
   run_tests:
-    name: Run Unittests
+    name: Run Tests
     runs-on: ubuntu-latest
     env:
       COMPOSE_FILE: docker-compose.test.yaml
@@ -23,5 +23,5 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Run Unittests
+      - name: Run Tests
         run: docker-compose -f $COMPOSE_FILE up --build --abort-on-container-exit

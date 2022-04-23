@@ -1,87 +1,13 @@
-"""Unittest Belinsky application."""
-# pylint: disable=redefined-outer-name
-import typing as t
-from contextlib import contextmanager
-
-import pytest
-from flask import Flask, template_rendered
+"""Test Belinsky Phrase Finder"""
+from flask import Flask
 from flask.testing import FlaskClient
 
-from belinsky import create_app, database, models
-from belinsky.routes.phrase_finder.phrase_finder import PhraseFinder, Token
-from belinsky.routes.utils import translit
+from . import utils
+from belinsky.routes.phrase_finder.phrase_finder import PhraseFinder, translit, Token
 
-
-# Utils to interact with app database
-def _add_user(_app: Flask, username: str, password: str) -> None:
-    """Add user model to database."""
-    with _app.app_context():
-        if database.get_instance(models.User, username=username) is None:
-            database.add_instance(
-                models.User,
-                lambda instance: instance.set_password(password),
-                username=username,
-            )
-
-
-def _delete_user(_app: Flask, username: str) -> None:
-    """Delete user model from database."""
-    with _app.app_context():
-        if database.get_instance(models.User, username=username) is not None:
-            database.delete_instance(models.User, username=username)
-
-
-# Utils to assert rendered template
-@contextmanager
-def captured_templates(app):
-    """Get rendered_template information."""
-    recorded = []
-
-    # pylint: disable=unused-argument
-    def record(sender, template, context, **extra):
-        recorded.append((template, context))
-
-    template_rendered.connect(record, app)
-    try:
-        yield recorded
-    finally:
-        template_rendered.disconnect(record, app)
-
-
-# Initialize pytest fixtures
-credentials = {"username": "unittester", "password": "test_password"}
 comparer = PhraseFinder()
 
 
-@pytest.fixture()
-def app() -> t.Generator:
-    """Initialize Belinsky test application."""
-    # Initialize app
-    app = create_app()
-
-    # Create test user and remove old ones
-    _add_user(app, credentials["username"], credentials["password"])
-    _delete_user(app, "unittester_1")
-
-    yield app
-
-
-@pytest.fixture()
-def client(app: Flask):
-    """Initialize Belinsky test client."""
-    _client = app.test_client()
-    _client.post("/login", data=credentials)
-
-    return _client
-
-
-@pytest.fixture()
-def runner(app: Flask):
-    """Initialize Belinsky test cli runner."""
-    return app.test_cli_runner()
-
-
-# Test Phrase Finder Worker
 def test_lemmatizer() -> None:
     """Test lemmatizer russian word."""
     response = comparer.lemmatize("Апельсины", "ru")
@@ -159,80 +85,10 @@ def test_compare_phrases() -> None:
     assert response == correct_response
 
 
-# Test application
-def test_healthcheck(client: FlaskClient) -> None:
-    """Test application healthcheck."""
-    response = client.get("/healthcheck")
-    assert response.json["status"] == "success"
-
-
-# Test auth routes
-def test_signup(app: Flask, client: FlaskClient) -> None:
-    """Test signup method with filled form."""
-    client.post("/logout")
-    response = client.post(
-        "/signup",
-        data={"username": "unittester_1", "password": "test_password", "raw": True},
-    )
-    _delete_user(app, "unittester_1")
-
-    assert response.status_code == 200
-
-
-def test_signup_template(app: Flask, client: FlaskClient) -> None:
-    """Test signup method."""
-    client.post("/logout")
-
-    with captured_templates(app) as templates:
-        response = client.get("/signup")
-        assert response.status_code == 200
-        assert len(templates) == 1
-        template, _ = templates[0]
-        assert template.name == "signup.html"
-
-
-def test_login(client: FlaskClient) -> None:
-    """Test login method with filled form."""
-    client.post("/logout")
-    response = client.post("login", data=credentials | {"raw": True})
-
-    assert response.status_code == 200
-
-
-def test_login_template(app: Flask, client: FlaskClient) -> None:
-    """Test login method."""
-    client.post("/logout")
-    with captured_templates(app) as templates:
-        response = client.get("/login")
-        assert response.status_code == 200
-        assert len(templates) == 1
-        template, _ = templates[0]
-        assert template.name == "login.html"
-
-
-def test_delete(app: Flask, client: FlaskClient) -> None:
-    """Test delete method."""
-    _add_user(app, "unittester_1", "test_password")
-
-    response = client.post(
-        "delete-user",
-        json={"username": "unittester_1", "password": "test_password"},
-    )
-
-    assert response.status_code == 200
-
-
-def test_logout(client: FlaskClient) -> None:
-    """Test logout method."""
-    response = client.post("/logout", data={"raw": True})
-
-    assert response.status_code == 200
-
-
 # Test phrase finder
 def test_find_phrase_template(app: Flask, client: FlaskClient) -> None:
     """Test find phrase method."""
-    with captured_templates(app) as templates:
+    with utils.captured_templates(app) as templates:
         response = client.get("/phrase-finder")
         assert response.status_code == 200
         assert len(templates) == 1
@@ -242,7 +98,7 @@ def test_find_phrase_template(app: Flask, client: FlaskClient) -> None:
 
 def test_find_phrase_post(app: Flask, client: FlaskClient) -> None:
     """Test find phrase method with russian text."""
-    with captured_templates(app) as templates:
+    with utils.captured_templates(app) as templates:
         response = client.post(
             "/phrase-finder",
             data={"text": "Клара у карла украла кораллы", "phrases": "коралл"},

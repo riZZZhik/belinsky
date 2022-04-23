@@ -1,0 +1,2 @@
+"""Test Belinsky Text Analyzer"""
+
