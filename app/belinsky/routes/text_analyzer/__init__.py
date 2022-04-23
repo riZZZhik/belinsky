@@ -1,6 +1,7 @@
 """Belinsky TextAnalyzer blueprint."""
 from flask import Blueprint, request, render_template, flash
 from flask_login import login_required
+from google.api_core import exceptions
 from prometheus_client import Summary
 
 from .text_analyzer import TextAnalyzer
@@ -42,8 +43,10 @@ def text_analyzer() -> str | tuple[dict[str, str | list | int], int]:
     if not text:
         flash("No text given. Try again please.")
     else:
-        analyzis = getattr(text_analyzer_worker, analyzis_type)(text)
-    print(analyzis, flush=True)
+        try:
+            analyzis = getattr(text_analyzer_worker, analyzis_type)(text)
+        except exceptions.InvalidArgument as e:
+            flash(f"Unknown language: {e.message[13:15]}.")
 
     # Response with raw data if required
     if request.form.get("raw"):
