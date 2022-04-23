@@ -17,7 +17,8 @@ def home():
         return redirect(url_for("auth.login"))
 
     available_modules = {
-        "phrase_finder": ("Phrase Finder", url_for("phrase_finder.phrase_finder"))
+        "phrase_finder": ("Phrase Finder", url_for("phrase_finder.phrase_finder")),
+        "text_analyzer": ("Text Analyzer", url_for("text_analyzer.text_analyzer")),
     }
 
     return render_template("home.html", available_modules=available_modules)

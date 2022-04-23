@@ -8,11 +8,16 @@ services:
     restart: unless-stopped
 
     environment:
+      BELINSKY_SECRET_KEY: ${BELINSKY_SECRET_KEY}
+      BELINSKY_GOOGLE_CLOUD_CREDENTIALS: ${BELINSKY_GOOGLE_CLOUD_CREDENTIALS}
+
       BELINSKY_POSTGRES_USER: belinsky
       BELINSKY_POSTGRES_PASSWORD: belinsky_db_password
       BELINSKY_POSTGRES_HOST: belinsky_database
       BELINSKY_POSTGRES_PORT: 5432
       BELINSKY_POSTGRES_DB: belinsky_db
+
+      GRPC_POLL_STRATEGY: poll
 
     ports:
       - "${BELINSKY_PORT-4958}:5000"

@@ -30,7 +30,7 @@ FROM base as test
 RUN pip install pytest==7.1.1 blinker==1.4
 
 # Copy test work files
-COPY app_test.py .
+COPY tests tests
 
 # Default execute
 CMD ["pytest", "-W ignore::DeprecationWarning"]
