@@ -1,6 +1,7 @@
 [![Tests](https://github.com/riZZZhik/belinsky/workflows/Tests/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/tests.yaml)
 [![Code analyzis](https://github.com/riZZZhik/belinsky/workflows/Code%20analyzis/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/code_analyzis.yaml)
 [![Build and push](https://github.com/riZZZhik/belinsky/workflows/Push%20new%20release%20to%20Docker%20Hub/badge.svg)](https://github.com/riZZZhik/belinsky/actions/workflows/push_docker_image.yaml)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 # How to use
 
