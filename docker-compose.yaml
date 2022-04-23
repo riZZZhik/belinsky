@@ -17,6 +17,8 @@ services:
       BELINSKY_POSTGRES_PORT: 5432
       BELINSKY_POSTGRES_DB: belinsky_db
 
+      GRPC_POLL_STRATEGY: poll
+
     ports:
       - "${BELINSKY_PORT-4958}:5000"
 
