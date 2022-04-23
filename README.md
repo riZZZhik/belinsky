@@ -12,6 +12,9 @@
 - BELINSKY_SECRET_KEY (default: secrets.token_hex(16)) - App's secret key.
 - BELINSKY_PORT (default: 4958) - Port to forward belinsky on.
 
+#### Modules envs:
+- BELINSKY_GOOGLE_CLOUD_CREDENTIALS (default: None) - Json string containing the GCP service credentials. Required for "text_analyzer" module.
+
 #### Gunicorn envs:
 - BELINSKY_GUNICORN_CONFIG (defalut: gunicorn_config.py) - Path to Gunicorn config file.
 - BELINSKY_NUM_WORKERS (default: 4) - Number of worker processes for handling requests.

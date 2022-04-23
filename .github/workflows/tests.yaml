@@ -25,3 +25,5 @@ jobs:
 
       - name: Run Tests
         run: docker-compose -f $COMPOSE_FILE up --build --abort-on-container-exit
+        env:
+          BELINSKY_GOOGLE_CLOUD_CREDENTIALS: ${{ secrets.GOOGLE_CLOUD_CREDENTIALS }}

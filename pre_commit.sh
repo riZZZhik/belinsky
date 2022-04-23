@@ -1,2 +1,2 @@
-black ./**/**.py
-pylint --disable=import-error ./**/**.py
+black **/**.py
+pylint --disable=import-error **/**.py
