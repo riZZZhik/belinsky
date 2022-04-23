@@ -1,4 +1,4 @@
-"""Format phrase finder outputs."""
+"""Format Phrase Analyzer outputs."""
 
 
 def bold_phrases(

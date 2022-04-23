@@ -4,6 +4,7 @@ from flask_login import login_required
 from google.api_core import exceptions
 from prometheus_client import Summary
 
+from .formatter import format_analyzis
 from .text_analyzer import TextAnalyzer
 from ... import config
 
@@ -45,6 +46,7 @@ def text_analyzer() -> str | tuple[dict[str, str | list | int], int]:
     else:
         try:
             analyzis = getattr(text_analyzer_worker, analyzis_type)(text)
+            analyzis = format_analyzis(analyzis, analyzis_type)
         except exceptions.InvalidArgument as e:
             flash(f"Unknown language: {e.message[13:15]}.")
 
