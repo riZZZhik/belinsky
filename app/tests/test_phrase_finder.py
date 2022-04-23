@@ -93,8 +93,7 @@ def test_phrase_finder_template(app: Flask, client: FlaskClient) -> None:
         response = client.get("/phrase-finder")
         assert response.status_code == 200
         assert len(templates) == 1
-        template, _ = templates[0]
-        assert template.name == "phrase_finder.html"
+        assert templates[0][0].name == "phrase_finder.html"
 
 
 def test_phrase_finder_post(app: Flask, client: FlaskClient) -> None:
@@ -106,9 +105,7 @@ def test_phrase_finder_post(app: Flask, client: FlaskClient) -> None:
         )
         assert response.status_code == 200
         assert len(templates) == 1
-        template, context = templates[0]
-        assert template.name == "phrase_finder.html"
-        assert "<b>кораллы</b>" in context["found_phrases"]
+        assert "<b>кораллы</b>" in templates[0][1]["found_phrases"]
 
 
 def test_phrase_finder_translit(client: FlaskClient) -> None:

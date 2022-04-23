@@ -2,7 +2,9 @@
 from google.cloud import language_v1 as api
 
 
-def format_analyzis(analyzis: api.ClassifyTextResponse, analyzis_type: str) -> None | str:
+def format_analyzis(
+    analyzis: api.ClassifyTextResponse, analyzis_type: str
+) -> None | str:
     """Format Text Analyzer outputs.
 
     Args:
@@ -14,7 +16,7 @@ def format_analyzis(analyzis: api.ClassifyTextResponse, analyzis_type: str) -> N
             Formatted Text Analyzer outputs.
     """
 
-    if analyzis_type == 'classify_text':
+    if analyzis_type == "classify_text":
         return f"Text type: <b>{analyzis.categories[0].name[1:]}</b>"
 
     raise ValueError(f"Unknown analyzis type: {analyzis_type}")
