@@ -155,19 +155,6 @@ class PhraseFinder:
         return result
 
     def _process_text(self, text: str, language: str) -> list:
-        # Preprocess russian text
-        if language == "ru":
-            # Split hyphened words
-            processed_text = []
-            for word in text.split():
-                if "-" in word and not all(symbol == "-" for symbol in word):
-                    split = word.split("-")
-                    word = " " * len("".join(split[:-1])) + " " + split[-1]
-
-                processed_text.append(word)
-
-            text = " ".join(processed_text)
-
         # Get tokens from spaCy
         tokens = self._get_lemmatizer(language)(text)
 
