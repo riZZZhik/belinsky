@@ -1,6 +1,9 @@
 """Belinsky observability blueprint."""
+import os
+
 from flask import Blueprint
-from healthcheck import EnvironmentDump, HealthCheck
+from healthcheck import HealthCheck
+from healthcheck.security import safe_dict
 from prometheus_client import CollectorRegistry, generate_latest, multiprocess
 
 from ..database import get_all
@@ -23,6 +26,12 @@ def metrics_prometheus() -> tuple[bytes, int]:
     return data, 200
 
 
+# Create environment function
+def environment() -> tuple[dict, int]:
+    """Generate application environment response."""
+    return safe_dict(os.environ, ["key", "token", "pass", "credentials"]), 200
+
+
 def create_blueprint_observability() -> Blueprint:
     """Create observability blueprint."""
     # Create blueprint
@@ -33,8 +42,8 @@ def create_blueprint_observability() -> Blueprint:
     health.add_check(check_database)
     observability_bp.add_url_rule("/healthcheck", "healthcheck", view_func=health.run)
 
-    env_dump = EnvironmentDump()
-    observability_bp.add_url_rule("/environment", "environment", view_func=env_dump.run)
+    # Register environment route
+    observability_bp.add_url_rule("/environment", "environment", view_func=environment)
 
     # Register prometheus route
     observability_bp.add_url_rule(
