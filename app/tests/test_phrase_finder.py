@@ -4,7 +4,7 @@ from flask.testing import FlaskClient
 
 from . import utils
 from belinsky.routes.phrase_finder import phrase_finder_worker
-from belinsky.routes.phrase_finder.phrase_finder import translit, Token
+from belinsky.routes.phrase_finder.phrase_finder import Token
 
 
 # Test Phrase Finder worker
@@ -40,13 +40,6 @@ def test_lemmatizer_en() -> None:
     """Test lemmatizer from Phrase Finder with english word."""
     response = phrase_finder_worker.lemmatize("stunned", "en")
     correct_response = ["stun"]
-    assert response == correct_response
-
-
-def test_translit_ru() -> None:
-    """Test lemmatizers with russian word using english translit."""
-    response = translit("banan", "ru")
-    correct_response = "банан"
     assert response == correct_response
 
 
@@ -106,22 +99,6 @@ def test_phrase_finder_post(app: Flask, client: FlaskClient) -> None:
         assert response.status_code == 200
         assert len(templates) == 1
         assert "<b>кораллы</b>" in templates[0][1]["found_phrases"]
-
-
-def test_phrase_finder_translit(client: FlaskClient) -> None:
-    """Test Phrase Finder with russian text in english translit."""
-    response = client.post(
-        "/phrase-finder",
-        data={
-            "text": "маме и папе по bananu",
-            "phrases": "бананы",
-            "language": "ru",
-            "raw": True,
-        },
-    )
-
-    assert response.status_code == 200
-    assert {"бананы": [[15, 20]]} == response.json["found_phrases"]
 
 
 def test_phrase_finder_multiple_in_text(client: FlaskClient) -> None:
