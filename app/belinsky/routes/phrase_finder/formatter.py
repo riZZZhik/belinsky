@@ -29,4 +29,6 @@ def bold_phrases(
         old_end = end
     formatted_text += text[old_end:]
 
+    formatted_text = "<br>".join(formatted_text.split('\r\n'))
+
     return formatted_text
