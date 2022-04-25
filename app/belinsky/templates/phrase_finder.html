@@ -38,12 +38,8 @@
         </form>
 
         {% if found_phrases is not none %}
-            <div class="field is-horizontal box" style="margin-top: 50px">
-                <div class="field-body">
-                    <div class="field">
-                        <p>{{ found_phrases | safe }}</p>
-                    </div>
-                </div>
+            <div class="field has-text-left box" style="margin-top: 50px">
+                <p>{{ found_phrases | safe }}</p>
             </div>
         {% endif %}
     </div>
