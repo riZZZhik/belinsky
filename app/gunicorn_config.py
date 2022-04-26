@@ -38,10 +38,11 @@ def __repr__():
         "accesslog": accesslog,
         "errorlog": errorlog,
     }
-    return ", ".join(f"{key}: {value}" for key, value in config.items())
+    config = "; ".join(f"{key}: {value}" for key, value in config.items())
+    return "Gunicorn configuration: " + config
 
 
-logger.info("Gunicorn configuration: " + __repr__())
+logger.info(__repr__())
 
 
 # noinspection PyUnusedLocal

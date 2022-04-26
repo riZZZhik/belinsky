@@ -23,14 +23,23 @@ elif "text_analyzer" in MODULES:
 
 # Database config
 if "BELINSKY_POSTGRES_URI" in os.environ:
-    BELINSKY_POSTGRES_URI = os.environ["BELINSKY_POSTGRES_URI"]
+    POSTGRES_URI = os.environ["BELINSKY_POSTGRES_URI"]
 else:
-    user = os.environ.get("BELINSKY_POSTGRES_USER", "admin")
-    password = os.environ.get("BELINSKY_POSTGRES_PASSWORD", "admin")
-    host = os.environ.get("BELINSKY_POSTGRES_HOST", "localhost")
-    port = os.environ.get("BELINSKY_POSTGRES_PORT", 5432)
-    database = os.environ.get("BELINSKY_POSTGRES_DB", "belinsky_db")
-
-    BELINSKY_POSTGRES_URI = (
-        f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}"
+    POSTGRES_URI = (
+        f"postgresql+psycopg2://"
+        f"{os.environ.get('BELINSKY_POSTGRES_USER', 'admin')}:"
+        f"{os.environ.get('BELINSKY_POSTGRES_PASSWORD', 'admin')}@"
+        f"{os.environ.get('BELINSKY_POSTGRES_HOST', 'localhost')}:"
+        f"{os.environ.get('BELINSKY_POSTGRES_PORT', 5432)}/"
+        f"{os.environ.get('BELINSKY_POSTGRES_DB', 'belinsky_db')}"
     )
+
+
+def __repr__():
+    config = {
+        "secret_key": SECRET_KEY,
+        "modules": ", ".join(MODULES),
+        "postgres_uri": POSTGRES_URI,
+    }
+    config = "; ".join(f"{key}: {value}" for key, value in config.items())
+    return "Belinsky configuration: " + config
