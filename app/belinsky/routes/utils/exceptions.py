@@ -15,9 +15,7 @@ class UnknownLanguageError(Exception):
             known_langs (list): Known languages.
         """
 
-        lang = format_language_name(lang)[0]
+        self.lang = format_language_name(lang)[0]
         known_langs = format_language_name(known_langs)
-        self.message = (
-            f"Unknown language: {lang}. Please use one of: {', '.join(known_langs)}."
-        )
+        self.message = f"Unknown language: {self.lang}. Please use one of: {', '.join(known_langs)}."
         super().__init__(self.message)
