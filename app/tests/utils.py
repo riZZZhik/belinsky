@@ -12,8 +12,10 @@ def captured_templates(app):
     """Get rendered_template information."""
     recorded = []
 
+    # noinspection PyUnusedLocal
     # pylint: disable=unused-argument
     def record(sender, template, context, **extra):
+        """Append template and context to recorded templates."""
         recorded.append((template, context))
 
     template_rendered.connect(record, app)
