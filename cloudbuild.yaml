@@ -13,12 +13,17 @@ steps:
     entrypoint: pytest
     args: ["-W", "ignore::DeprecationWarning"]
     env:
-      - "BELINSKY_GOOGLE_CLOUD_CREDENTIALS=$_BELINSKY_GOOGLE_CLOUD_CREDENTIALS"
-      - "BELINSKY_POSTGRES_URI=$_BELINSKY_POSTGRES_URI"
+      - "BELINSKY_GOOGLE_CLOUD_CREDENTIALS=${_BELINSKY_GOOGLE_CLOUD_CREDENTIALS}"
+      - "BELINSKY_POSTGRES_URI=${_BELINSKY_POSTGRES_URI}"
 
   # Docker Build
   - name: "gcr.io/cloud-builders/docker"
-    args: ["build", "-t", "europe-north1-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/belinsky:${SHORT_SHA}", "."]
+    args: [
+      "build",
+      "--target", "production",
+      "-t", "europe-north1-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/belinsky:${SHORT_SHA}",
+      "app/."
+    ]
 
   # Docker push to Google Artifact Registry
   - name: "gcr.io/cloud-builders/docker"
