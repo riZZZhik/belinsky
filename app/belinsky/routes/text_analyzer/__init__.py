@@ -2,6 +2,7 @@
 from flask import Blueprint, request, render_template, flash
 from flask_login import login_required
 from google.api_core import exceptions
+from loguru import logger
 from prometheus_client import Summary
 
 from .formatter import format_analyzis
@@ -43,12 +44,19 @@ def text_analyzer() -> str | tuple[dict[str, str | list | int], int]:
     # Process text
     if not text:
         flash("No text given. Try again please.")
+        logger.debug(f"Text not found in {request} request.")
     else:
         try:
             analyzis = getattr(text_analyzer_worker, analyzis_type)(text)
-            analyzis = format_analyzis(analyzis, analyzis_type)
+            logger.debug(
+                f"Analyzed {analyzis} with {analyzis_type} type "
+                f"in text with {len(text)} length."
+            )
         except exceptions.InvalidArgument as exc:
             flash(f"Unknown language: {exc.message[13:15]}.")
+            logger.debug(
+                f'Unknown "{exc.message[13:15]}" language caught on {request} request.'
+            )
 
     # Response with raw data if required
     if request.form.get("raw"):
@@ -59,6 +67,10 @@ def text_analyzer() -> str | tuple[dict[str, str | list | int], int]:
             "status": 200,
         }
         return response, 200
+
+    # Format analyzis for html
+    if analyzis is not None:
+        analyzis = format_analyzis(analyzis, analyzis_type)
 
     return render_template(
         "text_analyzer.html",
@@ -80,6 +92,7 @@ def create_blueprint_text_analyzer() -> Blueprint:
         "/text-analyzer", view_func=text_analyzer, methods=["GET", "POST"]
     )
 
+    logger.debug("Created Text Analyzer blueprint.")
     return text_analyzer_bp
 
 

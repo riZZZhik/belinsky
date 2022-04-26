@@ -3,6 +3,9 @@
 from flask import Flask, url_for, redirect, render_template
 from flask_login import current_user
 
+# Other imports
+from loguru import logger
+
 # Module imports
 from . import config
 from .database import db
@@ -25,6 +28,7 @@ def home():
 
 
 # pylint: disable=import-outside-toplevel
+@logger.catch
 def create_app() -> Flask:
     """Initialize belinsky Flask application."""
     app = Flask("Belinsky")
@@ -36,7 +40,7 @@ def create_app() -> Flask:
         from . import routes
 
         # Initialize database
-        app.config["SQLALCHEMY_DATABASE_URI"] = config.BELINSKY_POSTGRES_URI
+        app.config["SQLALCHEMY_DATABASE_URI"] = config.POSTGRES_URI
         app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
         db.init_app(app)
         db.create_all()
@@ -51,6 +55,7 @@ def create_app() -> Flask:
         for module in config.MODULES:
             app.register_blueprint(getattr(routes, "create_blueprint_" + module)())
 
+    logger.info(config.__repr__())
     return app
 
 

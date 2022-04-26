@@ -7,17 +7,18 @@ from .nlp_utils import format_language_name
 class UnknownLanguageError(Exception):
     """Unknown language error."""
 
-    def __init__(self, lang: str, known_langs: t.Iterable[str]):
+    def __init__(self, language: str, known_languages: t.Iterable[str]):
         """Initialize an UnknownLanguageError.
 
         Args:
-            lang (str): Language.
-            known_langs (list): Known languages.
+            language (str): Language.
+            known_languages (list): Known languages.
         """
 
-        lang = format_language_name(lang)[0]
-        known_langs = format_language_name(known_langs)
+        self.language = format_language_name(language)[0]
+        self.known_languages = format_language_name(known_languages)
         self.message = (
-            f"Unknown language: {lang}. Please use one of: {', '.join(known_langs)}."
+            f"Unknown language: {self.language}. "
+            f"Please use one of: {', '.join(self.known_languages)}."
         )
         super().__init__(self.message)

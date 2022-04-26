@@ -1,6 +1,7 @@
 """Belinsky PhraseFinder blueprint."""
 from flask import Blueprint, request, render_template, flash
 from flask_login import login_required
+from loguru import logger
 from prometheus_client import Summary
 
 from .formatter import bold_phrases
@@ -36,15 +37,23 @@ def phrase_finder() -> str | tuple[dict[str, str | list | int], int]:
     # Process text
     if not text:
         flash("No text given. Try again please.")
+        logger.debug(f"Text not found in {request} request.")
     elif not phrases:
         flash("No phrases given. Try again please.")
+        logger.debug(f"Phrases not found in {request} request.")
     else:
         try:
             found_phrases = phrase_finder_worker.find_phrases(
                 text, phrases, request.form.get("language")
             )
-        except UnknownLanguageError as exception:
-            flash(str(exception))
+            logger.debug(
+                f"Found {found_phrases} phrases in text with {len(text)} length."
+            )
+        except UnknownLanguageError as exc:
+            flash(str(exc))
+            logger.debug(
+                f'Unknown "{exc.language}" language caught on {request} request.'
+            )
 
     # Response with raw data if required
     if request.form.get("raw"):
@@ -80,6 +89,7 @@ def create_blueprint_phrase_finder() -> Blueprint:
         "/phrase-finder", view_func=phrase_finder, methods=["GET", "POST"]
     )
 
+    logger.debug("Created Phrase Finder blueprint.")
     return phrase_finder_bp
 
 
