@@ -51,7 +51,9 @@ def phrase_finder() -> str | tuple[dict[str, str | list | int], int]:
             )
         except UnknownLanguageError as exc:
             flash(str(exc))
-            logger.debug(f'Unknown "{exc.lang}" language caught on {request} request.')
+            logger.debug(
+                f'Unknown "{exc.language}" language caught on {request} request.'
+            )
 
     # Response with raw data if required
     if request.form.get("raw"):
