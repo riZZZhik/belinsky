@@ -58,7 +58,7 @@ class PhraseFinder:
         self._get_lemmatizer("en").add_pipe("sentencizer")
         self._get_lemmatizer("en").add_pipe("language_detector", last=True)
 
-    # pylint: disable=fixme
+    # noinspection PyProtectedMember
     def detect_language(self, text: str) -> str:
         """Detect text language
 
@@ -70,7 +70,6 @@ class PhraseFinder:
                 Language code as https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
         """
 
-        # TODO: Split text into sentences.
         tokens = self._get_lemmatizer("en")(text)
         language = tokens._.language["language"]
         return language
@@ -232,12 +231,13 @@ class PhraseFinder:
         """
 
         first, rest = sub[0], sub[1:]
-        pos = 0
+        start = 0
         result = []
         try:
             while True:
-                pos = bigger.index(first, pos) + 1
-                if not rest or bigger[pos : pos + len(rest)] == rest:
-                    result.append(pos - 1)
+                start = bigger.index(first, start) + 1
+                end = start + len(rest)
+                if not rest or bigger[start:end] == rest:
+                    result.append(start - 1)
         except ValueError:
             return result
