@@ -3,6 +3,7 @@
 import os
 import multiprocessing
 
+from loguru import logger
 from prometheus_client import multiprocess
 
 # Gunicorn config variables
@@ -27,7 +28,7 @@ errorlog = os.getenv("BELINSKY_ERROR_LOGFILE", "-")
 
 # Print configuration
 def __repr__():
-    return {
+    config = {
         "bind": bind,
         "workers": workers,
         "threads": threads,
@@ -37,9 +38,11 @@ def __repr__():
         "accesslog": accesslog,
         "errorlog": errorlog,
     }
+    config = "; ".join(f"{key}: {value}" for key, value in config.items())
+    return "Gunicorn configuration: " + config
 
 
-print("Gunicorn configuration: ", __repr__(), flush=True)
+logger.info(__repr__())
 
 
 # noinspection PyUnusedLocal
