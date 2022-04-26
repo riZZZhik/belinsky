@@ -18,7 +18,9 @@
                 <div class="field-body">
                     <div class="field">
                         <div class="control">
-                            <textarea class="textarea" name="text" placeholder="Text" autofocus="">{{ text }}</textarea>
+                            <label>
+                                <textarea class="textarea" name="text" placeholder="Text" autofocus="">{{ text }}</textarea>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -28,17 +30,19 @@
                 <div class="field-body">
                     <div class="field">
                         <div class="select is-large">
-                            <select name="analyzis_type">
-                                {% for option in available_analyzis %}
-                                    <option>{{ option }}</option>
-                                {% endfor %}
-                            </select>
+                            <label>
+                                <select name="analyzis_type">
+                                    {% for option in available_analyzis %}
+                                        <option>{{ option }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <button class="button is-block is-info is-large is-fullwidth">Find</button>
+            <button class="button is-block is-info is-large is-fullwidth">Analyze</button>
         </form>
 
         {% if analyzis is not none %}

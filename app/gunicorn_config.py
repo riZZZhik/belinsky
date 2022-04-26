@@ -1,5 +1,5 @@
 """Belinsky configuration for gunicorn."""
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,unused-argument
 import os
 import multiprocessing
 
@@ -42,7 +42,7 @@ def __repr__():
 print("Gunicorn configuration: ", __repr__(), flush=True)
 
 
-# pylint: disable=unused-argument
+# noinspection PyUnusedLocal
 def child_exit(server, worker):
     """Mark process dead for correct prometheus metrics."""
     multiprocess.mark_process_dead(worker.pid)
