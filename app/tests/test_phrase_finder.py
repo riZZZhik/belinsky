@@ -2,9 +2,9 @@
 from flask import Flask
 from flask.testing import FlaskClient
 
-from . import utils
 from belinsky.routes.phrase_finder import phrase_finder_worker
 from belinsky.routes.phrase_finder.phrase_finder import Token
+from . import utils
 
 
 # Test Phrase Finder worker
