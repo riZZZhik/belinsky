@@ -52,4 +52,4 @@ jobs:
           pip install pylint
 
       - name: Analysing the code with pylint
-        run: pylint --disable=import-error ./**/**.py
+        run: find . -type f -name "*.py" | xargs pylint --disable=import-error

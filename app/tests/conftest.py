@@ -4,8 +4,8 @@ import typing as t
 import pytest
 from flask import Flask
 
-from . import credentials, utils
 from belinsky import create_app
+from . import credentials, utils
 
 
 # Initialize pytest fixtures
@@ -13,15 +13,16 @@ from belinsky import create_app
 def app() -> t.Generator:
     """Initialize Belinsky test application."""
     # Initialize app
-    app = create_app()
+    _app = create_app()
 
     # Create test user and remove old ones
-    utils.add_user(app, credentials["username"], credentials["password"])
-    utils.delete_user(app, "unittester_1")
+    utils.add_user(_app, credentials["username"], credentials["password"])
+    utils.delete_user(_app, "unittester_1")
 
-    return app
+    return _app
 
 
+# pylint: disable=redefined-outer-name
 @pytest.fixture()
 def client(app: Flask):
     """Initialize Belinsky test client."""
@@ -31,6 +32,7 @@ def client(app: Flask):
     return _client
 
 
+# pylint: disable=redefined-outer-name
 @pytest.fixture()
 def runner(app: Flask):
     """Initialize Belinsky test cli runner."""

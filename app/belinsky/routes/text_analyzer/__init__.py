@@ -47,8 +47,8 @@ def text_analyzer() -> str | tuple[dict[str, str | list | int], int]:
         try:
             analyzis = getattr(text_analyzer_worker, analyzis_type)(text)
             analyzis = format_analyzis(analyzis, analyzis_type)
-        except exceptions.InvalidArgument as e:
-            flash(f"Unknown language: {e.message[13:15]}.")
+        except exceptions.InvalidArgument as exc:
+            flash(f"Unknown language: {exc.message[13:15]}.")
 
     # Response with raw data if required
     if request.form.get("raw"):
