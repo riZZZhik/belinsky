@@ -2,7 +2,7 @@ name: Code analyzis
 
 on:
   push:
-    branches: [dev/stage]
+    branches: [master, dev/stage]
   pull_request:
     branches: [master, dev/stage]
 
@@ -26,12 +26,12 @@ jobs:
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v1
+        uses: github/codeql-action/init@v2
         with:
           languages: ${{ matrix.language }}
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v1
+        uses: github/codeql-action/analyze@v2
 
   analyze_pylint:
     name: PyLint analyze
@@ -52,4 +52,4 @@ jobs:
           pip install pylint
 
       - name: Analysing the code with pylint
-        run: pylint --disable=import-error ./**/**.py
+        run: find . -type f -name "*.py" | xargs pylint --disable=import-error
