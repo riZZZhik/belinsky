@@ -1,0 +1,32 @@
+steps:
+  # Install dependencies.
+  - name: python
+    entrypoint: pip
+    args: [ "install", "-r", "app/requirements.txt", "--user" ]
+
+  # Run tests
+  - name: python
+    entrypoint: pip
+    args: [ "install", "pytest==7.1.1", "blinker==1.4", "--user" ]
+
+  - name: python
+    entrypoint: pytest
+    args: ["-W", "ignore::DeprecationWarning"]
+
+  # Docker Build
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "europe-north1-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/belinsky:${SHORT_SHA}", "."]
+
+  # Docker push to Google Artifact Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push",  "europe-north1-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/belinsky:${SHORT_SHA}"]
+
+# Save test logs to Google Cloud Storage
+artifacts:
+  objects:
+    location: gs://${_BUCKET_NAME}/
+    paths:
+      - ${SHORT_SHA}_test_log.xml
+
+images:
+  - europe-north1-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/belinsky:${SHORT_SHA}
