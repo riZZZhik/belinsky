@@ -2,7 +2,7 @@ name: Code analyzis
 
 on:
   push:
-    branches: [dev/stage]
+    branches: [master, dev/stage]
   pull_request:
     branches: [master, dev/stage]
 
