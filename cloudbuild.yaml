@@ -10,8 +10,8 @@ steps:
     args: [ "install", "pytest==7.1.1", "blinker==1.4", "--user" ]
 
   - name: python
-    entrypoint: pytest
-    args: ["-W", "ignore::DeprecationWarning"]
+    entrypoint: python
+    args: ["-m", "pytest", "-W", "ignore::DeprecationWarning"]
     env:
       - "BELINSKY_GOOGLE_CLOUD_CREDENTIALS=${_BELINSKY_GOOGLE_CLOUD_CREDENTIALS}"
       - "BELINSKY_POSTGRES_URI=${_BELINSKY_POSTGRES_URI}"
