@@ -9,14 +9,6 @@ steps:
     entrypoint: pip
     args: [ "install", "pytest==7.1.1", "blinker==1.4", "--user" ]
 
-# FIXME: cloudbuild.yaml freezes: https://console.cloud.google.com/cloud-build/builds;region=global/82ab35e8-e518-4bbb-930d-6e93499976a6?project=belinsky
-#  - name: python
-#    entrypoint: python
-#    args: ["-m", "pytest", "-W", "ignore::DeprecationWarning", "--junitxml=${SHORT_SHA}_test_log.xml"]
-#    env:
-#      - "BELINSKY_GOOGLE_CLOUD_CREDENTIALS=${_BELINSKY_GOOGLE_CLOUD_CREDENTIALS}"
-#      - "BELINSKY_POSTGRES_URI=${_BELINSKY_POSTGRES_URI}"
-
   # Docker Build
   - name: "gcr.io/cloud-builders/docker"
     args: [
@@ -26,16 +18,9 @@ steps:
       "app/."
     ]
 
-  # Docker push to Google Artifact Registry
+  # Docker push to GCR.io
   - name: "gcr.io/cloud-builders/docker"
     args: ["push",  "gcr.io/${PROJECT_ID}/belinsky:${SHORT_SHA}"]
-
-# Save test logs to Google Cloud Storage
-artifacts:
-  objects:
-    location: gs://${_BUCKET_NAME}/
-    paths:
-      - ${SHORT_SHA}_test_log.xml
 
 images:
   - gcr.io/${PROJECT_ID}/belinsky:${SHORT_SHA}
