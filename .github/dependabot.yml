@@ -2,15 +2,24 @@ version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "dev/stage"
     schedule:
       interval: "weekly"
+    reviewers:
+      - "riZZZhik"
 
   - package-ecosystem: "docker"
     directory: "/app"
+    target-branch: "dev/stage"
     schedule:
       interval: "weekly"
+    reviewers:
+      - "riZZZhik"
 
   - package-ecosystem: "pip"
     directory: "/"
+    target-branch: "dev/stage"
     schedule:
       interval: "weekly"
+    reviewers:
+      - "riZZZhik"

@@ -1,6 +1,6 @@
 # API requirements
-Flask==2.1.1
-Flask-Login==0.6.0
+Flask==2.1.2
+Flask-Login==0.6.1
 Flask-SQLAlchemy==2.5.1
 psycopg2==2.9.3
 gunicorn==20.1.0
@@ -12,11 +12,11 @@ prometheus_client==0.14.1
 
 # NLP requirements
 google-cloud-language==2.4.1
-spacy==3.2.4
+spacy==3.3.0
 spacy_langdetect==0.1.2
 iso639==0.1.4
 transliterate==1.10.2
 
 # spaCy models
-https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.2.0/en_core_web_sm-3.2.0.tar.gz
-https://github.com/explosion/spacy-models/releases/download/ru_core_news_sm-3.2.0/ru_core_news_sm-3.2.0.tar.gz
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.3.0/en_core_web_sm-3.3.0.tar.gz
+https://github.com/explosion/spacy-models/releases/download/ru_core_news_sm-3.3.0/ru_core_news_sm-3.3.0.tar.gz
