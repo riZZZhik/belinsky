@@ -22,13 +22,13 @@ steps:
     args: [
       "build",
       "--target", "production",
-      "-t", "europe-north1-docker.pkg.dev/${PROJECT_ID}/belinsky:${SHORT_SHA}",
+      "-t", "gcr.io/${PROJECT_ID}/belinsky:${SHORT_SHA}",
       "app/."
     ]
 
   # Docker push to Google Artifact Registry
   - name: "gcr.io/cloud-builders/docker"
-    args: ["push",  "europe-north1-docker.pkg.dev/${PROJECT_ID}/belinsky:${SHORT_SHA}"]
+    args: ["push",  "gcr.io/${PROJECT_ID}/belinsky:${SHORT_SHA}"]
 
 # Save test logs to Google Cloud Storage
 artifacts:
@@ -38,4 +38,4 @@ artifacts:
       - ${SHORT_SHA}_test_log.xml
 
 images:
-  - europe-north1-docker.pkg.dev/${PROJECT_ID}/belinsky:${SHORT_SHA}
+  - gcr.io/${PROJECT_ID}/belinsky:${SHORT_SHA}
