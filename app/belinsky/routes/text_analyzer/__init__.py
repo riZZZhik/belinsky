@@ -44,12 +44,12 @@ def text_analyzer() -> str | tuple[dict[str, str | list | int], int]:
     # Process text
     if not text:
         flash("No text given. Try again please.")
-        logger.debug(f"Text not found in {request} request.")
+        logger.debug(f'Text not found in "{request}" request.')
     else:
         try:
             analyzis = getattr(text_analyzer_worker, analyzis_type)(text)
             logger.debug(
-                f"Analyzed {analyzis} with {analyzis_type} type "
+                f'Analyzed "{analyzis}" with "{analyzis_type}" type '
                 f"in text with {len(text)} length."
             )
         except exceptions.InvalidArgument as exc:
