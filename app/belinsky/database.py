@@ -12,7 +12,7 @@ def get_instance(model: db.Model, **kwargs) -> db.Model:
     """Get instance using model query."""
     instance = model.query.filter_by(**kwargs).first()
 
-    logger.debug(f"Got {instance} instance from database.")
+    logger.debug(f'Got "{instance}" instance from database.')
     return instance
 
 
@@ -20,7 +20,7 @@ def get_all(model: db.Model) -> db.Model:
     """Get all instances of a model."""
     instances = model.query.all()
 
-    logger.debug(f"Got {instances} instances from database.")
+    logger.debug(f'Got "{instances}" instances from database.')
     return instances
 
 
@@ -34,7 +34,7 @@ def add_instance(
     db.session.add(instance)
     commit_changes()
 
-    logger.debug(f"Added {instance} instance to database.")
+    logger.debug(f'Added "{instance}" instance to database.')
     return instance
 
 
@@ -44,7 +44,7 @@ def delete_instance(model: db.Model, **kwargs) -> None:
     db.session.delete(instance)
     commit_changes()
 
-    logger.debug(f"Deleted {instance} instance from database.")
+    logger.debug(f'Deleted "{instance}" instance from database.')
 
 
 def edit_instance(
@@ -56,7 +56,7 @@ def edit_instance(
         setattr(instance, attr, new_value)
     commit_changes()
 
-    logger.debug(f"Edited {instance} instance in database with {kwargs} attributes.")
+    logger.debug(f'Edited "{instance}" instance in database with {kwargs} attributes.')
     return instance
 
 
