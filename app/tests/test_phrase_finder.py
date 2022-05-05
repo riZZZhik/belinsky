@@ -116,11 +116,11 @@ def test_phrase_finder_multiple_phrases(client: FlaskClient) -> None:
     """Test Phrase Finder with russian text and multiple phrases in text."""
     response = client.post(
         "/phrase-finder",
-        data={"text": "мама любит бананы", "phrases": "банан\r\nлюбит", "raw": True},
+        data={"text": "мама хочет апельсины", "phrases": "хотеть\r\nапельсин", "raw": True},
     )
 
     assert response.status_code == 200
-    assert {"банан": [[11, 16]], "любит": [[5, 9]]} == response.json["found_phrases"]
+    assert {"апельсин": [[11, 19]], "хотеть": [[5, 9]]} == response.json["found_phrases"]
 
 
 def test_phrase_finder_hyphen(client: FlaskClient) -> None:

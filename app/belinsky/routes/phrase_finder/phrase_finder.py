@@ -197,7 +197,7 @@ class PhraseFinder:
             language_model = self.known_spacy_languages[language]
             link = (
                 "https://github.com/explosion/spacy-models/releases/download/"
-                f"{language_model}-3.2.0/{language_model}-3.2.0.tar.gz"
+                f"{language_model}-3.3.0/{language_model}-3.3.0.tar.gz"
             )
             subprocess.check_call(
                 [sys.executable, "-m", "pip", "install", link],
