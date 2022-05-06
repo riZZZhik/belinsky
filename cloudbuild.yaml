@@ -1,14 +1,4 @@
 steps:
-  # Install dependencies.
-  - name: python
-    entrypoint: pip
-    args: [ "install", "-r", "app/requirements.txt", "--user" ]
-
-  # Run tests
-  - name: python
-    entrypoint: pip
-    args: [ "install", "pytest==7.1.1", "blinker==1.4", "--user" ]
-
   # Docker Build
   - name: "gcr.io/cloud-builders/docker"
     args: [
