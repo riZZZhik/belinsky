@@ -1,9 +1,11 @@
 """Format Text Analyzer outputs."""
+from flask import flash
 from google.cloud import language_v1 as api
 
 
 def format_analyzis(
-    analyzis: api.ClassifyTextResponse, analyzis_type: str
+    analyzis: api.ClassifyTextResponse,
+    analyzis_type: str,
 ) -> None | str:
     """Format Text Analyzer outputs.
 
@@ -16,7 +18,9 @@ def format_analyzis(
             Formatted Text Analyzer outputs.
     """
 
-    if analyzis_type == "classify_text":
-        return f"Text type: <b>{analyzis.categories[0].name[1:]}</b>"
+    if analyzis is not None:
+        if analyzis_type == "classify_text" and len(analyzis.categories) != 0:
+            return f"Text type: <b>{analyzis.categories[0].name[1:]}</b>"
 
-    raise ValueError(f"Unknown analyzis type: {analyzis_type}")
+    flash("Unable to classify this text.")
+    return None
