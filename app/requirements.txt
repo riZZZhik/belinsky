@@ -11,7 +11,7 @@ py-healthcheck==1.10.1
 prometheus_client==0.14.1
 
 # NLP requirements
-google-cloud-language==2.4.2
+google-cloud-language==2.7.0
 spacy==3.3.0
 spacy_langdetect==0.1.2
 iso639==0.1.4
