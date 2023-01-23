@@ -12,7 +12,7 @@ prometheus_client==0.14.1
 
 # NLP requirements
 google-cloud-language==2.4.2
-spacy==3.3.0
+spacy==3.5.0
 spacy_langdetect==0.1.2
 iso639==0.1.4
 transliterate==1.10.2
